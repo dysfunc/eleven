@@ -1,16 +1,21 @@
 <p align="center">
   <a href="https://dysfunc.github.io/eleven/">
-    <img alt="Yarn" src="https://github.com/yarnpkg/assets/blob/master/yarn-kitten-full.png?raw=true" width="546">
+    <img alt="Yarn" src="https://github.com/dysfunc/eleven/blob/master/app/img/logo.png?raw=true" width="546">
   </a>
 </p>
 
 <p align="center">
-  Fast, reliable, and secure dependency management.
+  A web experiment of AI voice agents with visual interactions.
 </p>
 
-<p align="center">
-  <a href="https://travis-ci.org/yarnpkg/yarn"><img alt="Travis Status" src="https://travis-ci.org/yarnpkg/yarn.svg"></a>
-  <a href="https://circleci.com/gh/yarnpkg/yarn"><img alt="Circle Status" src="https://circleci.com/gh/yarnpkg/yarn.svg?style=shield&circle-token=5f0a78473b0f440afb218bf2b82323cc6b3cb43f"></a>
-  <a href="https://ci.appveyor.com/project/kittens/yarn/branch/master"><img alt="Appveyor Status" src="https://ci.appveyor.com/api/projects/status/0xdv8chwe2kmk463?svg=true"></a>
-  <a href="https://discord.gg/yarnpkg"><img alt="Discord Chat" src="https://img.shields.io/discord/226791405589233664.svg"></a>
-</p>
+---
+
+Eleven leverages the [SpeechRecognition](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition) and [SpeechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis) interface of the Web Speech API to interpret user speech.
+
+## Features
+* **Pluggable** API provides an easy way to build plugins for any Eleven agent.
+* **Rules** Supports explicit rule-based command matching and AI engines (api.ai, wit.ai, ... etc).
+* **Flexible** Eleven + API are highly configurable, extensible and completely customizable.
+* **Speech APIs** Uses the [SpeechRecognition](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition) and [SpeechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis) interface of the Web Speech APIs.
+
+## Installing
