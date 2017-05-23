@@ -1,0 +1,18 @@
+.interactive {
+  #eleven {
+    bottom: 100px;
+    right: 100px;
+    will-change: transform, opacity;
+    @include transform(scale(.7));
+  }
+
+  #heading {
+    opacity: 0;
+    @include transform(translateY(-30deg));
+  }
+
+  #subheading {
+    opacity: 0;
+    @include transform(translateY(30deg));
+  }
+}

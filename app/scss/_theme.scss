@@ -1,0 +1,35 @@
+#eleven {
+  bottom: 50%;
+  height: 140px;
+  margin: 0 -70px -70px 0;
+  position: fixed;
+  right: 50%;
+  width: 140px;
+  z-index: 9998;
+  @include transition(all .3s ease-in-out);
+
+  .eleven-container,
+  .eleven-off,
+  .eleven-on {
+    height: 144px;
+    width: 144px;
+  }
+
+  .eleven-off > span {
+    font-size: 22px !important;
+    font-weight: 400;
+    line-height: 144px;
+  }
+
+  .eleven-on .bg {
+    // box-shadow: inset 5px -5px 25px 15px rgba(255,255,255, .07);
+  }
+
+  .eleven-on .bg,
+  .eleven-on .waves {
+    height: 142px;
+    left: 1px;
+    top: 1px;
+    width: 142px;
+  }
+}
