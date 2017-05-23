@@ -5,17 +5,47 @@
 </p>
 
 <p align="center">
-  A web experiment of AI voice agents with visual interactions.
+  A web experiment of AI voice agents and visual interactions.
 </p>
 
 ---
 
-Eleven leverages the [SpeechRecognition](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition) and [SpeechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis) interface of the Web Speech API to interpret user speech.
+Eleven is something I started hacking on after doing a bunch of development in the voice space. This side project evolved to something that others showed interest in -- so I've decided to throw it out there for everyone.
 
 ## Features
 * **Pluggable** API provides an easy way to build plugins for any Eleven agent.
 * **Rules** Supports explicit rule-based command matching and AI engines (api.ai, wit.ai, ... etc).
 * **Flexible** Eleven + API are highly configurable, extensible and completely customizable.
-* **Speech APIs** Uses the [SpeechRecognition](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition) and [SpeechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis) interface of the Web Speech APIs.
+* **Speech APIs** Is powered by [SpeechRecognition](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition) and [SpeechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis) interface of the Web Speech APIs.
 
-## Installing
+## Install
+Install yarn and dependencies
+```sh
+npm install --global yarn
+
+yarn install
+```
+
+Install the scss-lint gem
+```sh
+gem install scss_lint
+```
+
+## Development
+To build, lint and start the local development server:
+```sh
+gulp serve
+```
+
+To build and lint
+```sh
+gulp build
+```
+
+To lint JS and CSS
+```sh
+gulp lint
+```
+
+### Acknowledgements
+This concept was originally spawned from [annyang](https://github.com/TalAter/annyang) by TalAter.

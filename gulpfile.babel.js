@@ -45,7 +45,9 @@ bundler.on('update', bundle);
 gulp.task('default', ['watch']);
 
 // lint and build bundle
-gulp.task('build', ['lint-js', 'lint-style'], () => bundle());
+gulp.task('build', ['lint'], () => bundle());
+
+gulp.task('lint', ['lint-js', 'lint-style'], () => bundle());
 
 // lint, bundle and start dev server
 gulp.task('serve', ['build'], () => sync.init({ server: 'app' }));

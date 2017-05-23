@@ -16,7 +16,7 @@ Eleven.ready(function(){
     var count = 0,
         sessionId = Eleven.uuid(),
         running = false;
-
+        
     // initialize Eleven
     var E11 = Eleven({
       debug: true,
