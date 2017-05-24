@@ -833,6 +833,7 @@ $.fn = $.prototype = {
         width: 280
       }
     };
+
     this.container = _document2.default.querySelector(selector);
     // store options
     this.options = $.extend(true, {}, defaultConfig, options || {});
@@ -1356,7 +1357,7 @@ $.apply($.fn, {
         _this3.visualizer.stop();
       }
 
-      _this3.options.visualizer.container.classList.remove('ready');
+      _this3.container.classList.remove('ready');
       _this3.activated = false;
     }, 750);
 
@@ -1385,13 +1386,12 @@ $.apply($.fn, {
 
           command.callback.call(this, parameters, recognizedSpeech, phrase);
 
-          //this.insights.track(results[0], null, recognizedSpeech);
-
           if ($.isFunction(options.onResultMatch)) {
             options.onResultMatch.call(this, parameters, recognizedSpeech, phrase, results);
           }
 
-          this.options.visualizer.container.classList.remove('ready');
+          this.container.classList.remove('ready');
+
           this.activated = false;
 
           return;
@@ -1412,12 +1412,12 @@ $.apply($.fn, {
     if (this.options.wake.commands.indexOf(result[0].transcript.trim()) !== -1) {
       if (!this.activated) {
         this.activated = true;
-        this.options.visualizer.container.classList.add('ready');
+        this.container.classList.add('ready');
         this.wakeSound.play();
 
         this.commandTimer = setTimeout(function () {
           _this4.activated = false;
-          _this4.options.visualizer.container.classList.remove('ready');
+          _this4.container.classList.remove('ready');
         }, this.options.wake.commandWait);
       }
     } else {

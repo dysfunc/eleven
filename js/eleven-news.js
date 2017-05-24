@@ -19,9 +19,9 @@
           ul = document.createElement('ul');
 
       articles.forEach(function(article){
-        var description = article.description;
+        var description = article.description || '';
 
-        if(description.length > 120){
+        if(description && description.length > 120){
           description = article.description.substr(0, 300).split(' ').slice(0, -1).join(' ') + ' ...';
         }
 
@@ -98,7 +98,7 @@
         },
         success: function(data){
           if($$.debug){
-            console.log(data, '--- FETCH NEWS');
+            console.log(data, '--- FETCHING NEWS');
           }
 
           self.createList(data);

@@ -76,7 +76,7 @@ Eleven.ready(function(){
                 Eleven.speak(output, 'UK English Female', {
                   onStart: function(){
                     if(!running){
-                      E11.getVisualizer('container').classList.add('ready');
+                      E11.container.classList.add('ready');
                       E11.getVisualizer().start();
                       running = true;
                     }
@@ -84,7 +84,7 @@ Eleven.ready(function(){
                   onEnd: function(){
                     if(running){
                       E11.getVisualizer().stop();
-                      E11.getVisualizer('container').classList.remove('ready');
+                      E11.container.classList.remove('ready');
                       running = false;
                     }
                   }
