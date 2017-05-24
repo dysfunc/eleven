@@ -1,25 +1,17 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({"/Library/WebServer/Documents/concept/src/ajax.js":[function(require,module,exports){
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
-
-var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _typeof = typeof Symbol === "function" && _typeof2(Symbol.iterator) === "symbol" ? function (obj) {
-  return typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-} : function (obj) {
-  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-};
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var _core = require('./core');
 
 var _core2 = _interopRequireDefault(_core);
 
-function _interopRequireDefault(obj) {
-  return obj && obj.__esModule ? obj : { default: obj };
-}
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var activeXHR = 0,
     jsonPUID = 0,
@@ -324,7 +316,7 @@ _core2.default.extend({
 
 exports.default = _core2.default;
 
-},{"./core":"/Library/WebServer/Documents/concept/src/core.js"}],"/Library/WebServer/Documents/concept/src/commandParser.js":[function(require,module,exports){
+},{"./core":6}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -335,9 +327,7 @@ var _core = require('./core');
 
 var _core2 = _interopRequireDefault(_core);
 
-function _interopRequireDefault(obj) {
-  return obj && obj.__esModule ? obj : { default: obj };
-}
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var parser = function parser(command) {
   command = command.replace(_core2.default.regexp.escapeRegExp, '\\$&').replace(_core2.default.regexp.optionalParam, '(?:$1)?').replace(_core2.default.regexp.namedParam, function (match, optional) {
@@ -349,7 +339,7 @@ var parser = function parser(command) {
 
 exports.default = parser;
 
-},{"./core":"/Library/WebServer/Documents/concept/src/core.js"}],"/Library/WebServer/Documents/concept/src/commands.js":[function(require,module,exports){
+},{"./core":6}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -364,9 +354,7 @@ var _commandParser = require('./commandParser');
 
 var _commandParser2 = _interopRequireDefault(_commandParser);
 
-function _interopRequireDefault(obj) {
-  return obj && obj.__esModule ? obj : { default: obj };
-}
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 _core2.default.fn.extend({
   /**
@@ -480,7 +468,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"./commandParser":"/Library/WebServer/Documents/concept/src/commandParser.js","./core":"/Library/WebServer/Documents/concept/src/core.js"}],"/Library/WebServer/Documents/concept/src/common/enums.js":[function(require,module,exports){
+},{"./commandParser":2,"./core":6}],4:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -496,7 +484,7 @@ var eventTypes = {
 
 exports.default = eventTypes;
 
-},{}],"/Library/WebServer/Documents/concept/src/common/voiceConfigs.js":[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -728,21 +716,15 @@ exports.default = {
   defaultTypes: [{ name: 'UK English Female', ids: [3, 5, 1, 6, 7, 171, 8] }, { name: 'UK English Male', ids: [0, 4, 2, 6, 7, 75, 159] }, { name: 'US English Female', ids: [39, 40, 41, 42, 43, 173, 44] }, { name: 'Arabic Male', ids: [96, 95, 97, 98] }, { name: 'Armenian Male', ids: [99] }, { name: 'Australian Female', ids: [87, 86, 5, 88] }, { name: 'Brazilian Portuguese Female', ids: [124, 123, 125, 186, 126] }, { name: 'Chinese Female', ids: [58, 59, 60, 155, 191, 61] }, { name: 'Czech Female', ids: [101, 100, 102, 103] }, { name: 'Danish Female', ids: [105, 104, 106, 107] }, { name: 'Deutsch Female', ids: [27, 28, 29, 30, 31, 78, 170, 32] }, { name: 'Dutch Female', ids: [84, 157, 158, 184, 45] }, { name: 'Finnish Female', ids: [90, 89, 91, 92] }, { name: 'French Female', ids: [21, 22, 23, 77, 178, 26] }, { name: 'Greek Female', ids: [62, 63, 80, 64] }, { name: 'Hatian Creole Female', ids: [109] }, { name: 'Hindi Female', ids: [66, 154, 179, 67] }, { name: 'Hungarian Female', ids: [9, 10, 81, 11] }, { name: 'Indonesian Female', ids: [111, 112, 180, 113] }, { name: 'Italian Female', ids: [33, 34, 35, 36, 37, 79, 181, 38] }, { name: 'Japanese Female', ids: [50, 51, 52, 153, 182, 53] }, { name: 'Korean Female', ids: [54, 55, 56, 156, 183, 57] }, { name: 'Latin Female', ids: [114] }, { name: 'Norwegian Female', ids: [72, 73, 74] }, { name: 'Polish Female', ids: [120, 119, 121, 185, 122] }, { name: 'Portuguese Female', ids: [128, 127, 129, 187, 130] }, { name: 'Romanian Male', ids: [151, 150, 152, 46] }, { name: 'Russian Female', ids: [47, 48, 83, 188, 49] }, { name: 'Slovak Female', ids: [133, 132, 134, 135] }, { name: 'Spanish Female', ids: [19, 16, 17, 18, 20, 76, 174, 15] }, { name: 'Spanish Latin American Female', ids: [137, 136, 138, 175, 139] }, { name: 'Swedish Female', ids: [85, 148, 149, 65] }, { name: 'Tamil Male', ids: [141] }, { name: 'Thai Female', ids: [143, 142, 144, 189, 145] }, { name: 'Turkish Female', ids: [69, 70, 82, 190, 71] }, { name: 'Afrikaans Male', ids: [93] }, { name: 'Albanian Male', ids: [94] }, { name: 'Bosnian Male', ids: [14] }, { name: 'Catalan Male', ids: [68] }, { name: 'Croatian Male', ids: [13] }, { name: 'Czech Male', ids: [161] }, { name: 'Danish Male', ids: [162] }, { name: 'Esperanto Male', ids: [108] }, { name: 'Finnish Male', ids: [160] }, { name: 'Greek Male', ids: [163] }, { name: 'Hungarian Male', ids: [164] }, { name: 'Icelandic Male', ids: [110] }, { name: 'Latin Male', ids: [165] }, { name: 'Latvian Male', ids: [115] }, { name: 'Macedonian Male', ids: [116] }, { name: 'Moldavian Male', ids: [117] }, { name: 'Montenegrin Male', ids: [118] }, { name: 'Norwegian Male', ids: [166] }, { name: 'Serbian Male', ids: [12] }, { name: 'Serbo-Croatian Male', ids: [131] }, { name: 'Slovak Male', ids: [167] }, { name: 'Swahili Male', ids: [140] }, { name: 'Swedish Male', ids: [168] }, { name: 'Vietnamese Male', ids: [146] }, { name: 'Welsh Male', ids: [147] }, { name: 'US English Male', ids: [169] }]
 };
 
-},{}],"/Library/WebServer/Documents/concept/src/core.js":[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 (function (global){
 'use strict';
-
-var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _typeof = typeof Symbol === "function" && _typeof2(Symbol.iterator) === "symbol" ? function (obj) {
-  return typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-} : function (obj) {
-  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-};
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var _document = require('./document');
 
@@ -768,19 +750,9 @@ var _uuid2 = require('./utils/uuid');
 
 var _uuid3 = _interopRequireDefault(_uuid2);
 
-function _interopRequireDefault(obj) {
-  return obj && obj.__esModule ? obj : { default: obj };
-}
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _toConsumableArray(arr) {
-  if (Array.isArray(arr)) {
-    for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) {
-      arr2[i] = arr[i];
-    }return arr2;
-  } else {
-    return Array.from(arr);
-  }
-}
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 var slice = [].slice;
 var _ref = {},
@@ -1251,6 +1223,7 @@ $.apply($.fn, {
   error: function error(event) {
     var error = event.error;
 
+
     if (error === 'not-allowed' || error === 'network') {
       this.options.autoRestart = false;
     }
@@ -1420,8 +1393,8 @@ $.apply($.fn, {
   result: function result(event) {
     var _this4 = this;
 
-    var result = event.results[event.resultIndex],
-        results = [];
+    var result = event.results[event.resultIndex];
+    var results = [];
 
     if (this.options.wake.commands.indexOf(result[0].transcript.trim()) !== -1) {
       if (!this.activated) {
@@ -1518,7 +1491,7 @@ exports.default = $;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{"./common/enums":"/Library/WebServer/Documents/concept/src/common/enums.js","./document":"/Library/WebServer/Documents/concept/src/document.js","./speechRecognition":"/Library/WebServer/Documents/concept/src/speechRecognition.js","./utils/cookies":"/Library/WebServer/Documents/concept/src/utils/cookies.js","./utils/uuid":"/Library/WebServer/Documents/concept/src/utils/uuid.js","./window":"/Library/WebServer/Documents/concept/src/window.js"}],"/Library/WebServer/Documents/concept/src/document.js":[function(require,module,exports){
+},{"./common/enums":4,"./document":7,"./speechRecognition":11,"./utils/cookies":13,"./utils/uuid":14,"./window":16}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1529,13 +1502,11 @@ var _window = require('./window');
 
 var _window2 = _interopRequireDefault(_window);
 
-function _interopRequireDefault(obj) {
-  return obj && obj.__esModule ? obj : { default: obj };
-}
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = _window2.default.document;
 
-},{"./window":"/Library/WebServer/Documents/concept/src/window.js"}],"/Library/WebServer/Documents/concept/src/eleven.js":[function(require,module,exports){
+},{"./window":16}],8:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1556,13 +1527,24 @@ require('./speechSynthesis');
 
 require('./visualizer');
 
-function _interopRequireDefault(obj) {
-  return obj && obj.__esModule ? obj : { default: obj };
-}
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = _core2.default;
 
-},{"./ajax":"/Library/WebServer/Documents/concept/src/ajax.js","./commands":"/Library/WebServer/Documents/concept/src/commands.js","./core":"/Library/WebServer/Documents/concept/src/core.js","./regexp":"/Library/WebServer/Documents/concept/src/regexp.js","./speechSynthesis":"/Library/WebServer/Documents/concept/src/speechSynthesis.js","./visualizer":"/Library/WebServer/Documents/concept/src/visualizer.js"}],"/Library/WebServer/Documents/concept/src/regexp.js":[function(require,module,exports){
+},{"./ajax":1,"./commands":3,"./core":6,"./regexp":10,"./speechSynthesis":12,"./visualizer":15}],9:[function(require,module,exports){
+'use strict';
+
+var _eleven = require('./eleven');
+
+var _eleven2 = _interopRequireDefault(_eleven);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+(function (root) {
+  return root.Eleven = root.$$ = _eleven2.default;
+})(window);
+
+},{"./eleven":8}],10:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1573,9 +1555,7 @@ var _core = require('./core');
 
 var _core2 = _interopRequireDefault(_core);
 
-function _interopRequireDefault(obj) {
-  return obj && obj.__esModule ? obj : { default: obj };
-}
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 _core2.default.regexp = {
   callback: /\?(.+)=\?/,
@@ -1591,7 +1571,7 @@ _core2.default.regexp = {
 
 exports.default = _core2.default;
 
-},{"./core":"/Library/WebServer/Documents/concept/src/core.js"}],"/Library/WebServer/Documents/concept/src/speechRecognition.js":[function(require,module,exports){
+},{"./core":6}],11:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1602,13 +1582,11 @@ var _window = require('./window');
 
 var _window2 = _interopRequireDefault(_window);
 
-function _interopRequireDefault(obj) {
-  return obj && obj.__esModule ? obj : { default: obj };
-}
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = _window2.default.SpeechRecognition || _window2.default.webkitSpeechRecognition || _window2.default.mozSpeechRecognition || _window2.default.msSpeechRecognition || _window2.default.oSpeechRecognition;
 
-},{"./window":"/Library/WebServer/Documents/concept/src/window.js"}],"/Library/WebServer/Documents/concept/src/speechSynthesis.js":[function(require,module,exports){
+},{"./window":16}],12:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1627,9 +1605,7 @@ var _voiceConfigs = require('./common/voiceConfigs');
 
 var _voiceConfigs2 = _interopRequireDefault(_voiceConfigs);
 
-function _interopRequireDefault(obj) {
-  return obj && obj.__esModule ? obj : { default: obj };
-}
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var speechSynthesis = _window2.default.speechSynthesis;
 
@@ -1926,7 +1902,7 @@ _core2.default.speak = _core2.default.proxy(Speech.speak, Speech);
 
 exports.default = _core2.default;
 
-},{"./common/voiceConfigs":"/Library/WebServer/Documents/concept/src/common/voiceConfigs.js","./core":"/Library/WebServer/Documents/concept/src/core.js","./window":"/Library/WebServer/Documents/concept/src/window.js"}],"/Library/WebServer/Documents/concept/src/utils/cookies.js":[function(require,module,exports){
+},{"./common/voiceConfigs":5,"./core":6,"./window":16}],13:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1937,9 +1913,7 @@ var _document = require('../document');
 
 var _document2 = _interopRequireDefault(_document);
 
-function _interopRequireDefault(obj) {
-  return obj && obj.__esModule ? obj : { default: obj };
-}
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var cookies = {
   /**
@@ -2034,7 +2008,7 @@ var cookies = {
 
 exports.default = cookies;
 
-},{"../document":"/Library/WebServer/Documents/concept/src/document.js"}],"/Library/WebServer/Documents/concept/src/utils/uuid.js":[function(require,module,exports){
+},{"../document":7}],14:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2049,7 +2023,7 @@ exports.default = function () {
   });
 };
 
-},{}],"/Library/WebServer/Documents/concept/src/visualizer.js":[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2060,9 +2034,7 @@ var _core = require('./core');
 
 var _core2 = _interopRequireDefault(_core);
 
-function _interopRequireDefault(obj) {
-  return obj && obj.__esModule ? obj : { default: obj };
-}
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 _core2.default.fn.extend({
   visualize: function visualize() {
@@ -2296,7 +2268,7 @@ _core2.default.apply(Visualizer.prototype, {
 
 exports.default = _core2.default;
 
-},{"./core":"/Library/WebServer/Documents/concept/src/core.js"}],"/Library/WebServer/Documents/concept/src/window.js":[function(require,module,exports){
+},{"./core":6}],16:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -2307,6 +2279,5 @@ exports.default = global;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{}]},{},["/Library/WebServer/Documents/concept/src/eleven.js"])
-
-//# sourceMappingURL=build.js.map
+},{}]},{},[9])
+//# sourceMappingURL=eleven.js.map
