@@ -6,7 +6,6 @@
 
   var news = function(options){
     this.options = $$.extend(true, {}, options || {});
-    return this;
   };
 
   $$.extend(news.prototype, {

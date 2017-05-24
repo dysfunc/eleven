@@ -803,15 +803,15 @@ var _each = function _each(collection, fn) {
  * @param  {Object} options Object containing Eleven's configuration
  * @return {Object}         Eleven instance
  */
-var $ = function $(options) {
-  return $.initialized || new $.fn.init(options);
+var $ = function $(selector, options) {
+  return $.initialized || new $.fn.init(selector, options);
 };
 
 $.fn = $.prototype = {
   constructor: $,
   version: '1.0.0',
   context: null,
-  init: function init(options) {
+  init: function init(selector, options) {
     var defaultConfig = {
       debug: false,
       language: 'en',
@@ -833,6 +833,7 @@ $.fn = $.prototype = {
         width: 280
       }
     };
+    this.container = _document2.default.querySelector(selector);
     // store options
     this.options = $.extend(true, {}, defaultConfig, options || {});
     // reference to all of our commands
@@ -2050,22 +2051,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 _core2.default.fn.extend({
   visualize: function visualize() {
-    var options = this.options;
-    var container = options.visualizer.container;
-
-    if (!container) {
-      container = document.createElement('div');
-
-      container.id = 'eleven';
-
-      container.innerHTML = ['<div class="eleven-container">', '<div class="eleven-container-inner">', '<div class="eleven-off">', '<span>ELEVEN</span>', '</div>', '<div class="eleven-on">', '<div class="bg"></div>', '<div class="waves"></div>', '</div>', '</div>', '</div>'].join('');
-
-      document.body.appendChild(container);
-
-      options.visualizer.container = container;
-    }
-
-    this.visualizer = new Visualizer(options.visualizer);
+    this.visualizer = new Visualizer(this);
   },
 
   /**
@@ -2156,9 +2142,10 @@ _core2.default.apply(Curve.prototype, {
   }
 });
 
-function Visualizer(options) {
-  options = options || {};
+function Visualizer(config) {
+  var options = config.options.visualizer || {};
 
+  this.container = config.container;
   this.curves = [];
   this.tick = 0;
   this.run = false;
@@ -2188,8 +2175,6 @@ function Visualizer(options) {
     this.canvas.style.width = this.width / this.ratio + 'px';
     this.canvas.style.height = this.height / this.ratio + 'px';
   };
-
-  this.container = options.container;
 
   this.wavesContainer = this.container.querySelector(options.wavesContainer);
 

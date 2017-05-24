@@ -18,7 +18,7 @@ Eleven.ready(function(){
         running = false;
 
     // initialize Eleven
-    var E11 = Eleven({
+    var E11 = Eleven('#eleven', {
       debug: true,
       onCommand: function(params, speech, command){
         Eleven.ajax({
