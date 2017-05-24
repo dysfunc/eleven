@@ -11,7 +11,7 @@
 
   $$.extend(news.prototype, {
     createList: function(data, total){
-      var articles = data.articles.slice(8);
+      var articles = data.articles.slice(2);
       var data = [];
 
       $$.resetView();

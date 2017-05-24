@@ -1,4 +1,4 @@
-;(function(window, $$, $){
+;(function(window, $$, $, oauthSignature){
   $$.plugin('yelp', function(options){
     return new yelp(options);
   });
@@ -108,4 +108,4 @@
       });
     }
   });
-})(window, Eleven, $);
+})(window, Eleven, $, oauthSignature);

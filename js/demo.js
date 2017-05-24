@@ -16,7 +16,7 @@ Eleven.ready(function(){
     var count = 0,
         sessionId = Eleven.uuid(),
         running = false;
-        
+
     // initialize Eleven
     var E11 = Eleven({
       debug: true,
@@ -109,19 +109,5 @@ Eleven.ready(function(){
           oauth_token: 'VBlTansWmoTVcmX87GpUlhHNht5i4dpt'
         }
       });
-
-    // E11.getPlugin('weather').forecast('Los angeles');
-
-    //
-    // setTimeout(function(){
-    //   E11.getPlugin('news').headlines();
-    //
-    //   setTimeout(function(){
-    //     E11.getPlugin('yelp').search({
-    //       term: 'Mexican',
-    //       location: 'San Francisco'
-    //     });
-    //   }, 3000);
-    // }, 3000);
   }
 });

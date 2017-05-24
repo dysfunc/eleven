@@ -154,16 +154,15 @@ _core2.default.extend({
    * @param  {Function} success The callback function to execute upon success
    * @param  {Function} error   The callback function to execute upon failure
    */
-  jsonp: function jsonp(config, success, error) {
+  jsonp: function jsonp(config) {
+    var success = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : emptyFn;
+    var error = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : emptyFn;
+
     if ((typeof config === 'undefined' ? 'undefined' : _typeof(config)) !== 'object' || config && !config.url) {
       return undefined;
     }
 
-    return _core2.default.ajax(_core2.default.extend(true, {
-      dataType: 'jsonp',
-      success: success || emptyFn,
-      error: error || emptyFn
-    }, config));
+    return _core2.default.ajax(_core2.default.extend(true, { dataType: 'jsonp', success: success, error: error }, config));
   },
 
   /**
@@ -171,23 +170,30 @@ _core2.default.extend({
    * @param  {Object} config The request configuration
    * @return {Object}
    */
-  jsonP: function jsonP(config) {
-    var script = document.createElement('script'),
-        fn = config.jsonp || 'jsonpCallback' + jsonPUID++,
-        context = config.context,
-        data,
-        timeout;
+  jsonP: function jsonP(_ref) {
+    var context = _ref.context,
+        jsonp = _ref.jsonp,
+        url = _ref.url,
+        xhr = _ref.xhr,
+        error = _ref.error,
+        success = _ref.success,
+        timeout = _ref.timeout;
 
-    script.src = config.url.replace(_core2.default.regexp.callback, '?$1=' + fn);
+    var script = document.createElement('script');
+    var fn = jsonp || 'jsonpCallback' + jsonPUID++;
+
+    var data, timeout;
+
+    script.src = url.replace(_core2.default.regexp.callback, '?$1=' + fn);
 
     script.onerror = function () {
-      config.xhr.abort();
-      config.error.call(context, null, 'error');
+      xhr.abort();
+      error.call(context, null, 'error');
     };
 
     script.onload = function () {
-      if (_core2.default.isFunction(config.success)) {
-        config.success.call(context, data[0]);
+      if (_core2.default.isFunction(success)) {
+        success.call(context, data[0]);
       }
 
       script.parentNode.removeChild(script);
@@ -209,7 +215,7 @@ _core2.default.extend({
       data = arguments;
     };
 
-    if (config.timeout > 0) {
+    if (timeout > 0) {
       timeout = setTimeout(function () {
         script.parentNode.removeChild(script);
 
@@ -217,9 +223,9 @@ _core2.default.extend({
           window[fn] = emptyFn;
         }
 
-        config.error.call(context, null, 'timeout');
-        config.xhr.abort();
-      }, config.timeout);
+        error.call(context, null, 'timeout');
+        xhr.abort();
+      }, timeout);
     }
 
     return {};
@@ -247,7 +253,7 @@ _core2.default.extend({
       return result;
     }
 
-    _core2.default.each(query.split('&'), function (index, value) {
+    _core2.default.each('' + query.split('&'), function (index, value) {
       if (value) {
         var param = value.split('=');
         result[param[0]] = param[1];
@@ -274,8 +280,8 @@ _core2.default.extend({
    * @return {Array}          The updated params array
    */
   serialize: function serialize(params, data, scope) {
-    var array = _core2.default.isArray(data),
-        escape = encodeURIComponent;
+    var array = _core2.default.isArray(data);
+    var escape = encodeURIComponent;
 
     _core2.default.each(data, function (key, value) {
       if (scope) {
@@ -301,16 +307,17 @@ _core2.default.extend({
  * @param  {Function} error   The failure callback function
  */
 ['get', 'getJSON'].forEach(function (method, index) {
-  _core2.default[method] = function (url, data, success, error) {
-    _core2.default.isFunction(data) && (error = success) && (success = data) && (data = {});
+  _core2.default[method] = function (url, data) {
+    var success = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : emptyFn;
+    var error = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : emptyFn;
 
-    return _core2.default.ajax({
-      url: url,
-      data: data,
-      dataType: index === 0 ? 'html' : 'json',
-      success: success || emptyFn,
-      error: error || emptyFn
-    });
+    if (_core2.default.isFunction(data)) {
+      error = success;
+      success = data;
+      data = {};
+    }
+
+    return _core2.default.ajax({ url: url, data: data, success: success, error: error, dataType: index === 0 ? 'html' : 'json' });
   };
 });
 
@@ -403,6 +410,7 @@ _core2.default.fn.extend({
 
     return this;
   },
+
   /**
    * Adds the passed command to the command list
    * @param {String}   phrase   String continaing the command to listen for
@@ -420,6 +428,7 @@ _core2.default.fn.extend({
       console.debug('[Eleven] Command registered: ' + phrase);
     }
   },
+
   /**
    * Remove one or more commands from Eleven's registry
    *
@@ -1098,7 +1107,10 @@ $.apply($, {
    * Removes all rendered elements from the viewport and executes a callback
    * @param  {Function} fn Function to execute once the view has been cleared
    */
-  resetView: function resetView(selector, fn) {
+  resetView: function resetView() {
+    var selector = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '.results';
+    var fn = arguments[1];
+
     if ($.isFunction(selector)) {
       fn = selector;
       selector = '.results';
