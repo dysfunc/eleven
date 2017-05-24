@@ -110,7 +110,6 @@
         url: 'https://query.yahooapis.com/v1/public/yql?q=select * from weather.forecast where woeid in (select woeid from geo.places(1) where text="'+ city + '")&format=json',
         dataType: 'json',
         success: function(data){
-          console.log(data, '---asd--asd-as-dsa-d-a-');
           self.createList(data, total);
 
           if($$.isFunction(callback)){
