@@ -99,7 +99,7 @@ $.fn = $.prototype = {
     }
     // print the instance config
     if(this.options.debug){
-      $$.debug = true;
+      $.debug = true;
       console.debug(this);
     }
     // allow single instance (Speech API does not support multiple instances yet)
