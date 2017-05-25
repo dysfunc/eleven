@@ -751,14 +751,6 @@ var _enums = require('./common/enums');
 
 var _enums2 = _interopRequireDefault(_enums);
 
-var _cookies = require('./utils/cookies');
-
-var _cookies2 = _interopRequireDefault(_cookies);
-
-var _uuid2 = require('./utils/uuid');
-
-var _uuid3 = _interopRequireDefault(_uuid2);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
@@ -821,23 +813,15 @@ $.fn = $.prototype = {
       interimResults: true,
       maxAlternatives: 5,
       requiresWakeWord: true,
-      wake: {
-        commands: ['eleven', '11'],
-        audio: 'https://s3-us-west-1.amazonaws.com/voicelabs/static/chime.mp3',
-        commandWait: 10000
-      },
-      visualizer: {
-        height: 140,
-        ratio: 2,
-        wavesContainer: '.waves',
-        width: 280
-      },
+      wakeCommands: ['eleven', '11'],
+      wakeSound: 'https://s3-us-west-1.amazonaws.com/voicelabs/static/chime.mp3',
+      wakeCommandWait: 10000,
       template: '\n         <div class="eleven-container">\n          <div class="eleven-container-inner">\n            <div class="eleven-off">\n              <span>ELEVEN</span>\n            </div>\n            <div class="eleven-on">\n              <div class="bg"></div>\n              <div class="waves"></div>\n            </div>\n          </div>\n        </div>\n      '
     };
-
+    // create a ref to the container element
     this.container = _document2.default.querySelector(selector);
     // store options
-    this.options = $.extend(true, {}, defaultConfig, options || {});
+    this.options = $.extend({}, defaultConfig, options || {});
     // create markup
     this.container.innerHTML = this.options.template;
     // reference to all of our commands
@@ -845,7 +829,7 @@ $.fn = $.prototype = {
     // reference hash for installed plugins
     this.plugins = {};
     // create audio sound
-    this.wakeSound = new Audio(this.options.wake.audio);
+    this.wakeSound = new Audio(this.options.wakeSound);
     // buffer restarts and prevent insanity
     this.lastStartTime = this.restartCount = 0;
     // used to manage eventing
@@ -859,7 +843,7 @@ $.fn = $.prototype = {
     }
     // print the instance config
     if (this.options.debug) {
-      $$.debug = true;
+      $.debug = true;
       console.debug(this);
     }
     // allow single instance (Speech API does not support multiple instances yet)
@@ -889,7 +873,6 @@ $.apply = function (target, config, defaults) {
 };
 
 $.apply($, {
-  cookies: _cookies2.default,
   indexOf: indexOf,
   plugins: {},
   each: function each(collection, fn) {
@@ -1170,7 +1153,11 @@ $.apply($, {
    * @return {String} String containing the unique hash
    */
   uuid: function uuid() {
-    return (0, _uuid3.default)();
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      var r = Math.random() * 16 | 0;
+      var v = c == 'x' ? r : r & 0x3 | 0x8;
+      return v.toString(16);
+    });
   }
 });
 
@@ -1412,7 +1399,7 @@ $.apply($.fn, {
     var result = event.results[event.resultIndex];
     var results = [];
 
-    if (this.options.wake.commands.indexOf(result[0].transcript.trim()) !== -1) {
+    if (this.options.wakeCommands.indexOf(result[0].transcript.trim()) !== -1) {
       if (!this.activated) {
         this.activated = true;
         this.container.classList.add('ready');
@@ -1421,7 +1408,7 @@ $.apply($.fn, {
         this.commandTimer = setTimeout(function () {
           _this4.activated = false;
           _this4.container.classList.remove('ready');
-        }, this.options.wake.commandWait);
+        }, this.options.wakeCommandWait);
       }
     } else {
       if (this.activated) {
@@ -1507,7 +1494,7 @@ exports.default = $;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{"./common/enums":4,"./document":7,"./speechRecognition":11,"./utils/cookies":13,"./utils/uuid":14,"./window":16}],7:[function(require,module,exports){
+},{"./common/enums":4,"./document":7,"./speechRecognition":11,"./window":14}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1522,7 +1509,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _window2.default.document;
 
-},{"./window":16}],8:[function(require,module,exports){
+},{"./window":14}],8:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1547,7 +1534,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _core2.default;
 
-},{"./ajax":1,"./commands":3,"./core":6,"./regexp":10,"./speechSynthesis":12,"./visualizer":15}],9:[function(require,module,exports){
+},{"./ajax":1,"./commands":3,"./core":6,"./regexp":10,"./speechSynthesis":12,"./visualizer":13}],9:[function(require,module,exports){
 'use strict';
 
 var _eleven = require('./eleven');
@@ -1602,7 +1589,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _window2.default.SpeechRecognition || _window2.default.webkitSpeechRecognition || _window2.default.mozSpeechRecognition || _window2.default.msSpeechRecognition || _window2.default.oSpeechRecognition;
 
-},{"./window":16}],12:[function(require,module,exports){
+},{"./window":14}],12:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1918,128 +1905,7 @@ _core2.default.speak = _core2.default.proxy(Speech.speak, Speech);
 
 exports.default = _core2.default;
 
-},{"./common/voiceConfigs":5,"./core":6,"./window":16}],13:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _document = require('../document');
-
-var _document2 = _interopRequireDefault(_document);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var cookies = {
-  /**
-   * Determines whether a specific cookie exists
-   * @param  {String} key String containing the cookie key/name to for
-   * @return {Boolean}    The true/false result
-   */
-  contains: function contains(key) {
-    if (!key) {
-      return false;
-    }
-
-    return new RegExp('(?:^|;\\s*)' + encodeURIComponent(key).replace(/[\-\.\+\*]/g, '\\$&') + '\\s*\\=').test(_document2.default.cookie);
-  },
-  /**
-   * Returns a cookie from document.cookies
-   * @param  {String} key String containing the cookie name/key to lookup
-   * @return {String}     The value of the passed cookie key
-   */
-  get: function get(key) {
-    if (!key) {
-      return null;
-    }
-
-    return decodeURIComponent(_document2.default.cookie.replace(new RegExp('(?:(?:^|.*;)\\s*' + encodeURIComponent(key).replace(/[\-\.\+\*]/g, '\\$&') + '\\s*\\=\\s*([^;]*).*$)|^.*$'), '$1'));
-  },
-  /**
-   * Returns all cookies keys found inside document.cookies
-   * @return {Array} Collection of cookie key values
-   */
-  keys: function keys() {
-    var keys = _document2.default.cookie.replace(/((?:^|\s*;)[^\=]+)(?=;|$)|^\s*|\s*(?:\=[^;]*)?(?:\1|$)/g, '').split(/\s*(?:\=[^;]*)?;\s*/);
-
-    for (var i = 0, k = keys.length; i < k; i++) {
-      keys[i] = decodeURIComponent(keys[i]);
-    }
-
-    return keys;
-  },
-  /**
-   * Removes a cookie from document.cookies
-   * @param  {String} key    String containing the cookie key/name to lookup
-   * @param  {String} path   String containing the path defined during cookie creation
-   * @param  {String} domain String containing the defined during cookie creation
-   * @return {Object}        Cookie singleton
-   */
-  remove: function remove(key, path, domain) {
-    if (!this.contains(key)) {
-      return this;
-    }
-
-    _document2.default.cookie = encodeURIComponent(key) + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT' + (domain ? '; domain=' + domain : '') + (path ? '; path=' + path : '');
-
-    return this;
-  },
-  /**
-   * Creates a new cookie from the passed arguments
-   * @param  {String} key     String containing the cookie key/name to lookup
-   * @param  {String} value   String containing the value you want to set inside the cookie
-   * @param  {Mixed} age      Value of expiration
-   * @param  {String} path    String containing the path in which the cookie will be available
-   * @param  {String} domain  String containing the domains/subdomains the cookie will be available
-   * @param  {Boolean} secure True, if secure
-   * @return {Object}         Cookie singleton
-   */
-  set: function set(key, value, age, path, domain, secure) {
-    if (!key || /^(?:expires|max\-age|path|domain|secure)$/i.test(key)) {
-      return false;
-    }
-
-    var expires = '';
-
-    if (age) {
-      switch (age.constructor) {
-        case Number:
-          expires = age === Infinity ? '; expires=Fri, 31 Dec 9999 23:59:59 GMT' : '; max-age=' + age;
-          break;
-        case String:
-          expires = '; expires=' + age;
-          break;
-        case Date:
-          expires = '; expires=' + age.toUTCString();
-          break;
-      }
-    }
-
-    _document2.default.cookie = [encodeURIComponent(key) + '=' + encodeURIComponent(value), expires, domain ? '; domain=' + domain : '', path ? '; path=' + path : '', secure ? '; secure' : ''].join('');
-
-    return this;
-  }
-};
-
-exports.default = cookies;
-
-},{"../document":7}],14:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-exports.default = function () {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    var r = Math.random() * 16 | 0,
-        v = c == 'x' ? r : r & 0x3 | 0x8;
-    return v.toString(16);
-  });
-};
-
-},{}],15:[function(require,module,exports){
+},{"./common/voiceConfigs":5,"./core":6,"./window":14}],13:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2146,7 +2012,12 @@ _core2.default.apply(Curve.prototype, {
 });
 
 function Visualizer(config) {
-  var options = config.options.visualizer || {};
+  var options = {
+    height: 140,
+    ratio: 2,
+    wavesContainer: '.waves',
+    width: 280
+  };
 
   this.container = config.container;
   this.curves = [];
@@ -2268,7 +2139,7 @@ _core2.default.apply(Visualizer.prototype, {
 
 exports.default = _core2.default;
 
-},{"./core":6}],16:[function(require,module,exports){
+},{"./core":6}],14:[function(require,module,exports){
 (function (global){
 "use strict";
 
