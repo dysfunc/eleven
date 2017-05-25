@@ -1,0 +1,18 @@
+{
+  "env": {
+    "browser": true,
+    "node": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module"
+  },
+  "rules": {
+    "strict": 0,
+    "quotes": [2, "single"],
+    "consistent-return": 0,
+    "no-unused-expressions": 0,
+    "no-underscore-dangle": 0,
+    "camelcase": 0
+  }
+}
