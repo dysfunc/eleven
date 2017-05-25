@@ -814,7 +814,7 @@ $.fn = $.prototype = {
   init: function init(selector, options) {
     var defaultConfig = {
       debug: false,
-      language: 'en',
+      language: 'en-US',
       commands: [],
       autoRestart: true,
       continuous: true,
@@ -831,12 +831,15 @@ $.fn = $.prototype = {
         ratio: 2,
         wavesContainer: '.waves',
         width: 280
-      }
+      },
+      template: '\n         <div class="eleven-container">\n          <div class="eleven-container-inner">\n            <div class="eleven-off">\n              <span>ELEVEN</span>\n            </div>\n            <div class="eleven-on">\n              <div class="bg"></div>\n              <div class="waves"></div>\n            </div>\n          </div>\n        </div>\n      '
     };
 
     this.container = _document2.default.querySelector(selector);
     // store options
     this.options = $.extend(true, {}, defaultConfig, options || {});
+    // create markup
+    this.container.innerHTML = this.options.template;
     // reference to all of our commands
     this.commands = [];
     // reference hash for installed plugins
