@@ -1,0 +1,19 @@
+*.
+
+# configs
+!.babelrc
+!.editorconfig
+!.eslintignore
+!.eslintrc
+!.gitignore
+!.scss-lint.yml
+
+# generated
+node_modules
+build
+.publish
+
+# demo
+app/js/eleven.js
+app/js/eleven.js.map
+app/css/

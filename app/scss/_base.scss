@@ -1,0 +1,293 @@
+html {
+  height: 100%;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  color: #444;
+  font-family: "Open Sans", "Helvetica Neue", "Helvetica", Arial, sans-serif;
+  font-size: 13px;
+  font-weight: normal;
+  margin: 0;
+  padding: 0;
+}
+
+* {
+  @include box-sizing(border-box);
+  -webkit-overflow-scrolling: touch;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 100;
+  line-height: 1.1;
+  margin: 0;
+}
+
+p {
+  margin: 0;
+  padding: 0;
+}
+
+.block {
+  display: block;
+}
+
+.mt20 {
+  margin-top: 20px;
+}
+
+.max-w-700 {
+  margin: auto;
+  max-width: 700px;
+}
+
+code {
+  font-family: Consolas, Monaco, Menlo, "Courier New", monospace;
+  font-size: 13px;
+
+  &.badge {
+    background-color: #37bc9b;
+    color: #fff;
+    padding: 5px 8px 4px;
+    @include border-radius(2px);
+  }
+
+  &.gray {
+    background-color: #f0f0f0;
+    line-height: 18px;
+    padding: 5px 8px 4px;
+    @include border-radius(2px);
+  }
+}
+
+pre {
+  code {
+    display: block;
+    overflow: hidden !important;
+  }
+}
+
+#nav {
+  background: #073642;
+  bottom: 0;
+  left: 0;
+  overflow-y: auto;
+  padding: 15px 0;
+  position: absolute;
+  right: auto;
+  top: 0;
+  width: 200px;
+
+  #logo {
+    background: url(../img/symbol.png) no-repeat center center;
+    background-size: cover;
+    height: 40px;
+    margin-left: 10px;
+    width: 40px;
+  }
+
+  h6 {
+    color: #656d78;
+    font-size: 11px;
+    font-weight: bold;
+    margin: 10px 0 5px 15px;
+    text-transform: uppercase;
+  }
+
+  ul {
+    list-style: none;
+    margin: 0 10px;
+    padding: 0;
+
+    li {
+      color: #f0f0f0;
+      font-family: Consolas, Monaco, Menlo, "Courier New", monospace;
+      font-size: 13px;
+      padding: 2px 5px;
+      @include border-radius(2px);
+
+      a {
+        color: #f0f0f0;
+        display: block;
+        text-decoration: none;
+      }
+
+      &.active {
+        background: rgba(0, 0, 0, .15);
+        color: #fff;
+      }
+    }
+  }
+}
+
+#top {
+  background: #ed5565;
+  bottom: 0;
+  cursor: pointer;
+  max-height: 0;
+  opacity: 0;
+  padding: 7px 0 5px;
+  position: fixed;
+  right: 20px;
+  text-align: center;
+  width: 36px;
+  z-index: 999;
+  @include border-radius(2px 2px 0 0);
+  @include transition(all .4s ease-in-out);
+
+  img {
+    background-size: 24px 24px;
+    height: 24px;
+    min-width: 24px;
+  }
+
+  &:hover {
+    background: #da4453;
+  }
+}
+
+#content {
+  background: #fff;
+  bottom: 0;
+  left: 200px;
+  overflow-y: auto;
+  position: absolute;
+  right: 0;
+  top: 0;
+
+  #left,
+  #right {
+    // float: left;
+    // width: 40%;
+  }
+
+  hr {
+    border: 0;
+    border-top: 1px solid #ddd;
+    height: 1px;
+    margin: 10px 0;
+  }
+
+  h2 {
+    margin-top: 30px;
+  }
+
+  section {
+    &:first-child {
+      h2 {
+        margin-top: 0;
+      }
+    }
+  }
+
+  #left {
+    background: #fff;
+    // width: 100%;
+
+    #splash {
+      background-color: #f9f9f9;
+      padding: 80px 0 100px;
+      text-align: center;
+
+      h1 {
+        color: #434a54;
+        font-size: 40px;
+        margin: 15px 0 25px;
+      }
+
+      h3 {
+        color: #37bc9b;
+      }
+
+      img {
+        background-size: 420px 100px;
+        height: auto;
+        margin-left: -10px;
+        max-width: 420px;
+        min-width: 100px;
+      }
+    }
+
+    #body {
+      padding: 40px;
+
+      section {
+        margin-bottom: 50px;
+
+        .def {
+          margin: 10px 0;
+          padding-top: 20px;
+        }
+
+        .desc {
+          margin: 10px 0;
+        }
+
+        .title {
+          background: #3bafda;
+          color: #fff;
+          padding: 4px 8px;
+          @include border-radius(2px 2px 0 0);
+        }
+
+        .signatures .signature {
+          background: #f0f0f0;
+          color: #656d78;
+          padding: 4px 8px;
+          @include border-radius(0 0 2px 2px);
+
+          .argument {
+            margin: 10px;
+
+            small {
+              color: #aaa;
+              font-size: 9px;
+            }
+
+            p code {
+              color: #999;
+              width: 60px;
+              @include inline-block;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+
+  #header {
+    ul li span {
+      display: none;
+    }
+  }
+
+  #nav {
+    display: none;
+  }
+
+  #content {
+    left: 0;
+
+    #left {
+      #splash {
+        h3 {
+          padding: 0 10px;
+        }
+
+        img {
+          background-size: 280px 67px;
+          max-width: 280px;
+          min-width: 67px;
+        }
+      }
+
+      #body {
+        padding: 20px;
+      }
+    }
+  }
+}

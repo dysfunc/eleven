@@ -1,0 +1,82 @@
+#yelp-results {
+  bottom: 20%;
+  height: 60%;
+  left: 20%;
+  margin-left: -10%;
+  opacity: 0;
+  position: fixed;
+  top: 20%;
+  width: 80%;
+  will-change: transform, opacity;
+  @include transform(translateY(10%));
+  @include transition(transform .3s ease-in-out);
+
+  &.show {
+    opacity: 1;
+    position: fixed;
+    @include transform(translateY(0));
+    @include animation(vanishIn .5s linear);
+  }
+
+  > h1 {
+    padding-bottom: 20px;
+    text-align: center;
+  }
+
+  ul {
+    background-color: rgba(#000, .2);
+    margin: 0;
+    min-height: 240px;
+    overflow-x: auto;
+    padding: 10px;
+    @include border-radius(6px);
+    @include display-flex;
+
+    li {
+      background-color: #fff;
+      color: #333;
+      flex-basis: 140px;
+      flex-grow: 0;
+      flex-shrink: 0;
+      list-style-type: none;
+      margin-right: 10px;
+      padding: 10px 10px 0;
+      @include border-radius(3px);
+
+      .picture {
+        height: 120px;
+        overflow: hidden;
+        width: 120px;
+        @include border-radius(3px);
+
+        img {
+          background-size: cover;
+          width: 120px;
+        }
+      }
+
+      .details {
+        padding: 10px 0;
+
+        h1 {
+          display: block;
+          font-size: 15px;
+          font-weight: 500;
+        }
+
+        small {
+          color: #777;
+          font-size: 9px;
+        }
+
+        .rating {
+          height: 12px;
+
+          img {
+            height: 100%;
+          }
+        }
+      }
+    }
+  }
+}
