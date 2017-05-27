@@ -1,7 +1,8 @@
 import document from './document';
 import window from './window';
 import SpeechRecognition from './speechRecognition';
-import Enums from './common/enums';
+import SpeechSynthesis from './speechSynthesis';
+import SpeechSynthesisOverrides from './speechSynthesisOverrides';
 
 const { slice } = [];
 const { toString } = {};
@@ -57,6 +58,7 @@ $.fn = $.prototype = {
       interimResults: true,
       maxAlternatives: 5,
       requiresWakeWord: true,
+      synthesisAgent: 'Google UK English Female',
       wakeCommands: ['eleven', '11'],
       wakeSound: 'https://s3-us-west-1.amazonaws.com/voicelabs/static/chime.mp3',
       wakeCommandWait: 10000,
@@ -507,6 +509,30 @@ $.apply($.fn, {
     if($.isFunction(options.onActivate)){
       options.onActivate.call(this);
     }
+    // setup speech synthesis
+    SpeechSynthesis.onvoiceschanged = () => {
+      $.supportedVoices = SpeechSynthesis.getVoices();
+    };
+    // hack to fix issues with Chrome
+    setTimeout(() => {
+      if(!SpeechSynthesis){
+        console.warn('[Eleven] Voice synthesis is not supported.');
+      }else{
+        $.supportedVoices = SpeechSynthesis.getVoices();
+
+        if($.supportedVoices.length > 0){
+          $.mappedSupportedVoices = $.supportedVoices.slice().reduce((obj, item) => {
+            const overrides = SpeechSynthesisOverrides[item.name] || {};
+
+            obj[item.name] = $.extend({}, item, overrides, { suppportedVoice: item });
+
+            return obj;
+          }, {});
+
+          $.synthesisAgent = $.mappedSupportedVoices[options.synthesisAgent];
+        }
+      }
+    }, 500);
 
     const autoRestartConfig = options.autoRestart;
 

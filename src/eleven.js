@@ -2,7 +2,7 @@ import $ from './core';
 import './ajax';
 import './commands';
 import './regexp';
-import './speechSynthesis';
+import './speech';
 import './visualizer';
 
 export default $;
