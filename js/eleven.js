@@ -507,6 +507,8 @@ var _speechSynthesisOverrides = require('./speechSynthesisOverrides');
 
 var _speechSynthesisOverrides2 = _interopRequireDefault(_speechSynthesisOverrides);
 
+var _utils = require('./utils');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
@@ -517,33 +519,8 @@ var _ref = {},
 var _trim = String.prototype.trim;
 
 var class2type = {};
-var noop = function noop() {};
 
-var indexOf = function indexOf(collection, item) {
-  var i = 0,
-      k = collection.length;
-
-  for (; i < k; i++) {
-    if (collection[i] === item) {
-      return i;
-    }
-  }
-
-  return -1;
-};
-
-var _each = function _each(collection, fn) {
-  var i = 0,
-      k = collection.length;
-
-  for (; i < k; i++) {
-    var result = fn.call(collection[i], collection[i], i);
-
-    if (result === false) {
-      break;
-    }
-  }
-};
+var initialized = null;
 
 /**
  * Eleven
@@ -552,7 +529,7 @@ var _each = function _each(collection, fn) {
  * @return {Object}         Eleven instance
  */
 var $ = function $(selector, options) {
-  return $.initialized || new $.fn.init(selector, options);
+  return initialized || new $.fn.init(selector, options);
 };
 
 $.fn = $.prototype = {
@@ -603,7 +580,7 @@ $.fn = $.prototype = {
       console.debug(this);
     }
     // allow single instance (Speech API does not support multiple instances yet)
-    $.initialized = this;
+    initialized = this;
     // always return this for chaining
     return this;
   }
@@ -629,7 +606,7 @@ $.apply = function (target, config, defaults) {
 };
 
 $.apply($, {
-  indexOf: indexOf,
+  indexOf: _utils.indexOf,
   plugins: {},
   each: function each(collection, fn) {
     if (typeof collection === 'function') {
@@ -638,7 +615,7 @@ $.apply($, {
     }
 
     if (typeof collection.length === 'number') {
-      _each(collection, function (item, index) {
+      (0, _utils.each)(collection, function (item, index) {
         return fn.call(item, item, index);
       });
     } else if ((typeof collection === 'undefined' ? 'undefined' : _typeof(collection)) === 'object') {
@@ -724,7 +701,7 @@ $.apply($, {
    */
   inArray: function inArray(item, array, position) {
     var result;
-    return $.isArray(array) ? (result = indexOf(array, item)) && (position ? result : result !== -1) : -1;
+    return $.isArray(array) ? (result = (0, _utils.indexOf)(array, item)) && (position ? result : result !== -1) : -1;
   },
 
   /**
@@ -1029,10 +1006,11 @@ $.apply($.fn, {
         }
       }
     });
+
     // load user defined commands
-    // if(options.commands){
-    //   this.addCommands(options.commands);
-    // }
+    if (options.commands) {
+      this.addCommands(options.commands);
+    }
     // setup all SpeechRecognition event listeners
     this.listen();
     // fire activation event
@@ -1274,7 +1252,7 @@ exports.default = $;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{"./document":5,"./speechRecognition":10,"./speechSynthesis":11,"./speechSynthesisOverrides":12,"./window":14}],5:[function(require,module,exports){
+},{"./document":5,"./speechRecognition":10,"./speechSynthesis":11,"./speechSynthesisOverrides":12,"./utils":13,"./window":15}],5:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1289,7 +1267,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _window2.default.document;
 
-},{"./window":14}],6:[function(require,module,exports){
+},{"./window":15}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1314,7 +1292,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _core2.default;
 
-},{"./ajax":1,"./commands":3,"./core":4,"./regexp":8,"./speech":9,"./visualizer":13}],7:[function(require,module,exports){
+},{"./ajax":1,"./commands":3,"./core":4,"./regexp":8,"./speech":9,"./visualizer":14}],7:[function(require,module,exports){
 'use strict';
 
 var _eleven = require('./eleven');
@@ -1324,7 +1302,7 @@ var _eleven2 = _interopRequireDefault(_eleven);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 (function (root) {
-  return root.Eleven = root.$$ = _eleven2.default;
+  return root.Eleven = _eleven2.default;
 })(window);
 
 },{"./eleven":6}],8:[function(require,module,exports){
@@ -1454,7 +1432,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _window2.default.SpeechRecognition || _window2.default.webkitSpeechRecognition || _window2.default.mozSpeechRecognition || _window2.default.msSpeechRecognition || _window2.default.oSpeechRecognition;
 
-},{"./window":14}],11:[function(require,module,exports){
+},{"./window":15}],11:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1469,7 +1447,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _window2.default.speechSynthesis;
 
-},{"./window":14}],12:[function(require,module,exports){
+},{"./window":15}],12:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1547,6 +1525,44 @@ var configs = {
 exports.default = configs;
 
 },{}],13:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var indexOf = function indexOf(collection, item) {
+  var k = collection.length;
+  var i = 0;
+
+  for (; i < k; i++) {
+    if (collection[i] === item) {
+      return i;
+    }
+  }
+
+  return -1;
+};
+
+var each = function each(collection, fn) {
+  var k = collection.length;
+  var i = 0;
+
+  for (; i < k; i++) {
+    var result = fn.call(collection[i], collection[i], i);
+
+    if (result === false) {
+      break;
+    }
+  }
+};
+
+var noop = function noop() {};
+
+exports.indexOf = indexOf;
+exports.each = each;
+exports.noop = noop;
+
+},{}],14:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1780,7 +1796,7 @@ _core2.default.apply(Visualizer.prototype, {
 
 exports.default = _core2.default;
 
-},{"./core":4}],14:[function(require,module,exports){
+},{"./core":4}],15:[function(require,module,exports){
 (function (global){
 "use strict";
 

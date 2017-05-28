@@ -12,7 +12,6 @@
   $$.extend(weather.prototype, {
     createList: function(data, total){
       var query = data.query.results;
-      console.log(data, '-asd-as-d-asd-as-d-asd-as-d-as-')
       var forecast = query.channel.item.forecast;
       var city = query.channel.location.city;
       var region = query.channel.location.region;
