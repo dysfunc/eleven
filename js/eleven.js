@@ -1356,7 +1356,7 @@ _core2.default.speak = function (text) {
   // clean up text
   text = text.replace(/[\"\`]/gm, '\'');
   // split our phrases into 140 character chunks
-  var chunks = text.match(/.{1,140}\s+/g);
+  var chunks = text.match(/.{1,140}(?:\s+|\w+)/g);
   // find voice profile
   var agent = _core2.default.synthesisAgent;
 

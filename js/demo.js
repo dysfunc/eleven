@@ -14,7 +14,7 @@ Eleven.ready(function(){
 
   if(Eleven){
     var sessionId = Eleven.uuid();
-
+    // init
     Eleven('#eleven', {
       debug: true,
       onCommand: function(params, speech, command){
@@ -76,7 +76,7 @@ Eleven.ready(function(){
       }
     });
 
-
+    // instance will always be returned after init
     Eleven()
     .plugin('news')
     .plugin('weather')
