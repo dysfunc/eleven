@@ -418,11 +418,7 @@ _core2.default.fn.extend({
    * @param {Function} callback Function to execute when command has been invoked
    */
   registerCommands: function registerCommands(phrase, command, callback) {
-    this.commands[phrase] = {
-      callback: callback,
-      phrase: phrase,
-      regexp: command
-    };
+    this.commands[phrase] = { callback: callback, phrase: phrase, regexp: command };
 
     if (this.options.debug) {
       console.debug('[Eleven] Command registered: ' + phrase);
