@@ -498,10 +498,11 @@ $.apply($.fn, {
         }
       }
     });
+
     // load user defined commands
-    // if(options.commands){
-    //   this.addCommands(options.commands);
-    // }
+    if(options.commands){
+      this.addCommands(options.commands);
+    }
     // setup all SpeechRecognition event listeners
     this.listen();
     // fire activation event

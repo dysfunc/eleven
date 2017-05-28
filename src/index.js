@@ -1,3 +1,3 @@
 import Eleven from './eleven';
 
-((root) => (root.Eleven = root.$$ = Eleven))(window);
+((root) => (root.Eleven = Eleven))(window);
