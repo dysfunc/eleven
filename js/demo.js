@@ -16,7 +16,12 @@ Eleven.ready(function(){
     var sessionId = Eleven.uuid();
     // init
     Eleven('#eleven', {
-      debug: true,
+      debug: false,
+      useEngine: true,
+      onStop: function(){
+        // document.body.style.border = 0;
+        // document.body.style.boxShadow = 'none';
+      },
       onCommand: function(params, speech, command){
         Eleven.ajax({
           url: 'https://api.api.ai/api/query?v=20150910&lang=en',
@@ -76,18 +81,75 @@ Eleven.ready(function(){
       }
     });
 
+     var fn = function(params, speech, command, plugin){
+       console.log(params, speech, command, plugin);
+     }
+
     // instance will always be returned after init
     Eleven()
-    .plugin('news')
-    .plugin('weather')
-    .plugin('webSearch')
-    .plugin('yelp', {
-      params: {
-        consumerSecret: 'WoFonmd-gRsQ0LX1KX_7AMs8mgA',
-        tokenSecret: 'qsrlMjQGoucx9D8OM0B0XCL2VJA',
-        oauth_consumer_key: 'lqhazuTbcv2eTGCpamZedA',
-        oauth_token: 'VBlTansWmoTVcmX87GpUlhHNht5i4dpt'
-      }
-    });
+      // .plugin('news', {
+      //   commands: {
+      //     'hello :name': function(params, speech, command, plugin){
+      //       document.body.style.border='10px solid pink';
+      //     },
+      //     'hey (there)': fn,
+      //     'hi': function(params, speech, command, plugin){
+      //       document.body.style.boxShadow ='inset 0 0 0 10px yellow';
+      //     },
+      //     'hello': function(params, speech, command, plugin){
+      //       document.body.style.border='10px solid pink';
+      //     },
+      //     'news now': function(params, speech, command, plugin){
+      //       document.body.style.boxShadow ='inset 0 0 0 10px yellow';
+      //     }
+      //   }
+      // })
+      .plugin('news')
+      .plugin('weather')
+      .plugin('webSearch')
+      .plugin('yelp', {
+        params: {
+          consumerSecret: 'WoFonmd-gRsQ0LX1KX_7AMs8mgA',
+          tokenSecret: 'qsrlMjQGoucx9D8OM0B0XCL2VJA',
+          oauth_consumer_key: 'lqhazuTbcv2eTGCpamZedA',
+          oauth_token: 'VBlTansWmoTVcmX87GpUlhHNht5i4dpt'
+        }
+      })
+    //   .addCommands({
+    //     'hello :name': function(){
+    //       document.body.style.border = 0;
+    //       document.body.style.boxShadow = 'none';
+    //
+    //       console.log('asdoksaodk');
+    //     }
+    //   });
+    //
+    //
+    // Eleven().parser(['hi']);
+    //
+    // setTimeout(function(){
+    //   Eleven().parser(['hello kieran']);
+    // }, 2000);
+    // //
+    // setTimeout(function(){
+    //   Eleven().parser(['stop'])
+    // }, 10000);
+    //
+    //
+    // setTimeout(function(){
+    //   Eleven().parser(['hello Kieran'])
+    // }, 11000);
+    //
+    // setTimeout(function(){
+    //   Eleven.speak('hello world! how are you doing?');
+    // }, 12000);
+
+    //
+    //
+    // setTimeout(function(){
+    //   Eleven().removeCommands(['hello :name', 'stop']);
+    //   console.log(Eleven());
+    // }, 2000);
+
   }
 });

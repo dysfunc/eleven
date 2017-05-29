@@ -7,9 +7,13 @@ Object.defineProperty(exports, "__esModule", {
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _core = require('./core');
+var _core = require('../core');
 
 var _core2 = _interopRequireDefault(_core);
+
+var _document = require('../common/document');
+
+var _document2 = _interopRequireDefault(_document);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -33,7 +37,7 @@ _core2.default.extend({
     async: true,
     beforeSend: emptyFn,
     complete: emptyFn,
-    context: document,
+    context: _document2.default,
     crossDomain: false,
     error: emptyFn,
     global: true,
@@ -52,7 +56,7 @@ _core2.default.extend({
    * @return {Object}         XHR request object
    */
   ajax: function ajax(config) {
-    var callback = _core2.default.regexp.callback.test(config.url),
+    var callback = _core2.default.regexp.jsonCallback.test(config.url),
         config = _core2.default.extend(true, {}, _core2.default.ajaxSettings, config || {}),
         data = config.data && _core2.default.isObject(config.data) && (config.data = _core2.default.params(config.data)) || null,
         context = config.context,
@@ -179,7 +183,7 @@ _core2.default.extend({
         success = _ref.success,
         timeout = _ref.timeout;
 
-    var script = document.createElement('script');
+    var script = _document2.default.createElement('script');
     var fn = jsonp || 'jsonpCallback' + jsonPUID++;
 
     var data, timeout;
@@ -209,7 +213,7 @@ _core2.default.extend({
       data = null;
     };
 
-    document.head.appendChild(script);
+    _document2.default.head.appendChild(script);
 
     window[fn] = function () {
       data = arguments;
@@ -323,43 +327,33 @@ _core2.default.extend({
 
 exports.default = _core2.default;
 
-},{"./core":4}],2:[function(require,module,exports){
+},{"../common/document":5,"../core":9}],2:[function(require,module,exports){
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+var _eleven = require('./eleven');
 
-var _core = require('./core');
-
-var _core2 = _interopRequireDefault(_core);
+var _eleven2 = _interopRequireDefault(_eleven);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var parser = function parser(command) {
-  command = command.replace(_core2.default.regexp.escapeRegExp, '\\$&').replace(_core2.default.regexp.optionalParam, '(?:$1)?').replace(_core2.default.regexp.namedParam, function (match, optional) {
-    return optional ? match : '([^\\s]+)';
-  }).replace(_core2.default.regexp.splatParam, '(.*?)').replace(_core2.default.regexp.optionalRegex, '\\s*$1?\\s*');
+(function (root) {
+  return root.Eleven = _eleven2.default;
+})(window);
 
-  return new RegExp('^' + command + '$', 'i');
-};
-
-exports.default = parser;
-
-},{"./core":4}],3:[function(require,module,exports){
+},{"./eleven":10}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _core = require('./core');
+var _core = require('../core');
 
 var _core2 = _interopRequireDefault(_core);
 
-var _commandParser = require('./commandParser');
+var _commandsParser = require('./commandsParser');
 
-var _commandParser2 = _interopRequireDefault(_commandParser);
+var _commandsParser2 = _interopRequireDefault(_commandsParser);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -378,28 +372,36 @@ _core2.default.fn.extend({
    *   'hi': fn
    * });
    *
-   * // or you can add a single command
-   * agent.addCommands('hi', fn);
+   * Add plugin scoped commands when registering them after initializing Eleven
    *
+   * agent.plugin('news', {
+   *   commands: {
+   *     'show me the (top) stories': function(){
+   *       // do something when matched
+   *     }
+   *   }
+   * });
+   *
+   * @param  {Object} context  String containing the commands execution context
    * @param  {Object} commands Object containing commands and their callbacks
    * @return {Object}          Eleven instance
    */
-  addCommands: function addCommands(commands) {
+  addCommands: function addCommands(context, commands) {
     var command = {};
 
-    if (typeof commands === 'string' && arguments[1]) {
-      command[commands] = arguments[1];
-      commands = command;
+    if (typeof context !== 'string') {
+      commands = context;
+      context = 'eleven';
     }
 
     for (var phrase in commands) {
-      command = commands[phrase];
+      command[context] = commands[phrase];
 
-      if (command) {
-        if (_core2.default.isFunction(command)) {
-          this.registerCommands(phrase, (0, _commandParser2.default)(phrase), command);
-        } else if (_core2.default.isObject(command) && _core2.default.isRegExp(command.regexp)) {
-          this.registerCommands(phrase, new RegExp(command.regexp.source, 'i'), command.callback);
+      if (command[context]) {
+        if (_core2.default.isFunction(command[context])) {
+          this.registerCommands(context, phrase, (0, _commandsParser2.default)(phrase), command[context]);
+        } else if (_core2.default.isObject(command[context]) && _core2.default.isRegExp(command[context].regexp)) {
+          this.registerCommands(context, phrase, new RegExp(command[context].regexp.source, 'i'), command[context].callback);
         } else {
           if (this.options.debug) {
             console.debug('[Eleven] Command registration failed: ' + phrase);
@@ -413,12 +415,17 @@ _core2.default.fn.extend({
 
   /**
    * Adds the passed command to the command list
-   * @param {String}   phrase   String continaing the command to listen for
-   * @param {String}   command  String representing the RegExp for the command
-   * @param {Function} callback Function to execute when command has been invoked
+   * @param {String}   context   String containing the commands plugin namespace
+   * @param {String}   phrase    String continaing the command to listen for
+   * @param {String}   command   String representing the RegExp for the command
+   * @param {Function} callback  Function to execute when command has been invoked
    */
-  registerCommands: function registerCommands(phrase, command, callback) {
-    this.commands[phrase] = { callback: callback, phrase: phrase, regexp: command };
+  registerCommands: function registerCommands(context, phrase, command, callback) {
+    if (!this.commands[context]) {
+      this.commands[context] = {};
+    }
+
+    this.commands[context][phrase] = { callback: callback, phrase: phrase, regexp: command };
 
     if (this.options.debug) {
       console.debug('[Eleven] Command registered: ' + phrase);
@@ -426,38 +433,40 @@ _core2.default.fn.extend({
   },
 
   /**
-   * Remove one or more commands from Eleven's registry
+   * Removes one or more commands from the command registry
    *
-   * Example:
-   *
-   * var agent = Eleven();
-   *
-   * agent.addCommands({
-   *   'hello :name': fn,
-   *   'hey (there)': fn,
-   *   'hi': fn
-   * });
-   *
-   * // remove a single command
+   * // remove a single command from Eleven
    * agent.removeCommands('hi');
    *
-   * // remove multiple commands
+   * // remove a single command from a plugin
+   * agent.removeCommands('news', 'hi');
+   *
+   * // remove multiple commands from Eleven
    * agent.removeCommands(['hello :name', 'hi']);
+   *
+   * // remove multiple commands from a plugin
+   * agent.removeCommands('news', ['get news', 'todays headlines']);
    *
    * //remove all commands
    * agent.removeCommands();
    *
-   * @param  {Mixed} commands String or Array containing commands to remove from the command list
+   * @param  {String} context  String containing the plugin namespace to remove commands from
+   * @param  {Mixed}  commands String or Array containing commands to remove from the command list
    * @return {Object}         Eleven instance
    */
-  removeCommands: function removeCommands(commands) {
-    var currentCommmands = this.commands;
-
-    if (commands === undefined) {
+  removeCommands: function removeCommands(context, commands) {
+    if (context === undefined && commands === undefined) {
       return (this.commands = []) && this;
     }
 
-    if (typeof command === 'string') {
+    if (arguments.length === 1) {
+      commands = context;
+      context = 'eleven';
+    }
+
+    var currentCommmands = this.commands[context];
+
+    if (typeof commands === 'string') {
       commands = [commands];
     }
 
@@ -473,7 +482,126 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"./commandParser":2,"./core":4}],4:[function(require,module,exports){
+},{"../core":9,"./commandsParser":4}],4:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var parser = function parser(command) {
+  command = command.replace(_core2.default.regexp.escapeRegExp, '\\$&').replace(_core2.default.regexp.optionalParam, '(?:$1)?').replace(_core2.default.regexp.namedParam, function (match, optional) {
+    return optional ? match : '([^\\s]+)';
+  }).replace(_core2.default.regexp.splatParam, '(.*?)').replace(_core2.default.regexp.optionalRegex, '\\s*$1?\\s*');
+
+  return new RegExp('^' + command + '$', 'i');
+};
+
+exports.default = parser;
+
+},{"../core":9}],5:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _window = require('./window');
+
+var _window2 = _interopRequireDefault(_window);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = _window2.default.document;
+
+},{"./window":8}],6:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var indexOf = function indexOf(collection, item) {
+  var k = collection.length;
+  var i = 0;
+
+  for (; i < k; i++) {
+    if (collection[i] === item) {
+      return i;
+    }
+  }
+
+  return -1;
+};
+
+var each = function each(collection, fn) {
+  var k = collection.length;
+  var i = 0;
+
+  for (; i < k; i++) {
+    var result = fn.call(collection[i], collection[i], i);
+
+    if (result === false) {
+      break;
+    }
+  }
+};
+
+var noop = function noop() {};
+var slice = [].slice;
+var _ref = {},
+    toString = _ref.toString;
+var trim = String.prototype.trim;
+exports.indexOf = indexOf;
+exports.each = each;
+exports.noop = noop;
+exports.slice = slice;
+exports.toString = toString;
+exports.trim = trim;
+
+},{}],7:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_core2.default.regexp = {
+  jsonCallback: /\?(.+)=\?/,
+  escapeRegExp: /[\-{}\[\]+?.,\\\^$|#]/g,
+  optionalParam: /\s*\((.*?)\)\s*/g,
+  optionalRegex: /(\(\?:[^)]+\))\?/g,
+  namedParam: /(\(\?)?:\w+/g,
+  readyState: /^(?:complete|loaded|interactive)$/i,
+  splatParam: /\*\w+/g,
+  textChunks: /.{1,140}(?:\s+|\w+)/g
+};
+
+exports.default = _core2.default;
+
+},{"../core":9}],8:[function(require,module,exports){
+(function (global){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = global;
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+
+},{}],9:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -483,38 +611,23 @@ Object.defineProperty(exports, "__esModule", {
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _document = require('./document');
+var _document = require('./common/document');
 
 var _document2 = _interopRequireDefault(_document);
 
-var _window = require('./window');
+var _window = require('./common/window');
 
 var _window2 = _interopRequireDefault(_window);
 
-var _speechRecognition = require('./speechRecognition');
+var _speechRecognition = require('./speech/speechRecognition');
 
 var _speechRecognition2 = _interopRequireDefault(_speechRecognition);
 
-var _speechSynthesis = require('./speechSynthesis');
-
-var _speechSynthesis2 = _interopRequireDefault(_speechSynthesis);
-
-var _speechSynthesisOverrides = require('./speechSynthesisOverrides');
-
-var _speechSynthesisOverrides2 = _interopRequireDefault(_speechSynthesisOverrides);
-
-var _utils = require('./utils');
+var _helpers = require('./common/helpers');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
-var slice = [].slice;
-var _ref = {},
-    toString = _ref.toString;
-var _trim = String.prototype.trim;
-
-var class2type = {};
 
 var initialized = null;
 
@@ -541,7 +654,8 @@ $.fn = $.prototype = {
       interimResults: true,
       maxAlternatives: 5,
       requiresWakeWord: true,
-      synthesisAgent: 'Google UK English Female',
+      speechAgent: 'Google UK English Female',
+      useEngine: false,
       wakeCommands: ['eleven', '11'],
       wakeSound: 'https://s3-us-west-1.amazonaws.com/voicelabs/static/chime.mp3',
       wakeCommandWait: 10000,
@@ -575,6 +689,8 @@ $.fn = $.prototype = {
       $.debug = true;
       console.debug(this);
     }
+    // configure speechSynthesis voices
+    this.voices();
     // allow single instance (Speech API does not support multiple instances yet)
     initialized = this;
     // always return this for chaining
@@ -601,9 +717,16 @@ $.apply = function (target, config, defaults) {
   return target;
 };
 
+// type check cache
+var class2type = {};
+
 $.apply($, {
-  indexOf: _utils.indexOf,
-  plugins: {},
+  /**
+   * Iterates over an Array or Object executing a callback function on each item
+   * @param  {Mixed}    collection Array or Object to iterate over
+   * @param  {Function} fn         Function to execute on each item
+   * @return {Object}
+   */
   each: function each(collection, fn) {
     if (typeof collection === 'function') {
       fn = collection;
@@ -611,7 +734,7 @@ $.apply($, {
     }
 
     if (typeof collection.length === 'number') {
-      (0, _utils.each)(collection, function (item, index) {
+      (0, _helpers.each)(collection, function (item, index) {
         return fn.call(item, item, index);
       });
     } else if ((typeof collection === 'undefined' ? 'undefined' : _typeof(collection)) === 'object') {
@@ -651,7 +774,7 @@ $.apply($, {
       i--;
     }
 
-    $.each(slice.call(arguments, i), function (obj) {
+    $.each(_helpers.slice.call(arguments, i), function (obj) {
       var src, copy, isArray, clone;
 
       if (obj === target) {
@@ -697,7 +820,7 @@ $.apply($, {
    */
   inArray: function inArray(item, array, position) {
     var result;
-    return $.isArray(array) ? (result = (0, _utils.indexOf)(array, item)) && (position ? result : result !== -1) : -1;
+    return $.isArray(array) ? (result = (0, _helpers.indexOf)(array, item)) && (position ? result : result !== -1) : -1;
   },
 
   /**
@@ -776,30 +899,13 @@ $.apply($, {
   },
 
   /**
-   * Adds plugin to the plugin registry for any Eleven instance to bind to
-   * @param {String}  name String containing the plugins unique name
-   * @param {Functio} fn   Constructor function of plugin
-   */
-  plugin: function plugin(name, fn) {
-    if (!this.plugins[name]) {
-      if (!$.isFunction(fn)) {
-        throw '"' + name + '" does not have a constructor.';
-      } else {
-        this.plugins[name] = fn;
-      }
-    }
-
-    return this;
-  },
-
-  /**
    * Executes a function within a specific scope
    * @param  {Function} fn    The function whose scope will change
    * @param  {Object}   scope The scope in which the function should be called
    * @return {Function}       The function with the modified scope
    */
   proxy: function proxy(fn, scope) {
-    var args = slice.call(arguments, 2);
+    var args = _helpers.slice.call(arguments, 2);
 
     return $.isFunction(fn) ? function proxy() {
       return fn.apply(scope || this, [].concat(_toConsumableArray(args), Array.prototype.slice.call(arguments)));
@@ -860,21 +966,12 @@ $.apply($, {
   },
 
   /**
-   * Removes newlines, spaces (including non-breaking), and tabs from a text string
-   * @param  {String} text The text string to trim
-   * @return {String}      The modified string
-   */
-  trim: function trim(text) {
-    return text === null ? '' : _trim && _trim.call(text) || ('' + text).replace($.regexp.trim, '');
-  },
-
-  /**
    * Returns the internal JavaScript [Class]] of an Object
    * @param  {Object} obj Object to check the class property of
    * @return {String}     Only the class property of the Object
    */
   type: function type(obj) {
-    return obj === null ? String(obj) : class2type[toString.call(obj)] || 'object';
+    return obj === null ? String(obj) : class2type[_helpers.toString.call(obj)];
   },
 
   /**
@@ -906,48 +1003,7 @@ $.each(['Array', 'Boolean', 'Date', 'Error', 'Function', 'Object', 'RegExp', 'St
 $.fn.init.prototype = $.fn;
 
 $.apply($.fn, {
-  each: $.each,
   extend: $.extend,
-  /**
-   * Plugin cache
-   * @type {Object}
-   */
-  plugins: {},
-  /**
-   * Returns the specified plugin
-   * @param  {String} name String containing the plugins unique name
-   * @return {Object}      The plugin instance
-   */
-  getPlugin: function getPlugin(name) {
-    if (!this.plugins[name]) {
-      throw '"' + name + '" plugin does not exist!';
-    }
-
-    return this.plugins[name];
-  },
-
-  /**
-   * Registers a plugin with a given Eleven instance
-   * @param {String} name    String containing the plugins unique name
-   * @param {Object} options Object containing the options for that plugin
-   * @type {Object}          Eleven
-   */
-  plugin: function plugin(name) {
-    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-    if (!this.plugins[name] && $.plugins[name]) {
-      if (options.commands) {
-        this.addCommands(options.commands);
-      }
-
-      this.plugins[name] = new $.plugins[name](options);
-    } else {
-      throw '"' + name + '" plugin does not exist!';
-    }
-
-    return this;
-  },
-
   /**
    * Iterates over a collection of objects
    * @param {Mixed}    collection Collection to iterate over
@@ -988,24 +1044,33 @@ $.apply($.fn, {
     this.recognition.continuous = options.continuous;
     // return results immediately so we can emulate audio waves
     this.recognition.interimResults = options.interimResults;
+    // if true, this will pass all speech back to the onCommand callback
+    if (options.useEngine) {
+      this.addCommands({
+        '*msg': options.onCommand
+      });
+    }
     // add commands
-    this.addCommands({
-      '*msg': options.onCommand,
+    this.addCommands('eleven', {
       'stop': function stop() {
         if (_this.listening) {
-
           $.resetView(function () {
             _document2.default.body.classList.remove('interactive');
           });
 
           _this.stop();
         }
+
+        if ($.isFunction(options.onStop)) {
+          _this.context = null;
+          options.onStop.call(_this);
+        }
       }
     });
 
     // load user defined commands
     if (options.commands) {
-      this.addCommands(options.commands);
+      this.addCommands('eleven', options.commands);
     }
     // setup all SpeechRecognition event listeners
     this.listen();
@@ -1013,30 +1078,6 @@ $.apply($.fn, {
     if ($.isFunction(options.onActivate)) {
       options.onActivate.call(this);
     }
-    // setup speech synthesis
-    _speechSynthesis2.default.onvoiceschanged = function () {
-      $.supportedVoices = _speechSynthesis2.default.getVoices();
-    };
-    // hack to fix issues with Chrome
-    setTimeout(function () {
-      if (!_speechSynthesis2.default) {
-        console.warn('[Eleven] Voice synthesis is not supported.');
-      } else {
-        $.supportedVoices = _speechSynthesis2.default.getVoices();
-
-        if ($.supportedVoices.length > 0) {
-          $.mappedSupportedVoices = $.supportedVoices.slice().reduce(function (obj, item) {
-            var overrides = _speechSynthesisOverrides2.default[item.name] || {};
-
-            obj[item.name] = $.extend({}, item, overrides, { suppportedVoice: item });
-
-            return obj;
-          }, {});
-
-          $.synthesisAgent = $.mappedSupportedVoices[options.synthesisAgent];
-        }
-      }
-    }, 500);
 
     var autoRestartConfig = options.autoRestart;
 
@@ -1086,106 +1127,8 @@ $.apply($.fn, {
       }
     };
   },
-  parser: function parser(results) {
-    var _this3 = this;
-
-    var options = this.options;
-
-    if ($.isFunction(options.onResult)) {
-      options.onResult.call(this, results);
-    }
-
-    setTimeout(function () {
-      if (_this3.running && _this3.visualizer) {
-        _this3.running = false;
-        _this3.visualizer.stop();
-      }
-
-      _this3.container.classList.remove('ready');
-      _this3.activated = false;
-    }, 750);
-
-    for (var i = 0, k = results.length; i < k; i++) {
-      var recognizedSpeech = results[i].trim();
-
-      if (options.debug) {
-        console.debug('[Eleven] Speech recognized: ', recognizedSpeech);
-      }
-
-      for (var item in this.commands) {
-        var command = this.commands[item];
-        var phrase = command.phrase;
-        var result = command.regexp.exec(recognizedSpeech);
-
-        if (result) {
-          var parameters = result.slice(1);
-
-          if (options.debug) {
-            console.debug('[Eleven] Command match: ' + phrase);
-
-            if (parameters.length) {
-              console.debug('[Eleven] Command has parameters: ' + JSON.stringify(parameters, null, 2));
-            }
-          }
-
-          command.callback.call(this, parameters, recognizedSpeech, phrase);
-
-          if ($.isFunction(options.onResultMatch)) {
-            options.onResultMatch.call(this, parameters, recognizedSpeech, phrase, results);
-          }
-
-          this.container.classList.remove('ready');
-
-          this.activated = false;
-
-          return;
-        }
-      }
-    }
-
-    if ($.isFunction(options.onResultNoMatch)) {
-      options.onResultNoMatch.call(this, results);
-    }
-  },
-  result: function result(event) {
-    var _this4 = this;
-
-    var result = event.results[event.resultIndex];
-    var results = [];
-
-    if (this.options.wakeCommands.indexOf(result[0].transcript.trim()) !== -1) {
-      if (!this.activated) {
-        this.activated = true;
-        this.container.classList.add('ready');
-        this.wakeSound.play();
-
-        this.commandTimer = setTimeout(function () {
-          _this4.activated = false;
-          _this4.container.classList.remove('ready');
-        }, this.options.wakeCommandWait);
-      }
-    } else {
-      if (this.activated) {
-        if (!this.running && this.visualizer) {
-          this.running = true;
-          this.visualizer.start();
-          clearTimeout(this.commandTimer);
-        }
-
-        for (var i = 0, k = result.length; i < k; i++) {
-          if (result.isFinal) {
-            results[i] = result[i].transcript.trim();
-          }
-        }
-
-        if (results.length) {
-          this.parser(results);
-        }
-      }
-    }
-  },
   restart: function restart() {
-    var _this5 = this;
+    var _this3 = this;
 
     var timeSinceLastStart = new Date().getTime() - this.lastStartTime;
 
@@ -1199,7 +1142,7 @@ $.apply($.fn, {
 
     if (timeSinceLastStart < 1000) {
       setTimeout(function () {
-        _this5.start();
+        _this3.start();
       }, 1000 - timeSinceLastStart);
     } else {
       this.start();
@@ -1248,22 +1191,7 @@ exports.default = $;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{"./document":5,"./speechRecognition":10,"./speechSynthesis":11,"./speechSynthesisOverrides":12,"./utils":13,"./window":15}],5:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _window = require('./window');
-
-var _window2 = _interopRequireDefault(_window);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = _window2.default.document;
-
-},{"./window":15}],6:[function(require,module,exports){
+},{"./common/document":5,"./common/helpers":6,"./common/window":8,"./speech/speechRecognition":14}],10:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1274,13 +1202,19 @@ var _core = require('./core');
 
 var _core2 = _interopRequireDefault(_core);
 
-require('./ajax');
+require('./ajax/ajax');
 
-require('./commands');
+require('./commands/commands');
 
-require('./regexp');
+require('./common/regexp');
 
-require('./speech');
+require('./plugins');
+
+require('./speech/speak');
+
+require('./speech/speechParser');
+
+require('./speech/speechVoices');
 
 require('./visualizer');
 
@@ -1288,20 +1222,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _core2.default;
 
-},{"./ajax":1,"./commands":3,"./core":4,"./regexp":8,"./speech":9,"./visualizer":14}],7:[function(require,module,exports){
-'use strict';
-
-var _eleven = require('./eleven');
-
-var _eleven2 = _interopRequireDefault(_eleven);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-(function (root) {
-  return root.Eleven = _eleven2.default;
-})(window);
-
-},{"./eleven":6}],8:[function(require,module,exports){
+},{"./ajax/ajax":1,"./commands/commands":3,"./common/regexp":7,"./core":9,"./plugins":11,"./speech/speak":12,"./speech/speechParser":13,"./speech/speechVoices":17,"./visualizer":18}],11:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1314,28 +1235,81 @@ var _core2 = _interopRequireDefault(_core);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-_core2.default.regexp = {
-  callback: /\?(.+)=\?/,
-  escapeRegExp: /[\-{}\[\]+?.,\\\^$|#]/g,
-  optionalParam: /\s*\((.*?)\)\s*/g,
-  optionalRegex: /(\(\?:[^)]+\))\?/g,
-  namedParam: /(\(\?)?:\w+/g,
-  readyState: /^(?:complete|loaded|interactive)$/i,
-  splatParam: /\*\w+/g,
-  trim: /^\s+|\s+$/g,
-  whitespaces: /^\s*$/g
+// plugin registry cache
+var plugins = {};
+
+/**
+ * Adds plugin to the plugin registry for any Eleven instance to bind to
+ * @param {String}  name String containing the plugins unique name
+ * @param {Functio} fn   Constructor function of plugin
+ */
+_core2.default.plugin = function (name, fn) {
+  if (!plugins[name]) {
+    if (!_core2.default.isFunction(fn)) {
+      throw '"' + name + '" does not have a constructor.';
+    } else {
+      plugins[name] = fn;
+    }
+  }
+
+  return undefined;
 };
+
+_core2.default.fn.extend({
+  /**
+   * Plugin cache
+   * @type {Object}
+   */
+  plugins: {},
+  /**
+   * Returns the specified plugin
+   * @param  {String} name String containing the plugins unique name
+   * @return {Object}      The plugin instance
+   */
+  getPlugin: function getPlugin(name) {
+    if (!this.plugins[name]) {
+      throw '"' + name + '" plugin does not exist!';
+    }
+
+    return this.plugins[name];
+  },
+
+  /**
+   * Registers a plugin with a given Eleven instance
+   * @param {String} name    String containing the plugins unique name
+   * @param {Object} options Object containing the options for that plugin
+   * @type {Object}          Eleven
+   */
+  plugin: function plugin(name) {
+    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+    if (!this.plugins[name] && plugins[name]) {
+
+      if (options.commands) {
+        this.addCommands(name, options.commands);
+      }
+
+      this.plugins[name] = new plugins[name](options);
+    } else if (this.plugins[name] && plugins[name]) {
+      console.warn('"' + name + '" plugin has already been loaded!');
+    } else {
+      throw '"' + name + '" plugin does not exist!';
+    }
+
+    return this;
+  }
+});
 
 exports.default = _core2.default;
 
-},{"./core":4}],9:[function(require,module,exports){
+},{"./core":9}],12:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _core = require('./core');
+var _core = require('../core');
 
 var _core2 = _interopRequireDefault(_core);
 
@@ -1349,12 +1323,14 @@ _core2.default.speak = function (text) {
   var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
   var cancelled = false;
+  // get instance
+  var eleven = Eleven();
   // clean up text
   text = text.replace(/[\"\`]/gm, '\'');
-  // split our phrases into 140 character chunks
-  var chunks = text.match(/.{1,140}(?:\s+|\w+)/g);
+  // split text into 140 character chunks
+  var chunks = text.match(_core2.default.regexp.textChunks);
   // find voice profile
-  var agent = _core2.default.synthesisAgent;
+  var agent = _core2.default.speechAgent;
 
   if (!_speechSynthesis2.default) {
     throw '[Eleven] Speech Synthesis is not supported on this device.';
@@ -1383,6 +1359,9 @@ _core2.default.speak = function (text) {
 
     if (index == 0) {
       speechUtterance.onstart = function () {
+        eleven.getVisualizer('container').classList.add('ready');
+        eleven.getVisualizer().start();
+
         if (_core2.default.isFunction(config.onStart)) {
           config.onStart();
         }
@@ -1397,14 +1376,18 @@ _core2.default.speak = function (text) {
           return;
         }
 
+        eleven.getVisualizer().stop();
+
         if (_core2.default.isFunction(config.onEnd)) {
           config.onEnd();
         }
       };
     }
 
-    speechUtterance.onerror = function (e) {
-      console.log('[Eleven] Unknow Error: ' + e);
+    speechUtterance.onerror = function (error) {
+      if (_core2.default.debug) {
+        console.error('[Eleven] Unknow Error: ' + error);
+      }
     };
 
     speechSynthesis.speak(speechUtterance);
@@ -1413,14 +1396,160 @@ _core2.default.speak = function (text) {
 
 exports.default = _core2.default;
 
-},{"./core":4,"./speechSynthesis":11}],10:[function(require,module,exports){
+},{"../core":9,"./speechSynthesis":15}],13:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _window = require('./window');
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_core2.default.fn.extend({
+  parser: function parser(results) {
+    var _this = this;
+
+    var scoped = false;
+
+    if (_core2.default.isFunction(this.options.onResult)) {
+      this.options.onResult.call(this, results);
+    }
+
+    setTimeout(function () {
+      if (_this.running && _this.visualizer) {
+        _this.running = false;
+        _this.visualizer.stop();
+      }
+
+      _this.container.classList.remove('ready');
+      _this.activated = false;
+    }, 750);
+
+    for (var i = 0, k = results.length; i < k; i++) {
+      var recognizedSpeech = results[i].trim();
+
+      if (this.options.debug) {
+        console.debug('[Eleven] Speech recognized: ' + recognizedSpeech);
+      }
+
+      if (this.context) {
+        scoped = this.lookup(this.context, this.commands[this.context], recognizedSpeech);
+      }
+
+      if (!scoped) {
+        this.context = null;
+
+        for (var context in this.commands) {
+          var result = this.lookup(context, this.commands[context], recognizedSpeech);
+
+          if (result === true) {
+            break;
+          }
+        }
+      }
+    }
+
+    if (_core2.default.isFunction(this.options.onResultNoMatch)) {
+      options.onResultNoMatch.call(this, results);
+    }
+
+    return this;
+  },
+  lookup: function lookup(name, context, speech) {
+    var match = false;
+
+    for (var item in context) {
+      var command = context[item];
+      var plugin = name === 'eleven' ? this : this.getPlugin(name);
+      var phrase = command.phrase;
+      var result = command.regexp.exec(speech);
+
+      if (result) {
+        this.context = name;
+
+        var parameters = result.slice(1);
+
+        if (this.options.debug) {
+          console.debug('[Eleven] Command match: ' + name + ' - ' + phrase);
+
+          if (parameters.length) {
+            console.debug('[Eleven] Command results contain parameters: ' + JSON.stringify(parameters, null, 2));
+          }
+        }
+
+        command.callback.call(this, parameters, speech, phrase, plugin);
+
+        if (_core2.default.isFunction(this.options.onResultMatch)) {
+          this.options.onResultMatch.call(this, parameters, speech, phrase, results);
+        }
+
+        this.container.classList.remove('ready');
+
+        this.activated = false;
+
+        match = true;
+
+        break;
+      }
+    }
+
+    return match;
+  },
+  result: function result(event) {
+    var _this2 = this;
+
+    var result = event.results[event.resultIndex];
+    var results = [];
+
+    if (this.options.wakeCommands.indexOf(result[0].transcript.trim()) !== -1) {
+      if (!this.activated) {
+        this.activated = true;
+        this.container.classList.add('ready');
+        this.wakeSound.play();
+
+        this.commandTimer = setTimeout(function () {
+          _this2.activated = false;
+          _this2.container.classList.remove('ready');
+        }, this.options.wakeCommandWait);
+      }
+    } else {
+      if (this.activated) {
+        if (!this.running && this.visualizer) {
+          this.running = true;
+          this.visualizer.start();
+          clearTimeout(this.commandTimer);
+        }
+
+        for (var i = 0, k = result.length; i < k; i++) {
+          if (result.isFinal) {
+            results[i] = result[i].transcript.trim();
+          }
+        }
+
+        if (results.length) {
+          this.parser(results);
+        }
+      }
+    }
+
+    return this;
+  }
+});
+
+exports.default = _core2.default;
+
+},{"../core":9}],14:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _window = require('../common/window');
 
 var _window2 = _interopRequireDefault(_window);
 
@@ -1428,14 +1557,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _window2.default.SpeechRecognition || _window2.default.webkitSpeechRecognition || _window2.default.mozSpeechRecognition || _window2.default.msSpeechRecognition || _window2.default.oSpeechRecognition;
 
-},{"./window":15}],11:[function(require,module,exports){
+},{"../common/window":8}],15:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _window = require('./window');
+var _window = require('../common/window');
 
 var _window2 = _interopRequireDefault(_window);
 
@@ -1443,7 +1572,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _window2.default.speechSynthesis;
 
-},{"./window":15}],12:[function(require,module,exports){
+},{"../common/window":8}],16:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1520,45 +1649,63 @@ var configs = {
 
 exports.default = configs;
 
-},{}],13:[function(require,module,exports){
-"use strict";
+},{}],17:[function(require,module,exports){
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-var indexOf = function indexOf(collection, item) {
-  var k = collection.length;
-  var i = 0;
 
-  for (; i < k; i++) {
-    if (collection[i] === item) {
-      return i;
-    }
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+var _speechSynthesis = require('./speechSynthesis');
+
+var _speechSynthesis2 = _interopRequireDefault(_speechSynthesis);
+
+var _speechSynthesisOverrides = require('./speechSynthesisOverrides');
+
+var _speechSynthesisOverrides2 = _interopRequireDefault(_speechSynthesisOverrides);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_core2.default.fn.extend({
+  voices: function voices() {
+    var _this = this;
+
+    // setup speech synthesis
+    _speechSynthesis2.default.onvoiceschanged = function () {
+      _core2.default.supportedVoices = _speechSynthesis2.default.getVoices();
+    };
+    // hack to fix issues with Chrome
+    setTimeout(function () {
+      if (!_speechSynthesis2.default) {
+        console.warn('[Eleven] Voice synthesis is not supported.');
+      } else {
+        _core2.default.supportedVoices = _speechSynthesis2.default.getVoices();
+
+        if (_core2.default.supportedVoices.length > 0) {
+          _core2.default.mappedSupportedVoices = _core2.default.supportedVoices.slice().reduce(function (obj, item) {
+            var overrides = _speechSynthesisOverrides2.default[item.name] || {};
+
+            obj[item.name] = _core2.default.extend({}, item, overrides, { suppportedVoice: item });
+
+            return obj;
+          }, {});
+
+          _core2.default.speechAgent = _core2.default.mappedSupportedVoices[_this.options.speechAgent] || _core2.default.mappedSupportedVoices['Alex'];
+        }
+      }
+    }, 500);
+
+    return _speechSynthesis2.default;
   }
+});
 
-  return -1;
-};
+exports.default = _core2.default;
 
-var each = function each(collection, fn) {
-  var k = collection.length;
-  var i = 0;
-
-  for (; i < k; i++) {
-    var result = fn.call(collection[i], collection[i], i);
-
-    if (result === false) {
-      break;
-    }
-  }
-};
-
-var noop = function noop() {};
-
-exports.indexOf = indexOf;
-exports.each = each;
-exports.noop = noop;
-
-},{}],14:[function(require,module,exports){
+},{"../core":9,"./speechSynthesis":15,"./speechSynthesisOverrides":16}],18:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1776,6 +1923,7 @@ _core2.default.apply(Visualizer.prototype, {
     this.tick = 0;
     this.run = true;
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.container.classList.add('ready');
     this.wavesContainer.parentNode.classList.add('speaking');
     this.canvas.classList.add('fadein');
 
@@ -1784,6 +1932,7 @@ _core2.default.apply(Visualizer.prototype, {
   stop: function stop() {
     this.tick = 0;
     this.run = false;
+    this.container.classList.remove('ready');
     this.wavesContainer.parentNode.classList.remove('speaking');
     this.canvas.classList.remove('fadein');
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -1792,16 +1941,5 @@ _core2.default.apply(Visualizer.prototype, {
 
 exports.default = _core2.default;
 
-},{"./core":4}],15:[function(require,module,exports){
-(function (global){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = global;
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-
-},{}]},{},[7])
+},{"./core":9}]},{},[2])
 //# sourceMappingURL=eleven.js.map
