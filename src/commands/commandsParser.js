@@ -1,4 +1,4 @@
-import $ from './core';
+import $ from '../core';
 
 const parser = (command) => {
   command = command

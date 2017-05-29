@@ -25,5 +25,8 @@ const each = (collection, fn) => {
 };
 
 const noop = () => {};
+const { slice } = [];
+const { toString } = {};
+const { trim } = String.prototype;
 
-export { indexOf, each, noop }
+export { indexOf, each, noop, slice, toString, trim };

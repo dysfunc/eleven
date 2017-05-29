@@ -18,7 +18,7 @@ watchify.args.debug = true;
 
 const sync = browserSync.create();
 
-const bundler = browserify('src/index.js', {
+const bundler = browserify('src/bundle.js', {
   extensions: ['.js'],
   debug: true
 });

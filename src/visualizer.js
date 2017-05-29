@@ -214,6 +214,7 @@ $.apply(Visualizer.prototype, {
     this.tick = 0;
     this.run = true;
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.container.classList.add('ready');
     this.wavesContainer.parentNode.classList.add('speaking');
     this.canvas.classList.add('fadein');
 
@@ -223,6 +224,7 @@ $.apply(Visualizer.prototype, {
   stop(){
     this.tick = 0;
     this.run = false;
+    this.container.classList.remove('ready');
     this.wavesContainer.parentNode.classList.remove('speaking');
     this.canvas.classList.remove('fadein')
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);

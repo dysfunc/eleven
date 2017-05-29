@@ -1,4 +1,4 @@
-import window from './window';
+import window from '../common/window';
 
 export default (
   window.SpeechRecognition ||

@@ -1,15 +1,14 @@
-import $ from './core';
+import $ from '../core';
 
 $.regexp = {
-  callback      : /\?(.+)=\?/,
+  jsonCallback  : /\?(.+)=\?/,
   escapeRegExp  : /[\-{}\[\]+?.,\\\^$|#]/g,
   optionalParam : /\s*\((.*?)\)\s*/g,
   optionalRegex : /(\(\?:[^)]+\))\?/g,
   namedParam    : /(\(\?)?:\w+/g,
   readyState    : /^(?:complete|loaded|interactive)$/i,
   splatParam    : /\*\w+/g,
-  trim          : /^\s+|\s+$/g,
-  whitespaces   : /^\s*$/g
+  textChunks    : /.{1,140}(?:\s+|\w+)/g
 };
 
 export default $;
