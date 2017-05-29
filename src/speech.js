@@ -5,10 +5,10 @@ $.speak = function(text, config = {}){
   var cancelled = false;
   // clean up text
   text = text.replace(/[\"\`]/gm, '\'');
-  // split our phrases into 140 character chunks
-  const chunks = text.match(/.{1,140}(?:\s+|\w+)/g);
+  // split text into 140 character chunks
+  const chunks = text.match($.regexp.textChunks);
   // find voice profile
-  const agent = $.synthesisAgent;
+  const agent = $.speechAgent;
 
   if(!SpeechSynthesis){
     throw '[Eleven] Speech Synthesis is not supported on this device.';
@@ -57,8 +57,10 @@ $.speak = function(text, config = {}){
       };
     }
 
-    speechUtterance.onerror = (e) => {
-      console.log(`[Eleven] Unknow Error: ${e}`);
+    speechUtterance.onerror = (error) => {
+      if($.debug){
+        console.error(`[Eleven] Unknow Error: ${error}`);
+      }
     };
 
     speechSynthesis.speak(speechUtterance);

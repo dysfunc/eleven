@@ -3,12 +3,7 @@ import window from './window';
 import SpeechRecognition from './speechRecognition';
 import SpeechSynthesis from './speechSynthesis';
 import SpeechSynthesisOverrides from './speechSynthesisOverrides';
-import { each, indexOf } from './utils';
-
-const { slice } = [];
-const { toString } = {};
-const { trim } = String.prototype;
-const class2type = {};
+import { each, indexOf, slice, toString, trim } from './utils';
 
 var initialized = null;
 
@@ -33,7 +28,8 @@ $.fn = $.prototype = {
       interimResults: true,
       maxAlternatives: 5,
       requiresWakeWord: true,
-      synthesisAgent: 'Google UK English Female',
+      speechAgent: 'Google UK English Female',
+      useEngine: false,
       wakeCommands: ['eleven', '11'],
       wakeSound: 'https://s3-us-west-1.amazonaws.com/voicelabs/static/chime.mp3',
       wakeCommandWait: 10000,
@@ -79,6 +75,8 @@ $.fn = $.prototype = {
       $.debug = true;
       console.debug(this);
     }
+    // configure speechSynthesis
+    this.synthesis();
     // allow single instance (Speech API does not support multiple instances yet)
     initialized = this;
     // always return this for chaining
@@ -97,7 +95,7 @@ $.apply = function(target, config, defaults){
   defaults && $.apply(target, defaults);
 
   if(target && config && typeof(config) === 'object'){
-    for(var i in config){
+    for(const i in config){
       target[i] = config[i];
     }
   }
@@ -105,9 +103,18 @@ $.apply = function(target, config, defaults){
   return target;
 };
 
+// type check cache
+const class2type = {};
+// plugin registry cache
+const plugins = {};
+
 $.apply($, {
-  indexOf: indexOf,
-  plugins: {},
+  /**
+   * Iterates over an Array or Object executing a callback function on each item
+   * @param  {Mixed}    collection Array or Object to iterate over
+   * @param  {Function} fn         Function to execute on each item
+   * @return {Object}
+   */
   each(collection, fn){
     if(typeof(collection) === 'function'){
       fn = collection;
@@ -275,11 +282,11 @@ $.apply($, {
    * @param {Functio} fn   Constructor function of plugin
    */
   plugin(name, fn){
-    if(!this.plugins[name]){
+    if(!plugins[name]){
       if(!$.isFunction(fn)){
         throw `"${name}" does not have a constructor.`;
       }else{
-        this.plugins[name] = fn;
+        plugins[name] = fn;
       }
     }
 
@@ -344,20 +351,12 @@ $.apply($, {
     return JSON.stringify(value, replacer, spaces);
   },
   /**
-   * Removes newlines, spaces (including non-breaking), and tabs from a text string
-   * @param  {String} text The text string to trim
-   * @return {String}      The modified string
-   */
-  trim(text){
-    return text === null ? '' : trim && trim.call(text) || (`${text}`).replace($.regexp.trim, '');
-  },
-  /**
    * Returns the internal JavaScript [Class]] of an Object
    * @param  {Object} obj Object to check the class property of
    * @return {String}     Only the class property of the Object
    */
   type(obj){
-    return obj === null ? String(obj) : class2type[toString.call(obj)] || 'object';
+    return obj === null ? String(obj) : class2type[toString.call(obj)];
   },
   /**
    * Generates a random RFC4122 UUID
@@ -386,7 +385,6 @@ $.each(['Array', 'Boolean', 'Date', 'Error', 'Function', 'Object', 'RegExp', 'St
 $.fn.init.prototype = $.fn;
 
 $.apply($.fn, {
-  each: $.each,
   extend: $.extend,
   /**
    * Plugin cache
@@ -412,12 +410,14 @@ $.apply($.fn, {
    * @type {Object}          Eleven
    */
   plugin(name, options = {}){
-    if(!this.plugins[name] && $.plugins[name]){
+    // console.log(name, options.commands);
+    if(!this.plugins[name] && plugins[name]){
+
       if(options.commands){
-        this.addCommands(options.commands);
+        this.addCommands(name, options.commands);
       }
 
-      this.plugins[name] = new $.plugins[name](options);
+      this.plugins[name] = new plugins[name](options);
     }else{
       throw `"${name}" plugin does not exist!`;
     }
@@ -460,24 +460,33 @@ $.apply($.fn, {
     this.recognition.continuous = options.continuous;
     // return results immediately so we can emulate audio waves
     this.recognition.interimResults = options.interimResults;
+    // if true, this will pass all speech back to the onCommand callback
+    if(options.useEngine){
+      this.addCommands({
+        '*msg': options.onCommand
+      });
+    }
     // add commands
-    this.addCommands({
-      '*msg': options.onCommand,
+    this.addCommands('eleven', {
       'stop': () => {
         if(this.listening){
-
           $.resetView(() => {
             document.body.classList.remove('interactive');
           });
 
           this.stop();
         }
+
+        if($.isFunction(options.onStop)){
+          this.context = null;
+          options.onStop.call(this);
+        }
       }
     });
 
     // load user defined commands
     if(options.commands){
-      this.addCommands(options.commands);
+      this.addCommands('eleven', options.commands);
     }
     // setup all SpeechRecognition event listeners
     this.listen();
@@ -485,30 +494,6 @@ $.apply($.fn, {
     if($.isFunction(options.onActivate)){
       options.onActivate.call(this);
     }
-    // setup speech synthesis
-    SpeechSynthesis.onvoiceschanged = () => {
-      $.supportedVoices = SpeechSynthesis.getVoices();
-    };
-    // hack to fix issues with Chrome
-    setTimeout(() => {
-      if(!SpeechSynthesis){
-        console.warn('[Eleven] Voice synthesis is not supported.');
-      }else{
-        $.supportedVoices = SpeechSynthesis.getVoices();
-
-        if($.supportedVoices.length > 0){
-          $.mappedSupportedVoices = $.supportedVoices.slice().reduce((obj, item) => {
-            const overrides = SpeechSynthesisOverrides[item.name] || {};
-
-            obj[item.name] = $.extend({}, item, overrides, { suppportedVoice: item });
-
-            return obj;
-          }, {});
-
-          $.synthesisAgent = $.mappedSupportedVoices[options.synthesisAgent];
-        }
-      }
-    }, 500);
 
     const autoRestartConfig = options.autoRestart;
 
@@ -557,10 +542,10 @@ $.apply($.fn, {
   },
 
   parser(results){
-    var options = this.options;
+    var scoped = false;
 
-    if($.isFunction(options.onResult)){
-      options.onResult.call(this, results);
+    if($.isFunction(this.options.onResult)){
+      this.options.onResult.call(this, results);
     }
 
     setTimeout(() => {
@@ -574,46 +559,71 @@ $.apply($.fn, {
     }, 750);
 
     for(var i = 0, k = results.length; i < k; i++){
-      var recognizedSpeech = results[i].trim();
+      const recognizedSpeech = results[i].trim();
 
-      if(options.debug){
-        console.debug('[Eleven] Speech recognized: ', recognizedSpeech);
+      if(this.options.debug){
+        console.debug(`[Eleven] Speech recognized: ${recognizedSpeech}`);
       }
 
-      for(const item in this.commands){
-        const command = this.commands[item];
-        const phrase = command.phrase;
-        const result = command.regexp.exec(recognizedSpeech);
+      if(this.context){
+        scoped = this.lookup(this.context, this.commands[this.context], recognizedSpeech);
+      }
 
-        if(result){
-          var parameters = result.slice(1);
+      if(!scoped){
+        this.context = null;
 
-          if(options.debug){
-            console.debug(`[Eleven] Command match: ${phrase}`);
+        for(const context in this.commands){
+          const result = this.lookup(context, this.commands[context], recognizedSpeech);
 
-            if(parameters.length){
-              console.debug(`[Eleven] Command has parameters: ${JSON.stringify(parameters, null, 2)}`);
-            }
+          if(result){
+            break;
           }
-
-          command.callback.call(this, parameters, recognizedSpeech, phrase);
-
-          if($.isFunction(options.onResultMatch)){
-            options.onResultMatch.call(this, parameters, recognizedSpeech, phrase, results);
-          }
-
-          this.container.classList.remove('ready');
-
-          this.activated = false;
-
-          return;
         }
       }
     }
 
-    if($.isFunction(options.onResultNoMatch)){
+    if($.isFunction(this.options.onResultNoMatch)){
       options.onResultNoMatch.call(this, results);
     }
+
+    return this;
+  },
+
+  lookup(name, context, speech) {
+    for(const item in context){
+      const command = context[item];
+      const plugin = name === 'eleven' ? this : this.getPlugin(name);
+      const phrase = command.phrase;
+      const result = command.regexp.exec(speech);
+
+      if(result){
+        this.context = name;
+
+        var parameters = result.slice(1);
+
+        if(this.options.debug){
+          console.debug(`[Eleven] Command match: ${name} - ${phrase}`);
+
+          if(parameters.length){
+            console.debug(`[Eleven] Command results contain parameters: ${JSON.stringify(parameters, null, 2)}`);
+          }
+        }
+
+        command.callback.call(this, parameters, speech, phrase, plugin);
+
+        if($.isFunction(this.options.onResultMatch)){
+          this.options.onResultMatch.call(this, parameters, speech, phrase, results);
+        }
+
+        this.container.classList.remove('ready');
+
+        this.activated = false;
+
+        return true;
+      }
+    }
+
+    return false;
   },
 
   result(event){
@@ -650,7 +660,10 @@ $.apply($.fn, {
         }
       }
     }
+
+    return this;
   },
+
   restart(){
     const timeSinceLastStart = new Date().getTime() - this.lastStartTime;
 
@@ -709,6 +722,35 @@ $.apply($.fn, {
     }
 
     return this;
+  },
+
+  synthesis() {
+    // setup speech synthesis
+    SpeechSynthesis.onvoiceschanged = () => {
+      $.supportedVoices = SpeechSynthesis.getVoices();
+    };
+    // hack to fix issues with Chrome
+    setTimeout(() => {
+      if(!SpeechSynthesis){
+        console.warn('[Eleven] Voice synthesis is not supported.');
+      }else{
+        $.supportedVoices = SpeechSynthesis.getVoices();
+
+        if($.supportedVoices.length > 0){
+          $.mappedSupportedVoices = $.supportedVoices.slice().reduce((obj, item) => {
+            const overrides = SpeechSynthesisOverrides[item.name] || {};
+
+            obj[item.name] = $.extend({}, item, overrides, { suppportedVoice: item });
+
+            return obj;
+          }, {});
+
+          $.speechAgent = $.mappedSupportedVoices[this.options.speechAgent] || $.mappedSupportedVoices[0];
+        }
+      }
+    }, 500);
+
+    return SpeechSynthesis;
   }
 });
 

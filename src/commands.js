@@ -16,29 +16,37 @@ $.fn.extend({
    *   'hi': fn
    * });
    *
-   * // or you can add a single command
-   * agent.addCommands('hi', fn);
+   * Add plugin scoped commands when registering them after initializing Eleven
    *
+   * agent.plugin('news', {
+   *   commands: {
+   *     'show me the (top) stories': function(){
+   *       // do something when matched
+   *     }
+   *   }
+   * });
+   *
+   * @param  {Object} context  String containing the commands execution context
    * @param  {Object} commands Object containing commands and their callbacks
    * @return {Object}          Eleven instance
    */
-  addCommands(commands){
-    var command = {};
+  addCommands(context, commands){
+    const command = {};
 
-    if(typeof(commands) === 'string' && arguments[1]){
-      command[commands] = arguments[1];
-      commands = command;
+    if(typeof(context) !== 'string'){
+      commands = context;
+      context = 'eleven';
     }
 
     for(var phrase in commands){
-      command = commands[phrase];
+      command[context] = commands[phrase];
 
-      if(command){
-        if($.isFunction(command)){
-          this.registerCommands(phrase, parser(phrase), command);
+      if(command[context]){
+        if($.isFunction(command[context])){
+          this.registerCommands(context, phrase, parser(phrase), command[context]);
         }
-        else if($.isObject(command) && $.isRegExp(command.regexp)){
-          this.registerCommands(phrase, new RegExp(command.regexp.source, 'i'), command.callback);
+        else if($.isObject(command[context]) && $.isRegExp(command[context].regexp)){
+          this.registerCommands(context, phrase, new RegExp(command[context].regexp.source, 'i'), command[context].callback);
         }
         else{
           if(this.options.debug){
@@ -52,50 +60,57 @@ $.fn.extend({
   },
   /**
    * Adds the passed command to the command list
-   * @param {String}   phrase   String continaing the command to listen for
-   * @param {String}   command  String representing the RegExp for the command
-   * @param {Function} callback Function to execute when command has been invoked
+   * @param {String}   context   String containing the commands plugin namespace
+   * @param {String}   phrase    String continaing the command to listen for
+   * @param {String}   command   String representing the RegExp for the command
+   * @param {Function} callback  Function to execute when command has been invoked
    */
-  registerCommands(phrase, command, callback){
-    this.commands[phrase] = { callback, phrase, regexp: command };
+  registerCommands(context, phrase, command, callback){
+    if(!this.commands[context]){
+      this.commands[context] = {};
+    }
+
+    this.commands[context][phrase] = { callback, phrase, regexp: command };
 
     if(this.options.debug){
       console.debug(`[Eleven] Command registered: ${phrase}`);
     }
   },
   /**
-   * Remove one or more commands from Eleven's registry
+   * Removes one or more commands from the command registry
    *
-   * Example:
-   *
-   * var agent = Eleven();
-   *
-   * agent.addCommands({
-   *   'hello :name': fn,
-   *   'hey (there)': fn,
-   *   'hi': fn
-   * });
-   *
-   * // remove a single command
+   * // remove a single command from Eleven
    * agent.removeCommands('hi');
    *
-   * // remove multiple commands
+   * // remove a single command from a plugin
+   * agent.removeCommands('news', 'hi');
+   *
+   * // remove multiple commands from Eleven
    * agent.removeCommands(['hello :name', 'hi']);
+   *
+   * // remove multiple commands from a plugin
+   * agent.removeCommands('news', ['get news', 'todays headlines']);
    *
    * //remove all commands
    * agent.removeCommands();
    *
-   * @param  {Mixed} commands String or Array containing commands to remove from the command list
+   * @param  {String} context  String containing the plugin namespace to remove commands from
+   * @param  {Mixed}  commands String or Array containing commands to remove from the command list
    * @return {Object}         Eleven instance
    */
-  removeCommands(commands){
-    var currentCommmands = this.commands;
-
-    if(commands === undefined){
+  removeCommands(context, commands){
+    if(context === undefined && commands === undefined){
       return (this.commands = []) && this;
     }
 
-    if(typeof(command) === 'string'){
+    if(arguments.length === 1){
+      commands = context;
+      context = 'eleven';
+    }
+
+    const currentCommmands = this.commands[context];
+
+    if(typeof(commands) === 'string'){
       commands = [commands];
     }
 

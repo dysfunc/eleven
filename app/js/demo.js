@@ -17,6 +17,10 @@ Eleven.ready(function(){
     // init
     Eleven('#eleven', {
       debug: true,
+      onStop: function(){
+        document.body.style.border = 0;
+        document.body.style.boxShadow = 'none';
+      },
       onCommand: function(params, speech, command){
         Eleven.ajax({
           url: 'https://api.api.ai/api/query?v=20150910&lang=en',
@@ -76,18 +80,62 @@ Eleven.ready(function(){
       }
     });
 
+     var fn = function(params, phrase, command, plugin){
+       console.log(params, phrase, command, plugin);
+     }
+
     // instance will always be returned after init
     Eleven()
-    .plugin('news')
-    .plugin('weather')
-    .plugin('webSearch')
-    .plugin('yelp', {
-      params: {
-        consumerSecret: 'WoFonmd-gRsQ0LX1KX_7AMs8mgA',
-        tokenSecret: 'qsrlMjQGoucx9D8OM0B0XCL2VJA',
-        oauth_consumer_key: 'lqhazuTbcv2eTGCpamZedA',
-        oauth_token: 'VBlTansWmoTVcmX87GpUlhHNht5i4dpt'
-      }
-    });
+      .plugin('news', {
+        commands: {
+          'hello :name': fn,
+          'hey (there)': fn,
+          'hi': fn,
+          'hello': function(a, b){
+            document.body.style.border='10px solid pink';
+          },
+          'news now': function(a, b, c){
+            document.body.style.boxShadow ='inset 0 0 0 10px yellow';
+            console.log('MUFFFFIIINNNN!!!!!!!!!', a, b, c);
+          }
+        }
+      })
+      .plugin('weather')
+      .plugin('webSearch')
+      .plugin('yelp', {
+        params: {
+          consumerSecret: 'WoFonmd-gRsQ0LX1KX_7AMs8mgA',
+          tokenSecret: 'qsrlMjQGoucx9D8OM0B0XCL2VJA',
+          oauth_consumer_key: 'lqhazuTbcv2eTGCpamZedA',
+          oauth_token: 'VBlTansWmoTVcmX87GpUlhHNht5i4dpt'
+        }
+      })
+      .addCommands({
+        'hello :name': function(){
+          console.log('asdoksaodk');
+        }
+      });
+
+
+    Eleven().parser(['hi']);
+
+    setTimeout(function(){
+      Eleven().parser(['hello kieran']);
+    }, 2000);
+    //
+    setTimeout(function(){
+      Eleven().parser(['stop'])
+    }, 10000);
+
+
+    setTimeout(function(){
+      Eleven().parser(['hello Kieran'])
+    }, 11000);
+    //
+    // setTimeout(function(){
+    //   Eleven().removeCommands(['hello :name', 'stop']);
+    //   console.log(Eleven());
+    // }, 2000);
+
   }
 });

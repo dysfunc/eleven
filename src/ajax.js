@@ -39,7 +39,7 @@ $.extend({
    * @return {Object}         XHR request object
    */
   ajax(config){
-    var callback = $.regexp.callback.test(config.url),
+    var callback = $.regexp.jsonCallback.test(config.url),
         config = $.extend(true, {}, $.ajaxSettings, config || {}),
         data = config.data && $.isObject(config.data) && (config.data = $.params(config.data)) || null,
         context = config.context,
