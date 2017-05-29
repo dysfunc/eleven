@@ -1,8 +1,10 @@
 import $ from './core';
-import './ajax';
-import './commands';
-import './regexp';
-import './speech';
+import './ajax/ajax';
+import './commands/commands';
+import './common/regexp';
+import './plugins';
+import './speech/speak';
+import './speech/speechParser';
 import './visualizer';
 
 export default $;

@@ -1,4 +1,4 @@
-import $ from './core';
+import $ from '../core';
 import SpeechSynthesis from './speechSynthesis';
 
 $.speak = function(text, config = {}){

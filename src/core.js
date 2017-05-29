@@ -1,9 +1,9 @@
-import document from './document';
-import window from './window';
-import SpeechRecognition from './speechRecognition';
-import SpeechSynthesis from './speechSynthesis';
-import SpeechSynthesisOverrides from './speechSynthesisOverrides';
-import { each, indexOf, slice, toString, trim } from './utils';
+import document from './common/document';
+import window from './common/window';
+import SpeechRecognition from './speech/speechRecognition';
+import SpeechSynthesis from './speech/speechSynthesis';
+import SpeechSynthesisOverrides from './speech/speechSynthesisOverrides';
+import { each, indexOf, slice, toString, trim } from './common/helpers';
 
 var initialized = null;
 
@@ -105,8 +105,6 @@ $.apply = function(target, config, defaults){
 
 // type check cache
 const class2type = {};
-// plugin registry cache
-const plugins = {};
 
 $.apply($, {
   /**
@@ -277,22 +275,6 @@ $.apply($, {
     return parsed;
   },
   /**
-   * Adds plugin to the plugin registry for any Eleven instance to bind to
-   * @param {String}  name String containing the plugins unique name
-   * @param {Functio} fn   Constructor function of plugin
-   */
-  plugin(name, fn){
-    if(!plugins[name]){
-      if(!$.isFunction(fn)){
-        throw `"${name}" does not have a constructor.`;
-      }else{
-        plugins[name] = fn;
-      }
-    }
-
-    return this;
-  },
-  /**
    * Executes a function within a specific scope
    * @param  {Function} fn    The function whose scope will change
    * @param  {Object}   scope The scope in which the function should be called
@@ -386,44 +368,6 @@ $.fn.init.prototype = $.fn;
 
 $.apply($.fn, {
   extend: $.extend,
-  /**
-   * Plugin cache
-   * @type {Object}
-   */
-  plugins: {},
-  /**
-   * Returns the specified plugin
-   * @param  {String} name String containing the plugins unique name
-   * @return {Object}      The plugin instance
-   */
-  getPlugin(name){
-    if(!this.plugins[name]){
-      throw `"${name}" plugin does not exist!`;
-    }
-
-    return this.plugins[name];
-  },
-  /**
-   * Registers a plugin with a given Eleven instance
-   * @param {String} name    String containing the plugins unique name
-   * @param {Object} options Object containing the options for that plugin
-   * @type {Object}          Eleven
-   */
-  plugin(name, options = {}){
-    // console.log(name, options.commands);
-    if(!this.plugins[name] && plugins[name]){
-
-      if(options.commands){
-        this.addCommands(name, options.commands);
-      }
-
-      this.plugins[name] = new plugins[name](options);
-    }else{
-      throw `"${name}" plugin does not exist!`;
-    }
-
-    return this;
-  },
   /**
    * Iterates over a collection of objects
    * @param {Mixed}    collection Collection to iterate over
@@ -539,129 +483,6 @@ $.apply($.fn, {
         this.options.onStart.call(this);
       }
     };
-  },
-
-  parser(results){
-    var scoped = false;
-
-    if($.isFunction(this.options.onResult)){
-      this.options.onResult.call(this, results);
-    }
-
-    setTimeout(() => {
-      if(this.running && this.visualizer){
-        this.running = false;
-        this.visualizer.stop();
-      }
-
-      this.container.classList.remove('ready');
-      this.activated = false;
-    }, 750);
-
-    for(var i = 0, k = results.length; i < k; i++){
-      const recognizedSpeech = results[i].trim();
-
-      if(this.options.debug){
-        console.debug(`[Eleven] Speech recognized: ${recognizedSpeech}`);
-      }
-
-      if(this.context){
-        scoped = this.lookup(this.context, this.commands[this.context], recognizedSpeech);
-      }
-
-      if(!scoped){
-        this.context = null;
-
-        for(const context in this.commands){
-          const result = this.lookup(context, this.commands[context], recognizedSpeech);
-
-          if(result){
-            break;
-          }
-        }
-      }
-    }
-
-    if($.isFunction(this.options.onResultNoMatch)){
-      options.onResultNoMatch.call(this, results);
-    }
-
-    return this;
-  },
-
-  lookup(name, context, speech) {
-    for(const item in context){
-      const command = context[item];
-      const plugin = name === 'eleven' ? this : this.getPlugin(name);
-      const phrase = command.phrase;
-      const result = command.regexp.exec(speech);
-
-      if(result){
-        this.context = name;
-
-        var parameters = result.slice(1);
-
-        if(this.options.debug){
-          console.debug(`[Eleven] Command match: ${name} - ${phrase}`);
-
-          if(parameters.length){
-            console.debug(`[Eleven] Command results contain parameters: ${JSON.stringify(parameters, null, 2)}`);
-          }
-        }
-
-        command.callback.call(this, parameters, speech, phrase, plugin);
-
-        if($.isFunction(this.options.onResultMatch)){
-          this.options.onResultMatch.call(this, parameters, speech, phrase, results);
-        }
-
-        this.container.classList.remove('ready');
-
-        this.activated = false;
-
-        return true;
-      }
-    }
-
-    return false;
-  },
-
-  result(event){
-    const result = event.results[event.resultIndex];
-    const results = [];
-
-    if(this.options.wakeCommands.indexOf(result[0].transcript.trim()) !== -1){
-      if(!this.activated){
-        this.activated = true;
-        this.container.classList.add('ready');
-        this.wakeSound.play();
-
-        this.commandTimer = setTimeout(() => {
-          this.activated = false;
-          this.container.classList.remove('ready');
-        }, this.options.wakeCommandWait);
-      }
-    }else {
-      if(this.activated){
-        if(!this.running && this.visualizer){
-          this.running = true;
-          this.visualizer.start();
-          clearTimeout(this.commandTimer);
-        }
-
-        for(var i = 0, k = result.length; i < k; i++){
-          if(result.isFinal){
-            results[i] = result[i].transcript.trim();
-          }
-        }
-
-        if(results.length){
-          this.parser(results);
-        }
-      }
-    }
-
-    return this;
   },
 
   restart(){

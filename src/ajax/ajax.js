@@ -1,4 +1,5 @@
-import $ from './core';
+import $ from '../core';
+import document from '../common/document';
 
 var activeXHR = 0,
     jsonPUID = 0,

@@ -1,5 +1,5 @@
-import $ from './core';
-import parser from './commandParser';
+import $ from '../core';
+import Parser from './commandsParser';
 
 $.fn.extend({
   /**
@@ -43,7 +43,7 @@ $.fn.extend({
 
       if(command[context]){
         if($.isFunction(command[context])){
-          this.registerCommands(context, phrase, parser(phrase), command[context]);
+          this.registerCommands(context, phrase, Parser(phrase), command[context]);
         }
         else if($.isObject(command[context]) && $.isRegExp(command[context].regexp)){
           this.registerCommands(context, phrase, new RegExp(command[context].regexp.source, 'i'), command[context].callback);
