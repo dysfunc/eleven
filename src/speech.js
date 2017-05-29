@@ -3,6 +3,8 @@ import SpeechSynthesis from './speechSynthesis';
 
 $.speak = function(text, config = {}){
   var cancelled = false;
+  // get instance
+  const eleven = Eleven();
   // clean up text
   text = text.replace(/[\"\`]/gm, '\'');
   // split text into 140 character chunks
@@ -37,6 +39,9 @@ $.speak = function(text, config = {}){
 
     if(index == 0){
       speechUtterance.onstart = () => {
+        eleven.getVisualizer('container').classList.add('ready');
+        eleven.getVisualizer().start();
+
         if($.isFunction(config.onStart)){
           config.onStart();
         }
@@ -50,6 +55,8 @@ $.speak = function(text, config = {}){
           cancelled = false;
           return;
         }
+
+        eleven.getVisualizer().stop();
 
         if($.isFunction(config.onEnd)){
           config.onEnd();

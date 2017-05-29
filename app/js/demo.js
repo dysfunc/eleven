@@ -18,8 +18,8 @@ Eleven.ready(function(){
     Eleven('#eleven', {
       debug: true,
       onStop: function(){
-        document.body.style.border = 0;
-        document.body.style.boxShadow = 'none';
+        // document.body.style.border = 0;
+        // document.body.style.boxShadow = 'none';
       },
       onCommand: function(params, speech, command){
         Eleven.ajax({
@@ -80,23 +80,26 @@ Eleven.ready(function(){
       }
     });
 
-     var fn = function(params, phrase, command, plugin){
-       console.log(params, phrase, command, plugin);
+     var fn = function(params, speech, command, plugin){
+       console.log(params, speech, command, plugin);
      }
 
     // instance will always be returned after init
     Eleven()
       .plugin('news', {
         commands: {
-          'hello :name': fn,
-          'hey (there)': fn,
-          'hi': fn,
-          'hello': function(a, b){
+          'hello :name': function(params, speech, command, plugin){
             document.body.style.border='10px solid pink';
           },
-          'news now': function(a, b, c){
+          'hey (there)': fn,
+          'hi': function(params, speech, command, plugin){
             document.body.style.boxShadow ='inset 0 0 0 10px yellow';
-            console.log('MUFFFFIIINNNN!!!!!!!!!', a, b, c);
+          },
+          'hello': function(params, speech, command, plugin){
+            document.body.style.border='10px solid pink';
+          },
+          'news now': function(params, speech, command, plugin){
+            document.body.style.boxShadow ='inset 0 0 0 10px yellow';
           }
         }
       })
@@ -112,6 +115,9 @@ Eleven.ready(function(){
       })
       .addCommands({
         'hello :name': function(){
+          document.body.style.border = 0;
+          document.body.style.boxShadow = 'none';
+
           console.log('asdoksaodk');
         }
       });
@@ -131,6 +137,12 @@ Eleven.ready(function(){
     setTimeout(function(){
       Eleven().parser(['hello Kieran'])
     }, 11000);
+
+    setTimeout(function(){
+      Eleven.speak('hello world! how are you doing?');
+    }, 12000);
+
+
     //
     // setTimeout(function(){
     //   Eleven().removeCommands(['hello :name', 'stop']);

@@ -745,7 +745,7 @@ $.apply($.fn, {
             return obj;
           }, {});
 
-          $.speechAgent = $.mappedSupportedVoices[this.options.speechAgent] || $.mappedSupportedVoices[0];
+          $.speechAgent = $.mappedSupportedVoices[this.options.speechAgent] || $.mappedSupportedVoices['Alex'];
         }
       }
     }, 500);
