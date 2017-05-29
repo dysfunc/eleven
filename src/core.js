@@ -1,8 +1,6 @@
 import document from './common/document';
 import window from './common/window';
 import SpeechRecognition from './speech/speechRecognition';
-import SpeechSynthesis from './speech/speechSynthesis';
-import SpeechSynthesisOverrides from './speech/speechSynthesisOverrides';
 import { each, indexOf, slice, toString, trim } from './common/helpers';
 
 var initialized = null;
@@ -75,8 +73,8 @@ $.fn = $.prototype = {
       $.debug = true;
       console.debug(this);
     }
-    // configure speechSynthesis
-    this.synthesis();
+    // configure speechSynthesis voices
+    this.voices();
     // allow single instance (Speech API does not support multiple instances yet)
     initialized = this;
     // always return this for chaining
@@ -543,35 +541,6 @@ $.apply($.fn, {
     }
 
     return this;
-  },
-
-  synthesis() {
-    // setup speech synthesis
-    SpeechSynthesis.onvoiceschanged = () => {
-      $.supportedVoices = SpeechSynthesis.getVoices();
-    };
-    // hack to fix issues with Chrome
-    setTimeout(() => {
-      if(!SpeechSynthesis){
-        console.warn('[Eleven] Voice synthesis is not supported.');
-      }else{
-        $.supportedVoices = SpeechSynthesis.getVoices();
-
-        if($.supportedVoices.length > 0){
-          $.mappedSupportedVoices = $.supportedVoices.slice().reduce((obj, item) => {
-            const overrides = SpeechSynthesisOverrides[item.name] || {};
-
-            obj[item.name] = $.extend({}, item, overrides, { suppportedVoice: item });
-
-            return obj;
-          }, {});
-
-          $.speechAgent = $.mappedSupportedVoices[this.options.speechAgent] || $.mappedSupportedVoices['Alex'];
-        }
-      }
-    }, 500);
-
-    return SpeechSynthesis;
   }
 });
 
