@@ -668,7 +668,7 @@ $.fn = $.prototype = {
     // create markup
     this.container.innerHTML = this.options.template;
     // reference to all of our commands
-    this.commands = [];
+    this.commands = {};
     // reference hash for installed plugins
     this.plugins = {};
     // create audio sound
@@ -1413,7 +1413,7 @@ _core2.default.fn.extend({
   parser: function parser(results) {
     var _this = this;
 
-    var scoped = false;
+    var match = false;
 
     if (_core2.default.isFunction(this.options.onResult)) {
       this.options.onResult.call(this, results);
@@ -1429,29 +1429,25 @@ _core2.default.fn.extend({
       _this.activated = false;
     }, 750);
 
-    for (var i = 0, k = results.length; i < k; i++) {
-      var recognizedSpeech = results[i].trim();
+    _core2.default.each(results, function (result) {
+      var speech = result.trim();
 
-      if (this.options.debug) {
-        console.debug('[Eleven] Speech recognized: ' + recognizedSpeech);
+      if (_this.options.debug) {
+        console.debug('[Eleven] Recognized speech: ' + speech);
       }
 
-      if (this.context) {
-        scoped = this.lookup(this.context, this.commands[this.context], recognizedSpeech);
+      if (_this.context) {
+        match = _this.evaluate(_this.context, _this.commands[_this.context], speech);
       }
 
-      if (!scoped) {
-        this.context = null;
+      if (!match) {
+        _this.context = null;
 
-        for (var context in this.commands) {
-          var result = this.lookup(context, this.commands[context], recognizedSpeech);
-
-          if (result === true) {
-            break;
-          }
-        }
+        _core2.default.each(_this.commands, function (context) {
+          return !_this.evaluate(context, _this.commands[context], speech);
+        });
       }
-    }
+    });
 
     if (_core2.default.isFunction(this.options.onResultNoMatch)) {
       options.onResultNoMatch.call(this, results);
@@ -1459,7 +1455,7 @@ _core2.default.fn.extend({
 
     return this;
   },
-  lookup: function lookup(name, context, speech) {
+  evaluate: function evaluate(name, context, speech) {
     var match = false;
 
     for (var item in context) {
