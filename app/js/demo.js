@@ -16,12 +16,8 @@ Eleven.ready(function(){
     var sessionId = Eleven.uuid();
     // init
     Eleven('#eleven', {
-      debug: false,
+      debug: true,
       useEngine: true,
-      onStop: function(){
-        // document.body.style.border = 0;
-        // document.body.style.boxShadow = 'none';
-      },
       onCommand: function(params, speech, command){
         Eleven.ajax({
           url: 'https://api.api.ai/api/query?v=20150910&lang=en',

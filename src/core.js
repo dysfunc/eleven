@@ -52,7 +52,7 @@ $.fn = $.prototype = {
     // create markup
     this.container.innerHTML = this.options.template;
     // reference to all of our commands
-    this.commands = [];
+    this.commands = {};
     // reference hash for installed plugins
     this.plugins = {};
     // create audio sound
@@ -165,7 +165,7 @@ $.apply($, {
       if(deep && $.isArray(obj)){
         target = target.concat(obj);
       }else{
-        for(var key in obj){
+        for(const key in obj){
           src = target[key];
           copy = obj[key];
 

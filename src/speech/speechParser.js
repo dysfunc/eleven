@@ -2,7 +2,7 @@ import $ from '../core';
 
 $.fn.extend({
   parser(results){
-    var scoped = false;
+    var match = false;
 
     if($.isFunction(this.options.onResult)){
       this.options.onResult.call(this, results);
@@ -18,29 +18,23 @@ $.fn.extend({
       this.activated = false;
     }, 750);
 
-    for(var i = 0, k = results.length; i < k; i++){
-      const recognizedSpeech = results[i].trim();
+    $.each(results, (result) => {
+      const speech = result.trim();
 
       if(this.options.debug){
-        console.debug(`[Eleven] Speech recognized: ${recognizedSpeech}`);
+        console.debug(`[Eleven] Recognized speech: ${speech}`);
       }
 
       if(this.context){
-        scoped = this.lookup(this.context, this.commands[this.context], recognizedSpeech);
+        match = this.evaluate(this.context, this.commands[this.context], speech);
       }
 
-      if(!scoped){
+      if(!match){
         this.context = null;
 
-        for(const context in this.commands){
-          const result = this.lookup(context, this.commands[context], recognizedSpeech);
-
-          if(result === true){
-            break;
-          }
-        }
+        $.each(this.commands, (context) => !this.evaluate(context, this.commands[context], speech));
       }
-    }
+    });
 
     if($.isFunction(this.options.onResultNoMatch)){
       options.onResultNoMatch.call(this, results);
@@ -49,7 +43,7 @@ $.fn.extend({
     return this;
   },
 
-  lookup(name, context, speech) {
+  evaluate(name, context, speech){
     var match = false;
 
     for(const item in context){
@@ -105,7 +99,7 @@ $.fn.extend({
           this.container.classList.remove('ready');
         }, this.options.wakeCommandWait);
       }
-    }else {
+    }else{
       if(this.activated){
         if(!this.running && this.visualizer){
           this.running = true;
