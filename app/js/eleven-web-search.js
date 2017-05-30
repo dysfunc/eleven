@@ -1,19 +1,19 @@
-;(function(window, $$, $){
+;(function(window, Eleven, $){
 
-  $$.plugin('webSearch', function(options){
+  Eleven.plugin('webSearch', function(options){
     return new webSearch(options);
   });
 
   var webSearch = function(options){
-    this.options = $$.extend(true, {}, options || {});
+    this.options = Eleven.extend(true, {}, options || {});
     return this;
   };
 
-  $$.extend(webSearch.prototype, {
+  Eleven.extend(webSearch.prototype, {
     createList: function(data, total){
       var articles = data.items.slice(0, 1)
 
-      $$.resetView();
+      Eleven.resetView();
 
       var container = document.createElement('div'),
           ul = document.createElement('ul');
@@ -46,13 +46,13 @@
         document.body.appendChild(container);
         container.classList.add('show');
 
-        $$.speak(articles[0].snippet, 'UK English Female');
+        Eleven.speak(articles[0].snippet, 'UK English Female');
       }, 500);
     },
 
     fetch: function(query, callback){
       var self = this;
-      $$.ajax({
+      Eleven.ajax({
         url: 'https://www.googleapis.com/customsearch/v1',
         dataType: 'json',
         data: {
@@ -64,7 +64,7 @@
           console.log(data, '--- WEB SEARCH');
           self.createList(data);
 
-          if($$.isFunction(callback)){
+          if(Eleven.isFunction(callback)){
             callback(data);
           }
         },
@@ -79,4 +79,4 @@
       this.fetch(query, callback);
     }
   });
-})(window, Eleven, $);
+})(window, Eleven, Eleven.query);

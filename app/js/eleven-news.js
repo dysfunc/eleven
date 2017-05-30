@@ -1,19 +1,19 @@
-;(function(window, $$, $){
+;(function(window, Eleven, $){
 
-  $$.plugin('news', function(options){
+  Eleven.plugin('news', function(options){
     return new news(options);
   });
 
   var news = function(options){
-    this.options = $$.extend(true, {}, options || {});
+    this.options = Eleven.extend(true, {}, options || {});
   };
 
-  $$.extend(news.prototype, {
+  Eleven.extend(news.prototype, {
     createList: function(data, total){
       var articles = data.articles.slice(2);
       var data = [];
 
-      $$.resetView();
+      Eleven.resetView();
 
       var container = document.createElement('div'),
           ul = document.createElement('ul');
@@ -44,10 +44,10 @@
 
         document.body.appendChild(wrapper);
         wrapper.classList.add('show');
+console.log($('#carousel'));
 
         $('#carousel').carousel({
           template: [
-            //'<div class="info max-w-700">You can swipe through the articles using your left and right hands. To see the next article swipe your right hand left with an open palm. Make sure your camera is not obstructred.</div>',
             '<div class="carousel">',
               '<div class="carousel-nav carousel-prev">&lt;</div>',
               '<div class="carousel-viewport">',
@@ -88,7 +88,7 @@
     fetch: function(source, callback){
       var self = this;
 
-      $$.ajax({
+      Eleven.ajax({
         url: 'https://newsapi.org/v1/articles',
         dataType: 'json',
         data: {
@@ -97,13 +97,13 @@
           source: 'cnn'
         },
         success: function(data){
-          if($$.debug){
+          if(Eleven.debug){
             console.log(data, '--- FETCHING NEWS');
           }
 
           self.createList(data);
 
-          if($$.isFunction(callback)){
+          if(Eleven.isFunction(callback)){
             callback(data);
           }
         },
@@ -119,4 +119,4 @@
     }
   });
 
-})(window, Eleven, $);
+})(window, Eleven, Eleven.query);

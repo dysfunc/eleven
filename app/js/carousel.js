@@ -1,26 +1,4 @@
-(function($){
-
-  var regexpTemplates = {
-    keys        : /\{(\w+)\}/g,
-    indexed     : /\{(\d+)\}/g
-  };
-
-  /**
-   * Returns a formatted string template from the values of the passed argument
-   * @param  {String} template The string template containing the place-holders
-   * @param  {Mixed}  values   The argument containing the indexed values or property keys
-   * @return {String}          The formatted string
-   */
-  $.format = function(template, values){
-    if(!values || !(typeof(values) === 'object' || $.isArray(values))){
-      return undefined;
-    }
-
-    var match = typeof(values) === 'object' ? 'keys' : 'indexed';
-
-    return template.replace(regexpTemplates[match], (match, key) => values[key] || '');
-  };
-
+(function(Eleven, $){
   /**
    * @plugin $.fn.carousel
    * @param  {Object} options The configuration of the carousel instance
@@ -78,9 +56,9 @@
 
       if(this.config.data){
         // build each item in the carousel from the passed dataset
-        $.each(this.config.data, function(index, item){
+        Eleven.each(this.config.data, function(item, index){
           items.push(
-            $.format(self.config.itemTemplate, item)
+            Eleven.format(self.config.itemTemplate, item)
           );
         });
       }
@@ -88,7 +66,7 @@
       // append carousel template to container element
       var carousel = this.container.append(
         // inject our carousel items into the carousel template
-        $.format(this.config.template, {
+        Eleven.format(this.config.template, {
           items: items.join('')
         })
       );
@@ -172,4 +150,4 @@
       this.content.css('left', this.position + 'px');
     }
   });
-})(jQuery)
+})(Eleven, Eleven.query)

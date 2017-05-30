@@ -1,5 +1,5 @@
-;(function(window, $$, $, oauthSignature){
-  $$.plugin('yelp', function(options){
+;(function(window, Eleven, $, oauthSignature){
+  Eleven.plugin('yelp', function(options){
     return new yelp(options);
   });
 
@@ -10,15 +10,15 @@
       }
     };
 
-    this.options = $$.extend(true, defaultOptions, options || {});
+    this.options = Eleven.extend(true, defaultOptions, options || {});
 
     return this;
   };
 
-  $$.extend(yelp.prototype, {
+  Eleven.extend(yelp.prototype, {
     createList: function(data, speech){
       // clear any results from previous commands
-      $$.resetView();
+      Eleven.resetView();
 
       var container = document.createElement('div'),
           ul = document.createElement('ul'),
@@ -67,7 +67,7 @@
         return result;
       };
 
-      return $$.extend({}, {
+      return Eleven.extend({}, {
         callback: 'jsonpCallback1',
         oauth_signature_method: 'HMAC-SHA1',
         oauth_timestamp: new Date().getTime(),
@@ -80,14 +80,14 @@
     search: function(params, speech, callback){
       var self = this,
           url = 'https://api.yelp.com/v2/search',
-          params = $$.extend({}, this.getConfig(), params);
+          params = Eleven.extend({}, this.getConfig(), params);
 
       document.body.classList.add('interactive');
 
       // add our signature
       params.oauth_signature = this.generateSignature('GET', url, params, params.consumerSecret, params.tokenSecret, { encodeSignature: false });
 
-      $$.ajax({
+      Eleven.ajax({
         url: url,
         dataType: 'jsonp',
         jsonp: 'jsonpCallback1',
@@ -95,7 +95,7 @@
         success: function(data){
           self.createList(data.businesses, speech);
 
-          if($$.isFunction(callback)){
+          if(Eleven.isFunction(callback)){
             callback(data);
           }
 
@@ -108,4 +108,4 @@
       });
     }
   });
-})(window, Eleven, $, oauthSignature);
+})(window, Eleven, Eleven.query, oauthSignature);
