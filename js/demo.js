@@ -111,6 +111,8 @@ Eleven.ready(function(){
           oauth_token: 'VBlTansWmoTVcmX87GpUlhHNht5i4dpt'
         }
       })
+
+
     //   .addCommands({
     //     'hello :name': function(){
     //       document.body.style.border = 0;
@@ -140,12 +142,9 @@ Eleven.ready(function(){
     //   Eleven.speak('hello world! how are you doing?');
     // }, 12000);
 
-    //
-    //
     // setTimeout(function(){
     //   Eleven().removeCommands(['hello :name', 'stop']);
     //   console.log(Eleven());
     // }, 2000);
-
   }
 });

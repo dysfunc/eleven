@@ -2319,7 +2319,7 @@ p {
       .carousel .carousel-nav.show:hover {
         opacity: .9; }
       .carousel .carousel-nav.show:active {
-        background-color: #f0f0f0; }
+        background-color: rgba(0, 0, 0, 0.9); }
     .carousel .carousel-nav.carousel-prev {
       left: 10px;
       opacity: 1; }

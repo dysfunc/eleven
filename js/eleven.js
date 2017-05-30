@@ -327,7 +327,7 @@ _core2.default.extend({
 
 exports.default = _core2.default;
 
-},{"../common/document":5,"../core":9}],2:[function(require,module,exports){
+},{"../common/document":6,"../core":13}],2:[function(require,module,exports){
 'use strict';
 
 var _eleven = require('./eleven');
@@ -340,7 +340,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   return root.Eleven = _eleven2.default;
 })(window);
 
-},{"./eleven":10}],3:[function(require,module,exports){
+},{"./eleven":18}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -482,7 +482,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../core":9,"./commandsParser":4}],4:[function(require,module,exports){
+},{"../core":13,"./commandsParser":4}],4:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -505,12 +505,49 @@ var parser = function parser(command) {
 
 exports.default = parser;
 
-},{"../core":9}],5:[function(require,module,exports){
+},{"../core":13}],5:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var _ref = [],
+    concat = _ref.concat,
+    each = _ref.each,
+    filter = _ref.filter,
+    forEach = _ref.forEach,
+    includes = _ref.includes,
+    indexOf = _ref.indexOf,
+    pop = _ref.pop,
+    push = _ref.push,
+    reduce = _ref.reduce,
+    slice = _ref.slice,
+    splice = _ref.splice,
+    reverse = _ref.reverse,
+    shift = _ref.shift,
+    unshift = _ref.unshift;
+exports.concat = concat;
+exports.each = each;
+exports.filter = filter;
+exports.forEach = forEach;
+exports.includes = includes;
+exports.indexOf = indexOf;
+exports.pop = pop;
+exports.push = push;
+exports.reduce = reduce;
+exports.slice = slice;
+exports.splice = splice;
+exports.reverse = reverse;
+exports.shift = shift;
+exports.unshift = unshift;
+
+},{}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.defaultView = exports.documentElement = exports.document = undefined;
 
 var _window = require('./window');
 
@@ -518,14 +555,30 @@ var _window2 = _interopRequireDefault(_window);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-exports.default = _window2.default.document;
+var document = _window2.default.document;
+var documentElement = document.documentElement;
+var defaultView = document.defaultView;
 
-},{"./window":8}],6:[function(require,module,exports){
-"use strict";
+exports.document = document;
+exports.documentElement = documentElement;
+exports.defaultView = defaultView;
+
+},{"./window":12}],7:[function(require,module,exports){
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.noop = exports.indexOf = exports.getComputedStyle = exports.each = exports.documentFragments = exports.addScript = undefined;
+
+var _window = require('../common/window');
+
+var _window2 = _interopRequireDefault(_window);
+
+var _document = require('../common/document');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 var indexOf = function indexOf(collection, item) {
   var k = collection.length;
   var i = 0;
@@ -553,18 +606,114 @@ var each = function each(collection, fn) {
 };
 
 var noop = function noop() {};
-var slice = [].slice;
-var _ref = {},
-    toString = _ref.toString;
-var trim = String.prototype.trim;
-exports.indexOf = indexOf;
-exports.each = each;
-exports.noop = noop;
-exports.slice = slice;
-exports.toString = toString;
-exports.trim = trim;
 
-},{}],7:[function(require,module,exports){
+var getComputedStyle = _window2.default.getComputedStyle || _document.defaultView && _document.defaultView.getComputedStyle;
+
+/**
+ * Use document fragments for faster DOM manipulation
+ * @param {Array}   elements  The elements to append to the fragement
+ * @param {Object}  container The container element to append the fragment to
+ * @param {Boolean} insert    A flag to determine insertion
+ */
+var documentFragments = function documentFragments(elements, container, insert) {
+  var fragment = document.createDocumentFragment(),
+      l = elements.length,
+      i = l - 1,
+      k = 0;
+
+  if (insert) {
+    for (; i >= 0; i--) {
+      var element = elements[i];
+
+      if (element.nodeName.toLowerCase() === 'script') {
+        element = addScript(element);
+      }
+
+      fragment.insertBefore(element, fragment.firstChild);
+    }
+
+    container.insertBefore(fragment, container.firstChild);
+  } else {
+    for (; k < l; k++) {
+      var element = elements[k];
+
+      if (element.nodeName.toLowerCase() === 'script') {
+        element = addScript(element);
+      }
+
+      fragment.appendChild(element);
+    }
+
+    container.appendChild(fragment);
+  }
+
+  fragment = null;
+};
+
+var addScript = function addScript(node) {
+  var src = node.src && node.src.length > 0;
+
+  try {
+    if (!src) {
+      (1, eval)(node.innerHTML);
+      return node;
+    }
+
+    var script = document.createElement('script');
+
+    script.type = 'text/javascript';
+    script.src = node.src;
+
+    return script;
+  } catch (error) {
+    console.log('There was an error with the script:' + error);
+  }
+};
+
+exports.addScript = addScript;
+exports.documentFragments = documentFragments;
+exports.each = each;
+exports.getComputedStyle = getComputedStyle;
+exports.indexOf = indexOf;
+exports.noop = noop;
+
+},{"../common/document":6,"../common/window":12}],8:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.vendor = exports.userAgent = exports.navigator = exports.language = undefined;
+
+var _window = require('./window');
+
+var _window2 = _interopRequireDefault(_window);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var navigator = _window2.default.navigator;
+
+var language = navigator.language,
+    userAgent = navigator.userAgent,
+    vendor = navigator.vendor;
+exports.language = language;
+exports.navigator = navigator;
+exports.userAgent = userAgent;
+exports.vendor = vendor;
+
+},{"./window":12}],9:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var _ref = {},
+    hasOwnProperty = _ref.hasOwnProperty,
+    toString = _ref.toString;
+exports.hasOwnProperty = hasOwnProperty;
+exports.toString = toString;
+
+},{}],10:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -578,19 +727,63 @@ var _core2 = _interopRequireDefault(_core);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 _core2.default.regexp = {
+  alpha: /[A-Za-z]/,
+  browser: /(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*([\d\.]+)/i,
+  callback: /\?(.+)=\?/,
+  camel: /-([\da-z])/gi,
+  cssNumbers: /^((margin|padding|border)(top|right|bottom|left)(width|height)?|height|width|zindex?)$/i,
+  device: /((ip)(hone|ad|od)|playbook|hp-tablet)/i,
+  escape: /('|\\)/g,
+  fragments: /^\s*<(\w+|!)[^>]*>/,
   jsonCallback: /\?(.+)=\?/,
+  jsonString: /^(\{|\[)/i,
+  manipulation: /insert|to/i,
+  mixed: /^(?:\s*<[\w!]+>|body|head|#\w(?:[\w-]*)|\.\w(?:[\w-]*))$/,
+  mobile: /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i,
+  ms: /^-ms-/,
+  nodes: /^(?:1|3|8|9|11)$/,
+  numbers: /^(0|[1-9][0-9]*)$/i,
+  os: /(android|blackberry|bb10|macintosh|webos|windows)/i,
+  protocol: /^((http|ftp|file)(s?)\:)?/,
+  queries: /[&?]{1,2}/,
+  quotes: /^["']|["']$/g,
+  ready: /^(?:complete|loaded|interactive)$/i,
+  relative: /^([-+=])/,
+  responseOK: /^(20[0-6]|304)$/g,
+  root: /^(?:body|html)$/i,
+  space: /\s+/g,
+  tags: /^[\w-]+$/,
+  templates: {
+    keys: /\{(\w+)\}/g,
+    indexed: /\{(\d+)\}/g
+  },
+  trim: /^\s+|\s+$/g,
+  whitespaces: /^\s*$/g,
+
+  // commands regexp
   escapeRegExp: /[\-{}\[\]+?.,\\\^$|#]/g,
   optionalParam: /\s*\((.*?)\)\s*/g,
   optionalRegex: /(\(\?:[^)]+\))\?/g,
   namedParam: /(\(\?)?:\w+/g,
   readyState: /^(?:complete|loaded|interactive)$/i,
   splatParam: /\*\w+/g,
+
+  // speech splitting
   textChunks: /.{1,140}(?:\s+|\w+)/g
 };
 
 exports.default = _core2.default;
 
-},{"../core":9}],8:[function(require,module,exports){
+},{"../core":13}],11:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var trim = String.prototype.trim;
+exports.trim = trim;
+
+},{}],12:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -601,7 +794,7 @@ exports.default = global;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{}],9:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -611,10 +804,6 @@ Object.defineProperty(exports, "__esModule", {
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _document = require('./common/document');
-
-var _document2 = _interopRequireDefault(_document);
-
 var _window = require('./common/window');
 
 var _window2 = _interopRequireDefault(_window);
@@ -623,7 +812,15 @@ var _speechRecognition = require('./speech/speechRecognition');
 
 var _speechRecognition2 = _interopRequireDefault(_speechRecognition);
 
+var _document = require('./common/document');
+
 var _helpers = require('./common/helpers');
+
+var _objects = require('./common/objects');
+
+var _strings = require('./common/strings');
+
+var _arrays = require('./common/arrays');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -662,7 +859,7 @@ $.fn = $.prototype = {
       template: '\n         <div class="eleven-container">\n          <div class="eleven-container-inner">\n            <div class="eleven-off">\n              <span>ELEVEN</span>\n            </div>\n            <div class="eleven-on">\n              <div class="bg"></div>\n              <div class="waves"></div>\n            </div>\n          </div>\n        </div>\n      '
     };
     // create a ref to the container element
-    this.container = _document2.default.querySelector(selector);
+    this.container = _document.document.querySelector(selector);
     // store options
     this.options = $.extend({}, defaultConfig, options || {});
     // create markup
@@ -722,6 +919,16 @@ var class2type = {};
 
 $.apply($, {
   /**
+   * Converts a dasherized strings to camelCase
+   * @param  {String} str The string to modify
+   * @return {String}     The modified string
+   */
+  camelCase: function camelCase(str) {
+    return str.trim().replace($.regexp.camel, function (match, chr) {
+      return chr ? chr.toUpperCase() : '';
+    });
+  },
+  /**
    * Iterates over an Array or Object executing a callback function on each item
    * @param  {Mixed}    collection Array or Object to iterate over
    * @param  {Function} fn         Function to execute on each item
@@ -751,6 +958,50 @@ $.apply($, {
   },
 
   /**
+   * Converts a camelCase string to a dasherized one
+   * @param  {String} str The string to convert
+   * @return {String}     The dasherized version of the string
+   */
+  dasherize: function dasherize(str) {
+    return str.trim().replace(/([A-Z])/g, '-$1').replace(/[-_\s]+/g, '-').toLowerCase();
+  },
+  /**
+   * Sets a timer to delay the execution of a function
+   * @param  {Function} fn        The function to execute
+   * @param  {Object}   context   The object that will set the context (this) of the function
+   * @param  {Integer}  wait      The delay before executing the function (Defaults to 100)
+   * @param  {Boolean}  immediate Execute the function immediately -> overrides delay
+   */
+  debounce: function debounce(fn, context, delay, immediate) {
+    var timer = null,
+        args = arguments;
+
+    if (typeof context === 'number') {
+      immediate = delay;
+      delay = context;
+      context = null;
+    }
+
+    return function () {
+      var scope = context || this,
+          delayed,
+          now;
+
+      delayed = function delayed() {
+        timer = null;
+        !now && fn.apply(scope, args);
+      };
+
+      now = immediate && !timer;
+
+      clearTimeout(timer);
+
+      timer = setTimeout(delayed, delay || 200);
+
+      now && fn.apply(scope, args);
+    };
+  },
+  /**
    * Merge the contents of two or more objects into the target object
    * @param  {Boolean} deep      If true, the merge becomes recursive (optional)
    * @param  {Object}  target    Object receiving the new properties
@@ -774,7 +1025,7 @@ $.apply($, {
       i--;
     }
 
-    $.each(_helpers.slice.call(arguments, i), function (obj) {
+    (0, _helpers.each)(_arrays.slice.call(arguments, i), function (obj) {
       var src, copy, isArray, clone;
 
       if (obj === target) {
@@ -812,6 +1063,31 @@ $.apply($, {
   },
 
   /**
+   * Returns a "flat" one-dimensional array
+   * @param  {Array} array The multidimensional array to flatten
+   * @return {Array}       The flattened array
+   */
+  flatten: function flatten(array) {
+    return concat.apply([], array);
+  },
+  /**
+   * Returns a formatted string template from the values of the passed argument
+   * @param  {String} template The string template containing the place-holders
+   * @param  {Mixed}  values   The argument containing the indexed values or property keys
+   * @return {String}          The formatted string
+   */
+  format: function format(template, values) {
+    if (!values || !($.isObject(values) || $.isArray(values))) {
+      return undefined;
+    }
+
+    var match = $.isObject(values) ? 'keys' : 'indexed';
+
+    return template.replace($.regexp.templates[match], function (match, key) {
+      return values[key] || '';
+    });
+  },
+  /**
    * Determines whether the array contains a specific value
    * @param  {Mixed}   item     The item to look for in the array
    * @param  {String}  array    The array of items
@@ -822,6 +1098,37 @@ $.apply($, {
     return array.includes(item, position);
   },
 
+  /**
+   * Determines if the passed obj is an array or array-like object (NodeList, Arguments, etc...)
+   * @param  {Object}  obj Object to type check
+   * @return {Boolean}     The true/false result
+   */
+  isArrayLike: function isArrayLike(obj) {
+    var type = $.type(obj),
+        length = obj.length;
+
+    if (type === 'function' || obj === _window2.default || type === 'string') {
+      return false;
+    }
+
+    if (obj.nodeType === 1 && length) {
+      return true;
+    }
+
+    return type === 'array' || length === 0 || typeof length === 'number' && length > 0 && length - 1 in obj;
+  },
+  /**
+   * Determines if the passed obj is empty
+   * @param  {Object}  obj Object to check the contents of
+   * @return {Boolean}     The true/false result
+   */
+  isEmptyObject: function isEmptyObject(obj) {
+    for (var key in obj) {
+      return false;
+    }
+
+    return true;
+  },
   /**
    * Determines whether the passed object is a number
    * @param  {Object}  obj Object to type check
@@ -858,6 +1165,64 @@ $.apply($, {
     return obj !== null && obj === global;
   },
 
+  /**
+   * Returns a new array from the results of the mapping
+   * @param  {Array}    elements The array to map
+   * @param  {Function} fn       The function to execute on each item
+   * @return {Array}             The new array
+   */
+  map: function map(elements, fn) {
+    var k = elements.length,
+        key,
+        value,
+        values = [],
+        i = 0;
+
+    if (elements.length) {
+      for (; i < k; i++) {
+        value = fn(elements[i], i);
+
+        if (value != null) {
+          values.push(value);
+        }
+      }
+    } else {
+      for (key in elements) {
+        value = fn(elements[key], key);
+
+        if (value != null) {
+          values.push(value);
+        }
+      }
+    }
+
+    return $.flatten(values);
+  },
+  /**
+   * Merge arrays - second into the first
+   * @param  {Array} first   The array that will receive the new values
+   * @param  {Array} second  The array that will be merged into the first - unaltered
+   * @return {Array}         The modified array
+   */
+  merge: function merge(first, second) {
+    var total = second.length,
+        length = first.length,
+        i = 0;
+
+    if (typeof total === 'number') {
+      for (; i < total; i++) {
+        first[length++] = second[i];
+      }
+    } else {
+      while (second[i] !== undefined) {
+        first[length++] = second[i++];
+      }
+    }
+
+    first.length = length;
+
+    return first;
+  },
   /**
    * Parses a string as JSON, optionally transforming the value produced by parsing
    * @param  {String}   text    The string to parse as JSON
@@ -904,7 +1269,7 @@ $.apply($, {
    * @return {Function}       The function with the modified scope
    */
   proxy: function proxy(fn, scope) {
-    var args = _helpers.slice.call(arguments, 2);
+    var args = _arrays.slice.call(arguments, 2);
 
     return $.isFunction(fn) ? function proxy() {
       return fn.apply(scope || this, [].concat(_toConsumableArray(args), Array.prototype.slice.call(arguments)));
@@ -916,10 +1281,10 @@ $.apply($, {
    * @param {Function} fn The function to execute
    */
   ready: function ready(fn) {
-    if ($.regexp.readyState.test(_document2.default.readyState)) {
+    if ($.regexp.readyState.test(_document.document.readyState)) {
       fn.call();
     } else {
-      _document2.default.addEventListener('DOMContentLoaded', fn, false);
+      _document.document.addEventListener('DOMContentLoaded', fn, false);
     }
 
     return this;
@@ -938,7 +1303,7 @@ $.apply($, {
       selector = '.results';
     }
 
-    var results = _document2.default.querySelectorAll(selector);
+    var results = _document.document.querySelectorAll(selector);
 
     if (results && results.length) {
       results.forEach(function (element) {
@@ -969,14 +1334,53 @@ $.apply($, {
   },
 
   /**
+   * Converts anything that can be iterated over into a real JavaScript Array
+   * @param  {Mixed}   item  Can be a string, array or arugments object
+   * @param  {Integer} start Zero-based index to start the array at (optional)
+   * @param  {Integer} end   Zero-based index to end the array at (optional)
+   * @return {Array}         The new array
+   */
+  toArray: function toArray(item, start, end) {
+    var array = [];
+
+    if (!item || !item.length) {
+      return array;
+    }
+
+    $.isString(item) && (item = item.split(''));
+
+    end = end && end < 0 && item.length + end || end || item.length;
+
+    for (var i = start || 0; i < end; i++) {
+      array.push(item[i]);
+    }
+
+    return array;
+  },
+  /**
    * Returns the internal JavaScript [Class]] of an Object
    * @param  {Object} obj Object to check the class property of
    * @return {String}     Only the class property of the Object
    */
   type: function type(obj) {
-    return obj === null ? String(obj) : class2type[_helpers.toString.call(obj)];
+    return obj === null ? String(obj) : class2type[_objects.toString.call(obj)];
   },
 
+  /**
+   * Filters an array and by removing duplicates items
+   * @param  {Array} collection The array to filter
+   * @return {Array}            The modified array
+   */
+  unique: function unique(collection) {
+    for (var i = 0; i < collection.length; i++) {
+      if ((0, _helpers.indexOf)(collection, collection[i]) !== i) {
+        collection.splice(i, 1);
+        i--;
+      }
+    }
+
+    return collection;
+  },
   /**
    * Generates a random RFC4122 UUID
    * @return {String} String containing the unique hash
@@ -995,7 +1399,7 @@ $.apply($, {
  * @param  {Object}  obj The Object to type check
  * @return {Boolean}     The value of true or false
  */
-$.each(['Array', 'Boolean', 'Date', 'Error', 'Function', 'Object', 'RegExp', 'String'], function (name) {
+(0, _helpers.each)(['Array', 'Boolean', 'Date', 'Error', 'Function', 'Object', 'RegExp', 'String'], function (name) {
   class2type['[object ' + name + ']'] = name.toLowerCase();
 
   $['is' + name] = function (obj) {
@@ -1058,7 +1462,7 @@ $.apply($.fn, {
       'stop': function stop() {
         if (_this.listening) {
           $.resetView(function () {
-            _document2.default.body.classList.remove('interactive');
+            _document.document.body.classList.remove('interactive');
           });
 
           _this.stop();
@@ -1084,8 +1488,8 @@ $.apply($.fn, {
 
     var autoRestartConfig = options.autoRestart;
 
-    _document2.default.addEventListener('visibilitychange', function () {
-      if (_document2.default.hidden) {
+    _document.document.addEventListener('visibilitychange', function () {
+      if (_document.document.hidden) {
         if (_this.recognition && _this.recognition.abort && _this.listening) {
           if (_this.debug) {
             console.debug('[Eleven] User switched to another tab. Disabling listeners.');
@@ -1194,7 +1598,180 @@ exports.default = $;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{"./common/document":5,"./common/helpers":6,"./common/window":8,"./speech/speechRecognition":14}],10:[function(require,module,exports){
+},{"./common/arrays":5,"./common/document":6,"./common/helpers":7,"./common/objects":9,"./common/strings":11,"./common/window":12,"./speech/speechRecognition":31}],14:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+var _window = require('../common/window');
+
+var _window2 = _interopRequireDefault(_window);
+
+var _navigator = require('../common/navigator');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_core2.default.browser = function () {
+  var match = _navigator.userAgent.match(_core2.default.regexp.browser);
+  var browser = RegExp.$1.toLowerCase();
+  var types = {
+    'chrome': 'webkit',
+    'firefox': 'moz',
+    'msie': 'ms',
+    'opera': 'o',
+    'safari': 'webkit',
+    'trident': 'ms'
+  };
+  var prefix = types[browser] || '';
+  var nativeSelector = prefix + 'MatchesSelector';
+  var language = language;
+
+  return {
+    chrome: browser === 'chrome' && !('doNotTrack' in _window2.default),
+    cssPrefix: '-' + prefix + '-',
+    firefox: browser === 'firefox',
+    language: language && language.toLowerCase(),
+    msie: browser === 'msie' || browser === 'trident',
+    nativeSelector: prefix.length > 0 ? nativeSelector : nativeSelector[0].toLowerCase(),
+    opera: browser === 'opera',
+    prefix: prefix,
+    safari: browser === 'safari' && 'doNotTrack' in _window2.default,
+    version: _navigator.userAgent.match(/version\/([\.\d]+)/i) !== null ? RegExp.$1 : match[2],
+    webkit: prefix === 'webkit'
+  };
+}();
+
+exports.default = _core2.default;
+
+},{"../common/navigator":8,"../common/window":12,"../core":13}],15:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+var _window = require('../common/window');
+
+var _window2 = _interopRequireDefault(_window);
+
+var _navigator = require('../common/navigator');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_core2.default.device = function () {
+  var match = _navigator.userAgent.match(_core2.default.regexp.device);
+  var device = RegExp.$1.toLowerCase();
+  var detectMobile = function () {
+    return _core2.default.regexp.mobile.test(_navigator.userAgent || _navigator.vendor || _window2.default.opera);
+  }();
+
+  return {
+    idevice: /((ip)(hone|ad|od))/i.test(device),
+    ipad: device === 'ipad',
+    iphone: device === 'iphone',
+    ipod: device === 'ipod',
+    isDesktop: !detectMobile,
+    isMobile: detectMobile,
+    orientation: function orientation() {
+      return _window2.default.innerHeight > _window2.default.innerWidth ? 'portrait' : 'landscape';
+    },
+    playbook: device === 'playbook',
+    touchpad: device === 'hp-tablet'
+  };
+}();
+
+exports.default = _core2.default;
+
+},{"../common/navigator":8,"../common/window":12,"../core":13}],16:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+var _window = require('../common/window');
+
+var _window2 = _interopRequireDefault(_window);
+
+var _navigator = require('../common/navigator');
+
+var _document = require('../common/document');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var supports = function supports(name) {
+  return _core2.default.camelCase(_core2.default.browser.prefix.replace(_core2.default.regexp.ms, 'ms-')) + name;
+};
+
+_core2.default.supports = {
+  cssAnimationEvents: supports('AnimationName') in _document.documentElement.style,
+  cssTransform: supports('Transform') in _document.documentElement.style,
+  cssTransitionEnd: supports('TransitionEnd') in _document.documentElement.style,
+  cssTransition: supports('Transition') in _document.documentElement.style,
+  cssTransform3d: 'WebKitCSSMatrix' in _window2.default && 'm11' in new WebKitCSSMatrix(),
+  homescreen: 'standalone' in _navigator.navigator,
+  localStorage: _typeof(_window2.default.localStorage) !== undefined,
+  pushState: 'pushState' in _window2.default.history && 'replaceState' in _window2.default.history,
+  retina: 'devicePixelRatio' in _window2.default && _window2.default.devicePixelRatio > 1,
+  touch: 'ontouchstart' in _window2.default
+};
+
+exports.default = _core2.default;
+
+},{"../common/document":6,"../common/navigator":8,"../common/window":12,"../core":13}],17:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+var _navigator = require('../common/navigator');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_core2.default.os = function () {
+  var match = _navigator.userAgent.match(_core2.default.regexp.os);
+  var mobile = /mobile/i.test(_navigator.userAgent);
+  var os = RegExp.$1.toLowerCase();
+
+  if (_core2.default.device.idevice) {
+    return 'ios';
+  }
+
+  if (os === 'blackberry' && mobile) {
+    return 'bbmobile';
+  }
+
+  if (os === 'macintosh') {
+    return 'osx';
+  }
+
+  return os;
+}();
+
+exports.default = _core2.default;
+
+},{"../common/navigator":8,"../core":13}],18:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1211,6 +1788,16 @@ require('./commands/commands');
 
 require('./common/regexp');
 
+require('./detection/browser');
+
+require('./detection/device');
+
+require('./detection/feature');
+
+require('./detection/os');
+
+require('./query/query');
+
 require('./plugins');
 
 require('./speech/speak');
@@ -1225,7 +1812,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _core2.default;
 
-},{"./ajax/ajax":1,"./commands/commands":3,"./common/regexp":7,"./core":9,"./plugins":11,"./speech/speak":12,"./speech/speechParser":13,"./speech/speechVoices":17,"./visualizer":18}],11:[function(require,module,exports){
+},{"./ajax/ajax":1,"./commands/commands":3,"./common/regexp":10,"./core":13,"./detection/browser":14,"./detection/device":15,"./detection/feature":16,"./detection/os":17,"./plugins":19,"./query/query":28,"./speech/speak":29,"./speech/speechParser":30,"./speech/speechVoices":34,"./visualizer":35}],19:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1305,7 +1892,1801 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"./core":9}],12:[function(require,module,exports){
+},{"./core":13}],20:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_core2.default.fn.extend({
+  /**
+   * Get the value of an attribute for the first element in the set of matched
+   * elements or set one or more attributes for every matched element
+   * @param  {Mixed} name  The name of the attribute to get or a hash of key/value pairs to set
+   * @param  {Mixed} value The value to set for one or more elements (optional)
+   * @return {Mixed}       The attribute value or the matched set
+   */
+  attr: function attr(name, value) {
+    var element = this[0];
+
+    if (!element || element && element.nodeType !== 1) {
+      return undefined;
+    }
+
+    if (typeof name === 'string' && value === undefined && value != 'null') {
+      if (typeof name === 'string') {
+        return element.getAttribute(name);
+      }
+    } else {
+      var i = 0,
+          k = this.length,
+          process = function process(element, key, value) {
+        if (value == null) {
+          element.removeAttribute(key);
+        } else {
+          element.setAttribute(key, value);
+        }
+      };
+
+      for (; i < k; i++) {
+        element = this[i];
+
+        if (!element || element && element.nodeType !== 1) {
+          return undefined;
+        }
+
+        if (typeof name === 'string') {
+          process(element, name, value);
+        }
+
+        if ((typeof name === 'undefined' ? 'undefined' : _typeof(name)) === 'object') {
+          for (var key in name) {
+            process(element, key, name[key]);
+          }
+        }
+      }
+    }
+
+    return this;
+  },
+
+  /**
+   * Removes one or more attributes from a set of matched elements in a collection
+   * @param {Mixed} name The string or array of properties names to remove
+   */
+  removeAttr: function removeAttr(name) {
+    if (this[0] === undefined) {
+      return;
+    }
+
+    var i = 0,
+        k = this.length;
+
+    for (; i < k; i++) {
+      var element = this[i];
+
+      if (element.nodeType !== 1) {
+        continue;
+      }
+
+      if (typeof name === 'string') {
+        element.removeAttribute(name);
+      } else if (typeof name === 'array') {
+        var j = 0,
+            l = name.length;
+
+        for (; j < l; j++) {
+          var property = name[j];
+          element[property] && element.removeAttribute(property);
+        }
+      }
+
+      element = null;
+    }
+
+    return this;
+  }
+});
+
+exports.default = _core2.default;
+
+},{"../core":23}],21:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+var _helpers = require('../../common/helpers');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var cssNumber = { 'columns': 1, 'columnCount': 1, 'fillOpacity': 1, 'flexGrow': 1, 'flexShrink': 1, 'fontWeight': 1, 'lineHeight': 1, 'opacity': 1, 'order': 1, 'orphans': 1, 'widows': 1, 'zIndex': 1, 'zoom': 1 };
+var formatValue = function formatValue(prop, value) {
+  return typeof value === 'number' && !cssNumber[prop] && parseFloat(value) + 'px' || value;
+};
+
+_core2.default.fn.extend({
+  /**
+   * Get the value of a style property for the first element in the set of matched
+   * elements or set the style property value for one or more elements
+   * @param  {Mixed} property The style property to set or get
+   * @param  {Mixed} value    The value to set for the given property
+   * @return {Mixed}          The style property value or this
+   */
+  css: function css(property, value) {
+    var element = this[0],
+        isString = typeof property === 'string',
+        returnZero = { width: 1, height: 1 },
+        process = function process(element, prop, value, get) {
+      if (value == null || value !== value && get) {
+        return;
+      }
+
+      var camelCase = _core2.default.camelCase(prop);
+
+      if (get) {
+        value = element.style[camelCase] || (0, _helpers.getComputedStyle)(element, null)[camelCase];
+      }
+
+      if (parseFloat(value) < 0 && returnZero[camelCase]) {
+        value = 0;
+      }
+
+      if (value === '') {
+        if (camelCase === 'opacity') {
+          value = 1;
+        }
+
+        if (returnZero[camelCase]) {
+          return '0px';
+        }
+      }
+
+      if (get) {
+        return _core2.default.regexp.cssNumbers.test(camelCase) ? parseFloat(value) : value;
+      } else {
+        element.style[camelCase] = formatValue(camelCase, value);
+      }
+    };
+
+    if (!element || element.nodeType === 3 || element.nodeType === 8 || !element.style) {
+      return;
+    }
+
+    if (isString && value === undefined) {
+      return process(element, property, '1', true);
+    }
+
+    var i = 0,
+        k = this.length;
+
+    for (; i < k; i++) {
+      element = this[i];
+
+      if (!element || element.nodeType === 3 || element.nodeType === 8 || !element.style) {
+        return;
+      }
+
+      if (isString) {
+        process(element, property, value);
+      } else {
+        for (var key in property) {
+          process(element, key, property[key]);
+        }
+      }
+    }
+
+    return this;
+  }
+});
+
+exports.default = _core2.default;
+
+},{"../../common/helpers":7,"../core":23}],22:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * Data cache
+ * @type {Object}
+ */
+var cache = {};
+
+/**
+ * Removes the cache of a given element
+ * @param  {DOM Element} element The element we want to remove the data cache from
+ * @return {Object}              Always returns true
+ */
+var removeDataCache = function removeDataCache(element) {
+  var id = element.uid;
+
+  if (cache[id]) {
+    delete cache[id];
+  }
+
+  return true;
+};
+
+_core2.default.extend({
+  /**
+   * Sets or gets arbitrary data of one or more elements
+   * @param  {Array} collection The matched set or a single DOM element
+   * @param  {Mixed} key        String containing the key to retrieve or modify, or an Object of key/value pairs to set
+   * @param  {Mixed} value      The value to assign to the key. If key is an Object, value should be undefined
+   * @return {Mixed}            The key value, the current data object (no key/value defined), or the set of match elements (setting values across multiple elements)
+   */
+  data: function data(collection, key, value) {
+    var elevObject = collection instanceof _core2.default;
+    var elements = elevObject ? collection : [collection];
+
+    if (elements[0] === undefined || elements[0] && elements[0].nodeType !== 1) {
+      return undefined;
+    }
+
+    var id = elements[0].uid,
+        k = elements.length,
+        i = 0;
+
+    if (key === undefined && value === undefined) {
+      return cache[id] || undefined;
+    }
+
+    if (typeof key === 'string' && key !== 'destroy' && value === undefined) {
+      return cache[id] && cache[id][key] || undefined;
+    }
+
+    for (; i < k; i++) {
+      if (elements[i].nodeType === 1) {
+        if (key === 'destroy' && 'uid' in elements[i]) {
+          removeDataCache(elements[i]);
+        } else {
+          id = elements[i].uid || (elements[i].uid = _core2.default.uuid());
+
+          if (!cache[id]) {
+            cache[id] = {};
+          }
+
+          if ((typeof key === 'undefined' ? 'undefined' : _typeof(key)) === 'object') {
+            for (var _i in key) {
+              cache[id][_i] = key[_i];
+            }
+          } else {
+            cache[id][key] = value;
+          }
+        }
+      }
+    }
+
+    return collection;
+  }
+});
+
+_core2.default.fn.extend({
+  /**
+   * Store arbitrary data associated with an element - Shortcut for $.data
+   * @param  {String} key   The key in the dataset
+   * @param  {Mixed}  value The value to assign to the property
+   * @return {Mixed}        The key value or the set of match elements
+   */
+  data: function data(key, value) {
+    return _core2.default.data(this, key, value);
+  }
+});
+
+exports.default = _core2.default;
+
+},{"../core":23}],23:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _core = require('../core/');
+
+var _core2 = _interopRequireDefault(_core);
+
+var _window = require('../common/window');
+
+var _window2 = _interopRequireDefault(_window);
+
+var _document = require('../common/document');
+
+var _objects = require('../common/objects');
+
+var _strings = require('../common/strings');
+
+var _arrays = require('../common/arrays');
+
+var _helpers = require('../common/helpers');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var classCache = {};
+var channels = {};
+var fragmentContainer = {};
+var classRE = function classRE(name) {
+  return name in classCache ? classCache[name] : classCache[name] = new RegExp('(^|\\s)' + name + '(\\s|$)');
+};
+
+var _channelsUID = -1;
+
+/**
+ * Define a local copy of $
+ * @param {Mixed} selector String containing CSS selector(s), HTML tags to create, or DOM Element
+ * @param {Mixed} context  Context in which to perform the search (can be a CSS Selector or DOM Element)
+ */
+var $ = function $(selector, context) {
+  return new $.fn.init(selector, context);
+};
+
+$.fn = $.prototype = {
+  constructor: $,
+  version: '1.0.0',
+  init: function init(selector, context) {
+    this.length = 0;
+
+    if (!selector) {
+      return this;
+    }
+
+    if (selector.constructor === $) {
+      return selector;
+    }
+
+    var type = typeof selector === 'undefined' ? 'undefined' : _typeof(selector);
+
+    if (type === 'function') {
+      return $(_document.document).ready(selector);
+    }
+
+    this.selector = selector;
+    this.context = context;
+
+    if (selector === 'body' || selector === _document.document.body) {
+      this[this.length++] = this.context = _document.document.body;
+      return this;
+    }
+
+    if (selector === _window2.default || selector.nodeType || selector === 'body') {
+      this[this.length++] = this.context = selector;
+      return this;
+    }
+
+    if (type === 'string') {
+      selector = selector.trim();
+
+      if (selector[0] === '<' && selector[selector.length - 1] === '>' && $.regexp.fragments.test(selector)) {
+        selector = $.fragment(_document.document.createElement(fragmentContainer[RegExp.$1] || 'div'), selector);
+        this.selector = selector;
+      }
+    }
+
+    if (selector.length !== undefined && _objects.toString.call(selector) === '[object Array]') {
+      var i = 0,
+          k = selector.length;
+
+      for (; i < k; i++) {
+        this[this.length++] = selector[i] instanceof $ ? selector[i][0] : selector[i];
+      }
+
+      return this;
+    }
+
+    if (!this.context && this.context !== _document.document) {
+      context = this.context = _document.document;
+    } else {
+      context = $(this.context)[0];
+    }
+
+    return $.merge(this, $.query(selector, context));
+  }
+};
+
+/**
+ * Creates a dictionary of fragment containers for
+ * proper DOM node creation when using $.fragment
+ */
+(0, _helpers.each)(['tbody', 'thead', 'tfoot', 'tr', 'th', 'td'], function (item) {
+  fragmentContainer[item] = item === 'th' || item === 'td' ? 'tr' : 'table';
+});
+
+/**
+ * Returns the created DOM node(s) from a passed HTML string
+ * @param  {String} html The string containing arbitrary HTML
+ * @return {Array}       The DOM node(s)
+ */
+$.fragment = function (container, html) {
+  container.innerHTML = '' + html;
+
+  var items = _arrays.slice.call(container.childNodes);
+
+  (0, _helpers.each)(items, function (element) {
+    return container.removeChild(element);
+  });
+
+  return items;
+};
+
+/**
+ * Traverses the DOM and returns matched elements
+ * @param  {Mixed} selector String containing CSS selector(s), HTML tags to create, or DOM Element
+ * @param  {Mixed} context  Context in which to perform the search (can be a CSS Selector or DOM Element)
+ * @return {Array}          NodeList of matched selectors
+ */
+$.query = function (selector, context) {
+  var query = [];
+  var noSpace = selector.length && selector.indexOf(' ') < 0;
+
+  if (selector[0] === '#' && context === _document.document && noSpace) {
+    var element = context.getElementById(selector.slice(1));
+
+    if (element) {
+      query = [element];
+    }
+  } else {
+    if (context.nodeType === 1 || context.nodeType === 9) {
+      if (selector[0] === '.' && noSpace) {
+        query = context.getElementsByClassName(selector.slice(1));
+      } else if ($.regexp.tags.test(selector)) {
+        query = context.getElementsByTagName(selector);
+      } else {
+        query = context.querySelectorAll(selector);
+      }
+    }
+  }
+
+  return _arrays.slice.call(query);
+};
+
+_core2.default.apply($, {
+  /**
+   * Determines if a DOM element is a descendant of another DOM element
+   * @param  {Object}  container The DOM element or Y object that may contain the child element
+   * @param  {Object}  contained The DOM element or Y object that may be a descendant of the parent
+   * @return {Boolean}           True if the child element is a descendant of the parent, otherwise false
+   */
+  contains: function contains(container, contained) {
+    return !container || !contained ? false : !!((container = $(container)[0]) && (contained = $(contained)[0]) && container.contains(contained));
+  },
+
+  /**
+   * Get the children of each element in the set of matched elements, including text and comment nodes
+   * @return {DOM Element} The DOM element
+   * @return {Object}      The collection of matched elements
+   */
+  contents: function contents(element) {
+    var name = function name(o, n) {
+      return o.nodeName && o.nodeName.toUpperCase() === n.toUpperCase();
+    };
+
+    return name(element, 'iframe') ? $(element.contentDocument || element.contentWindow.document) : $(_arrays.slice.call(element.childNodes));
+  },
+
+  /**
+   * Determine whether or not a DOM element matches a given selector
+   * @param  {DOM Element} element  The DOM element to perform the test on
+   * @param  {String}      selector The selector to test
+   * @return {Boolean}              The value true or false
+   */
+  match: function match(element, selector) {
+
+    if (!element || element.nodeType !== 1) {
+      return;
+    }
+
+    var matches = function matches(element, selector) {
+      var nativeSelector = element[_core2.default.browser.nativeSelector];
+      return element && nativeSelector && nativeSelector.call(element, selector);
+    };
+
+    return matches(element, selector || '*');
+  },
+
+  /**
+   * Get the siblings of each element in the collection
+   * @param  {Object}      nodes   The collection of DOM nodes
+   * @param  {DOM Element} element The sibling to exclude from the collection (optional)
+   * @return {Array}       The collection of siblings
+   */
+  siblings: function siblings(nodes, element) {
+    var collection = [];
+
+    if (nodes == undefined) {
+      return collection;
+    }
+
+    for (; nodes; nodes = nodes.nextSibling) {
+      if (nodes.nodeType == 1 && nodes !== element) {
+        collection.push(nodes);
+      }
+    }
+
+    return collection;
+  }
+});
+
+/**
+ * Map select methods from Eleven
+ */
+(0, _helpers.each)(['ajax', 'ajaxSettings', 'appendQuery', 'camelCase', 'dasherize', 'debounce', 'deparam', 'each', 'extend', 'format', 'get', 'getJSON', 'inArray', 'isArray', 'isArrayLike', 'isEmptyObject', 'isFunction', 'isNumber', 'isNumeric', 'isObject', 'isPlainObject', 'isString', 'isWindow', 'jsonP', 'map', 'merge', 'params', 'proxy', 'regexp', 'ready', 'serialize', 'supports', 'toArray', 'unique', 'uuid'], function (item) {
+  $[item] = _core2.default[item];
+});
+
+$.fn.init.prototype = $.fn;
+
+_core2.default.apply($.fn, {
+  concat: _arrays.concat,
+  forEach: _helpers.each,
+  indexOf: _helpers.indexOf,
+  reduce: _arrays.reduce,
+  splice: _arrays.splice,
+  each: $.each,
+  extend: $.extend,
+  /**
+   * Add additional items to an existing Y collection
+   * @param  {Mixed}  selector The Object or CSS selector
+   * @param  {Mixed}  context  The context of the selector
+   * @return {Object}          The modified Y Object
+   */
+  add: function add(selector, context) {
+    return this.chain($.unique($.merge(this, $(selector, context))));
+  },
+
+  /**
+   * Creates a reference to the original matched collection for chain breaking (e.g. using .end())
+   * @param  {Object} collection The collection to add the prev reference to
+   * @return {Object}            The modified collection
+   */
+  chain: function chain(collection) {
+    return !!collection && (collection.prevObject = this) && $(collection) || $();
+  },
+
+  /**
+   * Return the child elements of each element in the set of matched elements
+   * @param  {String} selector Filter by a selector (optional)
+   * @return {Object}          The collection of child elements
+   */
+  children: function children(selector) {
+    var collection = [];
+
+    if (this[0] === undefined) {
+      return undefined;
+    }
+
+    var i = 0,
+        k = this.length;
+
+    if (this.length === 1) {
+      collection = $.siblings(this[0].firstChild);
+    } else {
+      for (; i < k; i++) {
+        collection = collection.concat($.siblings(this[i].firstChild));
+      }
+    }
+
+    return this.chain($(collection).filter(selector));
+  },
+
+  /**
+   * Create a copy, or deep copy (optional), of a node
+   * @param {Boolean} deep If true, the children of the node will also be cloned
+   */
+  clone: function clone(deep) {
+    var collection = this.map(function () {
+      return this.cloneNode(!!deep);
+    });
+
+    return $(collection);
+  },
+
+  /**
+   * Find the closest ancestor of the element that matches a given selector
+   * @param  {Mixed}  selector The selector we are looking for
+   * @param  {Mixed}  context  The context in which to perform the search
+   * @return {Object}          The matched element
+   */
+  closest: function closest(selector, context) {
+    if (!this.length) {
+      return undefined;
+    }
+
+    var element = this[0],
+        query = $(selector, context);
+
+    if (!query.length) {
+      return $();
+    }
+
+    while (element && query.indexOf(element) < 0) {
+      element = element !== context && element !== _document.document && element.parentNode;
+    }
+
+    return this.chain($(element || []));
+  },
+
+  /**
+   * Determines if a DOM element is a descendant of another DOM element
+   * @param  {Mixed} selector The CSS selector or DOM element
+   * @return {Boolean}        The true or false value
+   */
+  contains: function contains(selector) {
+    return $.contains(this, selector);
+  },
+
+  /**
+   * Get the children of each element in the set of matched elements, including text and comment nodes.
+   * @return {Object} The collection of matched elements
+   */
+  contents: function contents() {
+    return this[0] !== undefined && $.contents(this[0]);
+  },
+
+  /**
+   * Remove all child nodes from each parent element in the matched set
+   * @return {Object} The Y object
+   */
+  empty: function empty() {
+
+    if (this[0] === undefined) {
+      return;
+    }
+
+    var i = 0,
+        k = this.length;
+
+    for (; i < k; i++) {
+      var element = this[i];
+
+      while (element.firstChild) {
+        if ('uid' in element.firstChild) {
+          $.data(element.firstChild, 'destroy');
+        }
+
+        element.removeChild(element.firstChild);
+      }
+
+      element = null;
+    }
+
+    return this;
+  },
+
+  /**
+   * Breaks the current chain and returns the set of matched elements defined in `prevObject` (i.e. previous state)
+   * @return {Object}  The matched elements from its previous state
+   */
+  end: function end() {
+    return this.prevObject || $();
+  },
+
+  /**
+   * Reduce the set of matched elements to the one at a specified index. If a negative integer is used
+   * it will do a reverse search of the set - eq(-1) will return the last item in the array.
+   * @param  {Integer} index Zero-based index of the element to match
+   * @return {Object}        The matched element in specified index of the collection
+   */
+  eq: function eq(index) {
+    return $(index < 0 ? this[index += this.length - 1] : this[index]);
+  },
+
+  /**
+   * Search descendants of an element and returns matches
+   * @param  {String} selector The element(s) to search for
+   * @return {Object}          The matched set of elements
+   */
+  find: function find(selector) {
+    var search;
+
+    if (!selector || typeof selector !== 'string') {
+      return [];
+    }
+
+    if (this.length === 1) {
+      search = $($.query(selector, this[0]));
+    } else {
+      search = $($.map(this, function (node) {
+        return $.query(selector, node);
+      }));
+    }
+
+    return this.chain(search);
+  },
+
+  /**
+   * Returns the first matched element in the collection
+   * @return {Object} The first matched element
+   */
+  first: function first() {
+    return $(this[0]);
+  },
+
+  /**
+   * Reduce the collection of matched elements to that of the passed selector
+   * @param  {String} selector A string containing a selector to match the current set of elements against
+   * @return {Object}          The matached elements object
+   */
+  filter: function filter(selector) {
+    if (!selector) {
+      return this;
+    }
+
+    return $(_arrays.filter.call(this, function (element) {
+      return $.match(element, selector);
+    }));
+  },
+
+  /**
+   * Retrieve the DOM element at the specified index the Y object collection
+   * @param  {Integer} index A zero-based index indicating which element to retrieve
+   * @return {Mixed}         A matched DOM element. If no index is specified all of the matched DOM elements are returned.
+   */
+  get: function get(index) {
+    return index !== undefined ? index < 0 ? this[this.length + index] : this[index] : _arrays.slice.call(this);
+  },
+
+  /**
+   * Determines whether an element has a specific CSS class
+   * @param  {String}  name String containing the CSS class name to search
+   * @return {Boolean}      True/false result
+   */
+  hasClass: function hasClass(name) {
+    return classRE(name).test(this[0].className);
+  },
+
+  /**
+   * Hides each element in the matched set of elements
+   * @return {Object} The Y object
+   */
+  hide: function hide() {
+    if (this[0] === undefined) {
+      return this;
+    }
+
+    var i = 0,
+        k = this.length;
+
+    for (; i < k; i++) {
+      var element = this[i],
+          display = (0, _helpers.getComputedStyle)(element, null)['display'];
+
+      if (element.nodeType === 1 && display !== 'none') {
+        element.displayRef = display;
+        element.style.display = 'none';
+      }
+
+      element = display = null;
+    }
+
+    return this;
+  },
+
+  /**
+   * Returns the HTML contents of the first element in a matched set or updates the contents of one or more elements
+   * @param  {String} html The HTML string to replace the contents with
+   * @return {Mixed}       The contents of an individual element, or sets the contents for each element in the matched set
+   */
+  html: function html(_html) {
+    if (!this.length || this[0] === undefined) {
+      return undefined;
+    }
+
+    if (!_html) {
+      return this[0].innerHTML;
+    }
+
+    return this.empty().each(function () {
+      $(this).append(_html);
+    });
+  },
+
+  /**
+   * Returns the position of an element. If no element is provided, returns position of the current element among its siblings else -1 if not found.
+   * @param  {Mixed}  element The DOM element or CSS selector
+   * @return {Integer}        The index of the element
+   */
+  index: function index(selector) {
+    return this.length ? selector ? (0, _helpers.indexOf)(this, $(selector)[0]) : (0, _helpers.indexOf)(this[0].parentNode.children, this[0]) : undefined;
+  },
+
+  /**
+   * Returns the last element in a matched set
+   * @return {Object} The last element
+   */
+  last: function last() {
+    return $(this[this.length - 1]);
+  },
+
+  /**
+   * Returns a new $ collection of values by mapping each element
+   * in a collection through the iterative function
+   * @param {Function} fn The function to process each item against in the collection
+   */
+  map: function map(fn) {
+    return $($.map(this, function (element, index) {
+      return fn.call(element, index, element);
+    }));
+  },
+
+  /**
+   * Returns the offset object for the first matched element in a collection
+   * @return {Object} The offset object: height, left, top, width
+   */
+  offset: function offset(properties) {
+
+    if (!this.length || this[0] === undefined) {
+      return undefined;
+    }
+
+    var element = this[0].getBoundingClientRect();
+
+    return {
+      bottom: element.top + element.height + _window2.default.pageYOffset,
+      height: element.height,
+      left: element.left + _window2.default.pageXOffset,
+      right: element.left + element.width + _window2.default.pageXOffset,
+      top: element.top + _window2.default.pageYOffset,
+      width: element.width
+    };
+  },
+
+  /**
+   * Get the closest positioned parent element
+   * @return {Object} The parent DOM Element
+   */
+  offsetParent: function offsetParent() {
+    return this.map(function () {
+      var offsetParent = this.offsetParent || _document.document.body;
+
+      while (offsetParent && !$.regexp.root.test(offsetParent.nodeName) && $(offsetParent).css('position') === 'static') {
+        offsetParent = offsetParent.offsetParent;
+      }
+
+      return offsetParent;
+    });
+  },
+
+  /**
+   * Returns an HTML string of the element and its descendants
+   * @return {HTML String} The container element and its children
+   */
+  outerHTML: function outerHTML() {
+    return this[0] !== undefined && this[0].outerHTML || undefined;
+  },
+
+  /**
+   * Return the parent element of the first matched element
+   * @param  {String} selector The selector to filter by (optional)
+   * @return {Object}          The parent element object
+   */
+  parent: function parent(selector) {
+    var result;
+
+    if (!this[0].parentNode) {
+      return this;
+    }
+
+    if (selector) {
+      result = $(this[0].parentNode).filter(selector);
+    } else {
+      result = $(this[0].parentNode || []);
+    }
+
+    return this.chain(result);
+  },
+
+  /**
+   * Returns the current position of an element relative to its offset parent
+   * @return {Object} The position object containing the top and left coordinates
+   */
+  position: function position() {
+
+    if (!this.length) {
+      return undefined;
+    }
+
+    var element = $(this[0]),
+        offsetParent = $(this.offsetParent()),
+        offset = this.offset(),
+        first = offsetParent.eq(0),
+        parentOffset = $.regexp.root.test(offsetParent[0].nodeName) ? { top: 0, left: 0 } : offsetParent.offset();
+
+    offset.top -= parseFloat(element.css('marginTop')) || 0, offset.left -= parseFloat(element.css('marginLeft')) || 0, parentOffset.top += parseFloat(first.css('borderTopWidth')) || 0;
+    parentOffset.left += parseFloat(first.css('borderLeftWidth')) || 0;
+
+    return {
+      top: offset.top - parentOffset.top,
+      left: offset.left - parentOffset.left
+    };
+  },
+
+  /**
+   * Executes a function when the DOM is ready
+   * @param {Function} fn The function to execute
+   */
+  ready: function ready(fn) {
+    if ($.regexp.ready.test(_document.document.readyState)) {
+      fn.call();
+    } else {
+      _document.document.addEventListener('DOMContentLoaded', fn, false);
+    }
+
+    return this;
+  },
+
+  /**
+   * Shows each element in the matched set of elements
+   * @return {Object} The Y object
+   */
+  show: function show() {
+    if (!this.length || this[0] === undefined) {
+      return this;
+    }
+
+    var i = 0,
+        k = this.length;
+
+    for (; i < k; i++) {
+      var element = this[i];
+
+      if (element.nodeType === 1 && (0, _helpers.getComputedStyle)(element, null)['display'] === 'none') {
+        element.style.display = element.displayRef || 'block';
+        try {
+          delete element.displayRef;
+        } catch (e) {
+          element.displayRef = null;
+        }
+      }
+
+      element = null;
+    }
+
+    return this;
+  },
+
+  /**
+   * Get the siblings of each element in the set of matched elements
+   * @param  {String} selector Selector to filter by (optional)
+   * @return {Object}          The siblings of the matched elements in the set
+   */
+  siblings: function siblings(selector) {
+    var collection = [];
+
+    if (!this.length) {
+      return undefined;
+    }
+
+    var i = 0,
+        k = this.length;
+
+    if (this.length === 1) {
+      if (this[0].nodeType == 1) {
+        this[0].parentNode && (collection = $.siblings(this[0].parentNode.firstChild, this[0]));
+      }
+    } else {
+      for (; i < k; i++) {
+        if (this[i].nodeType == 1) {
+          this[i].parentNode && (collection = collection.concat($.siblings(this[i].parentNode.firstChild, this[i])));
+        }
+      }
+    }
+
+    return this.chain($(collection).filter(selector));
+  },
+
+  /**
+   * Slice a matched collection
+   * @return {Object} The modified collection
+   */
+  slice: function slice() {
+    return $(_arrays.slice.apply(this, arguments));
+  },
+
+  /**
+   * Swaps one CSS class name for another
+   * @param  {String} remove String containing the class name to remove
+   * @param  {String} add    String containing the class name to add
+   * @return {Object}        The Y collection
+   */
+  swapClass: function swapClass(remove, add) {
+    if (!this.length) {
+      return undefined;
+    }
+
+    return this.removeClass(remove).addClass(add);
+  },
+
+  /**
+   * Returns the text from the first element in the matched set, or sets the
+   * text value for one or more elements
+   * @param  {String} text The text content to set
+   * @return {Mixed}       Gets or sets the text content of the element(s)
+   */
+  text: function text(_text) {
+    if (!this[0] === undefined) {
+      return undefined;
+    }
+
+    if (!_text) {
+      return this[0].textContent;
+    }
+
+    var i = 0,
+        k = this.length;
+
+    for (; i < k; i++) {
+      var element = this[i];
+
+      if (element.nodeType) {
+        $(element).empty();
+
+        if (typeof _text === 'function') {
+          element.textContent = _text.call(element, i, element.textContent);
+        } else {
+          element.textContent = _text;
+        }
+      }
+
+      element = null;
+    }
+
+    return this;
+  },
+
+  /**
+   * Converts anything that can be iterated over into a real JavaScript Array
+   * @param  {Integer} start Zero-based index to start the array at (optional)
+   * @param  {Integer} end   Zero-based index to end the array at (optional)
+   * @return {Array}         The new array
+   */
+  toArray: function toArray(start, end) {
+    return $.toArray(this, start, end);
+  },
+
+  /**
+   * Toggles a specific class on one or more elements
+   * @param {Mixed} cls The CSS class to toggle or the function to execute
+   */
+  toggleClass: function toggleClass(cls, fn) {
+    if (!this.length) {
+      return undefined;
+    }
+
+    return this[this.hasClass(cls) ? 'removeClass' : 'addClass'](fn && fn(cls) || cls);
+  },
+
+  /**
+   * Gets the value for the first element in the matched set or sets the value for one or more elements
+   * @param  {Mixed} value The value to set
+   * @return {Mixed}       The property value
+   */
+  val: function val(value) {
+
+    if (this[0] === undefined) {
+      return;
+    }
+
+    if (value === undefined) {
+      return this[0].value;
+    }
+
+    var i = 0,
+        k = this.length;
+
+    for (; i < k; i++) {
+      this[i].value = value;
+    }
+
+    return this;
+  },
+
+  /**
+   * Wrap an HTML fragment around each element in the matched set
+   * @param {Array} node The element(s) to wrap
+   */
+  wrap: function wrap(node) {
+
+    if (this[0] === undefined) {
+      return;
+    }
+
+    var node = $(node),
+        i = 0,
+        k = this.length,
+        element = null;
+
+    for (; i < k; i++) {
+      element = $(this[i]);
+      element.before(node) && node.append(element);
+    }
+
+    return this;
+  }
+});
+
+/**
+ * Add or remove one or more CSS classes from one or more elements
+ * @param {Mixed} cls The CSS class to add/remove or the function to execute
+ */
+(0, _helpers.each)(['addClass', 'removeClass'], function (method, index) {
+  $.fn[method] = function (name) {
+    if (this[0] === undefined) {
+      return undefined;
+    }
+
+    var i = 0,
+        k = this.length,
+        self = this,
+        type = typeof name === 'undefined' ? 'undefined' : _typeof(name),
+        names = type === 'string' ? name.split(' ') : [],
+        l = names.length,
+        remove = method === 'removeClass';
+
+    for (; i < k; i++) {
+      if (remove && (name === undefined || name.length === 0)) {
+        this[i].className = '';
+      } else {
+        var element = this[i],
+            classnames = element.className,
+            classes = ('' + classnames).split(' '),
+            j = 0;
+
+        if (type === 'function') {
+          name.call(element, classnames, i);
+        } else {
+          for (; j < l; j++) {
+            var index = (0, _helpers.indexOf)(classes, names[j]);
+
+            if (remove && index !== -1) {
+              element.className = element.className.replace(classRE(names[j]), '');
+            } else {
+              if (index < 0) {
+                element.className = element.className + ' ' + names[j];
+              }
+            }
+          }
+
+          element.className = element.className.trim();
+        }
+      }
+    }
+
+    return this;
+  };
+});
+
+/**
+ * Removes an element from the DOM
+ * @return {Object}
+ */
+(0, _helpers.each)(['detach', 'remove'], function (method, index) {
+  $.fn[method] = function (selector) {
+
+    if (!this.length || this[0] === undefined) {
+      return;
+    }
+
+    var i = 0,
+        k = this.length;
+
+    for (; i < k; i++) {
+      var element = this[i];
+
+      if (element.nodeType === 1) {
+        if (index === 1 && 'uid' in element) {
+          $.data(element, 'destroy');
+        }
+
+        element.parentNode && element.parentNode.removeChild(element);
+      }
+
+      element = null;
+    }
+
+    return this;
+  };
+});
+
+/**
+ * .parents(), .next() and .prev() - get the next or previous sibling of
+ * the first matched in a collection or get the ancestors of each element in
+ * the set of matched elements
+ * @param  {String} selector The selector to filter the elements against
+ * @return {Object}          The matched element(s)
+ */
+$.each({ parents: 'parentNode', next: 'nextElementSibling', prev: 'previousElementSibling' }, function (method, property) {
+  $.fn[method] = function (selector) {
+    if (!this.length) {
+      return undefined;
+    }
+
+    var collection = [],
+        elements = this;
+
+    while (elements.length > 0) {
+      elements = $.map(elements, function (element) {
+        element = element[property];
+
+        if (element && element.nodeType === 1 && (0, _helpers.indexOf)(collection, element) < 0) {
+          return collection.push(element) && element;
+        }
+      });
+    }
+
+    collection = selector ? $(collection).filter(selector) : $(collection);
+
+    return method !== 'parents' ? collection.first() : collection;
+  };
+});
+
+/**
+ * Get all preceding or following siblings of the first matched element in a collection
+ * @param  {String} selector Filter siblings by a selector (optional)
+ * @return {Array}           The collection of child elements
+ */
+(0, _helpers.each)(['nextAll', 'prevAll'], function (method) {
+  $.fn[method] = function (selector) {
+
+    if (!this.length || this[0] === undefined || !this[0].parentNode) {
+      return this;
+    }
+
+    var index = this.index(),
+        items = $(this[0].parentNode).children(selector),
+        collection = [];
+
+    (0, _helpers.each)(items, function (item, i) {
+      if (method === 'nextAll' ? i > index : i < index) {
+        collection.push(this);
+      }
+    });
+
+    return $(collection);
+  };
+});
+
+/**
+ * .width() and .height() methods; Returns width or height of the
+ * matched element or set the height and width of one or more elements
+ *
+ * .outerWidth and .outerHeight will return the elements
+ *  width + padding + borders + margins (optional, pass true as param)
+ * @param  {Mixed} value  If passed true, it will return the width/height including margins, otherwise, sets the value
+ * @return {Mixed}        The property value, or the matched set
+ */
+(0, _helpers.each)(['width', 'height', 'outerWidth', 'outerHeight'], function (method) {
+  $.fn[method] = function (value) {
+    var element = this[0],
+        dimension = method.replace('outer', '').toLowerCase(),
+        property = dimension.charAt(0).toUpperCase() + dimension.slice(1),
+        scrollOffset = 'scroll' + property,
+        clientOffset = 'client' + property,
+        offsetProperty = 'offset' + property,
+        padding = 0,
+        margin = 0,
+        extra = 0;
+
+    if (!element) {
+      return undefined;
+    }
+
+    if ($.isWindow(element)) {
+      return element['inner' + property];
+    }
+
+    if (element.nodeType === 9) {
+      var doc = _document.documentElement;
+
+      return Math.max(element.body[scrollOffset], element.body[offsetProperty], doc[scrollOffset], doc[offsetProperty], doc[clientOffset]);
+    }
+
+    if (value === undefined && method.indexOf('outer') < 0) {
+      return this.css(method);
+    } else if (method.indexOf('outer') !== -1) {
+      padding = dimension === 'width' ? this.css('paddingLeft') + this.css('paddingRight') : this.css('paddingTop') + this.css('paddingBottom');
+      margin = value === true ? dimension === 'width' ? this.css('marginLeft') + this.css('marginRight') : this.css('marginTop') + this.css('marginBottom') : dimension === 'width' ? this.css('borderLeftWidth') + this.css('borderRightWidth') : this.css('borderTopWidth') + this.css('borderBottomWidth');
+
+      return this.css(dimension) + padding + margin + extra;
+    } else {
+      return this.css(method, value);
+    }
+  };
+});
+
+/**
+ * Sets or gets the scroll position for the first element - .scrollLeft() and .scrollTop()
+ * @return {Mixed} The current X/Y scroll position or this
+ */
+(0, _helpers.each)(['scrollLeft', 'scrollTop'], function (method, index) {
+  var top = index === 1,
+      property = top ? 'pageYOffset' : 'pageXOffset';
+
+  $.fn[method] = function (value) {
+
+    if (this[0] === undefined) {
+      return undefined;
+    }
+
+    var elem = this[0],
+        win = $.isWindow(elem) ? elem : elem.nodeType === 9 ? elem.defaultView || elem.parentWindow : false;
+
+    return value === undefined ? win ? property in win ? win[property] : _document.documentElement[method] : elem[method] : win ? win.scrollTo(!top ? value : $(win).scrollLeft(), top ? value : $(win).scrollTop()) : elem[method] = value;
+  };
+});
+
+_core2.default.query = $;
+
+exports.default = $;
+
+},{"../common/arrays":5,"../common/document":6,"../common/helpers":7,"../common/objects":9,"../common/strings":11,"../common/window":12,"../core/":13}],24:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _core = require('./core');
+
+var _core2 = _interopRequireDefault(_core);
+
+var _helpers = require('../common/helpers');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var eventsCache = {};
+
+(0, _helpers.each)(['blur', 'change', 'click', 'dblclick', 'enter', 'error', 'focus', 'focusin', 'focusout', 'hashchange', 'keydown', 'keypress', 'keyup', 'leave', 'load', 'mousedown', 'mousemove', 'mouseout', 'mouseover', 'mouseenter', 'mouseleave', 'mouseup', 'resize', 'scroll', 'select', 'submit', 'unload'], function (event) {
+  _core2.default.fn[event] = function (data, fn) {
+
+    if (typeof data === 'function') {
+      fn = data;
+      data = null;
+    }
+
+    return fn ? this.on(event, data, fn) : this.trigger(event);
+  };
+});
+
+/**
+ * Add or remove one or more event handlers - .on(), .bind() or .off(), .unbind() methods
+ * @param  {String}   event    The string containing the event type(s)
+ * @param  {String}   selector A selector string to filter the descendants of the selected elements that trigger the event (optional)
+ * @param  {Anything} data     Data to be passed to the handler in event.data (optional)
+ * @param  {Function} fn       The callback function
+ */
+(0, _helpers.each)(['on', 'off', 'bind', 'unbind'], function (method, index) {
+  _core2.default.fn[method] = function (events, data, fn, capture) {
+    if (this[0] === undefined) {
+      return undefined;
+    }
+
+    if (fn == null) {
+      fn = data;
+      data = null;
+    }
+
+    return this.each(function () {
+      _core2.default.events[index % 2 === 0 ? 'add' : 'remove'](this, events, data, fn, capture);
+    });
+  };
+});
+
+_core2.default.fn.extend({
+  /**
+   * Binds to both the mouseenter/mouseover and mouseleave/mouseout of an element
+   * @param  {Function} over The function to execute when the mouse enters the element
+   * @param  {Function} out  The function to execute when the mouse leaves the element
+   * @return {Object}        Y object
+   */
+  hover: function hover(over, out) {
+    return this.mouseenter(over).mouseleave(out || over);
+  },
+
+  /**
+   * Bind to the defined events only once
+   * @param {String}   events The event(s) to bind to
+   * @param {Function} fn     The function to execute on the event
+   * @param {Mixed}    data   Data passed to the event handler
+   */
+  one: function one(events, fn, data) {
+    var self = this,
+        proxy = function proxy(e) {
+      if (typeof fn === 'function') {
+        fn.call(this, e, e.data);
+        self.off(events, data, proxy);
+      }
+    };
+
+    return this.each(function (element, index) {
+      var element = (0, _core2.default)(this);
+
+      if ((typeof events === 'undefined' ? 'undefined' : _typeof(events)) === 'object') {
+        if (typeof fn !== 'function') {
+          data = fn;
+          fn = null;
+        }
+
+        _core2.default.each(events, function (key, value) {
+          element.one(key, value, data);
+        });
+      } else {
+        element.on(events, data, proxy);
+      }
+    });
+  },
+
+  /**
+   * Triggers an event on more or more elements
+   * @param {String} event The event to trigger
+   * @param {Object} data  The event data
+   */
+  trigger: function trigger(type, data) {
+    if (typeof type !== 'string') {
+      return undefined;
+    }
+
+    return this.each(function () {
+      var self = this;
+
+      (0, _helpers.each)(_core2.default.events.find(this, type), function (handler) {
+        if (handler.fn && typeof handler.fn === 'function') {
+          if ((typeof data === 'undefined' ? 'undefined' : _typeof(data)) === 'object') {
+            handler.data = data;
+          }
+
+          handler.fn({
+            currentTarget: self,
+            data: handler.data,
+            handleObj: handler,
+            namespace: handler.namespace,
+            timeStamp: new Date().getTime(),
+            type: handler.type
+          }, handler.data);
+        }
+      });
+    });
+  }
+});
+
+/**
+ * Event aliases dictionary
+ * @param  {String} event String containing the event name
+ * @return {String}       The original event name or the mapped alias
+ */
+var eventAlias = function eventAlias(event) {
+  var alias = {
+    blur: _core2.default.supports.focusin ? 'focusout' : 'blur',
+    focus: _core2.default.supports.focusin ? 'focusin' : 'focus',
+    mouseenter: 'mouseover',
+    mouseleave: 'mouseout',
+    turn: 'orientationchange'
+  };
+
+  return alias[event] || event;
+};
+
+_core2.default.events = {
+  /**
+   * Returns the matching handler(s) of a specified element from the internal event cache
+   * @param  {DOM Element} element The DOM element
+   * @param  {Object}      event   The event object
+   * @param  {Function}    fn      The passed event handler
+   * @return {Object}              The matched event handler from the cache
+   */
+  find: function find(element, event, fn) {
+    var e = _core2.default.events.namespace(event);
+
+    return (eventsCache[element.uid] || []).filter(function (handler) {
+      return handler && (!e.type || handler.type === e.type) && (!e.namespace || handler.namespace === e.namespace) && (!fn || handler.fn === fn);
+    });
+  },
+
+  /**
+   * Helper method for binding events to elements
+   * @param {DOM Element} element The DOM element(s)
+   * @param {String}      events  The event to bind to
+   * @param {Function}    fn      The function to execute on the event
+   * @param {Anything}    data    Data passed to the event handler
+   * @param {Boolean}     capture The flag to determine if we capture the event or not
+   */
+  add: function add(element, events, data, fn, capture) {
+    var unique = element.uid || (element.uid = _core2.default.uuid());
+    var handler = eventsCache[unique] || (eventsCache[unique] = []);
+
+    (0, _helpers.each)(('' + events).split(_core2.default.regexp.space), function (event) {
+      var e = _core2.default.events.namespace(event);
+      var type = eventAlias[e.type];
+      var proxy = _core2.default.events.proxy(element, event, data, fn);
+
+      capture = _core2.default.supports.focusin && /focusin|focusout/i.test(event) || capture;
+
+      handler.push({
+        data: data,
+        fn: fn,
+        index: handler.length,
+        namespace: e.namespace,
+        proxy: proxy,
+        type: e.type
+      });
+
+      if ('addEventListener' in element) {
+        element.addEventListener(e.type, proxy, !!capture);
+      }
+    });
+  },
+
+  /**
+   * Helper method for unbinding events to elements
+   * @param {DOM Element} element The DOM element
+   * @param {String}      events  The event to unbind
+   * @param {Function}    fn      The function that maps to the event
+   */
+  remove: function remove(element, events, data, fn) {
+    (0, _helpers.each)(('' + events).split(_core2.default.regexp.space), function (event) {
+      (0, _helpers.each)(_core2.default.events.find(element, event, fn), function (handler) {
+        try {
+          delete eventsCache[element.uid][handler.index];
+        } catch (e) {
+          eventsCache[element.uid][handler.index] = null;
+        }
+
+        if ('removeEventListener' in element) {
+          element.removeEventListener(handler.type, handler.proxy, false);
+        }
+      });
+    });
+  },
+
+  /**
+   * Returns an event object containing the type and any custom namespace
+   * @param  {String} event String containing the event type
+   * @return {Object}       The event properties object
+   */
+  namespace: function namespace(event) {
+    var chunks = event.split('.');
+
+    return {
+      type: chunks[0],
+      namespace: chunks.slice(1).sort().join(' ')
+    };
+  },
+
+  /**
+   * Helper function for event callback
+   * @param  {Element}  element The DOM element
+   * @param  {Object}   event   The event object
+   * @param  {Function} fn      The event handler function
+   * @return {Function}         The proxy function
+   */
+  proxy: function proxy(element, event, data, fn) {
+    return function (event) {
+      var result;
+
+      if (typeof fn === 'function') {
+        event.data = data || {};
+        result = fn.call(element, event, event.data);
+      }
+
+      if (result === false) {
+        event.preventDefault();
+      }
+
+      return result;
+    };
+  }
+};
+
+exports.default = _core2.default;
+
+},{"../common/helpers":7,"./core":23}],25:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+var _helpers = require('../../common/helpers');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_core2.default.fn.extend({
+  /**
+   * Insert content to the end of each element in the matched set
+   * @param {Mixed}   element DOM element, array of elements, HTML string, or Y object
+   * @param {Boolean} insert  Flag for managing the insertion point (internal)
+   */
+  append: function append(element, insert) {
+    if (element && element.length != undefined && !element.length) {
+      return this;
+    }
+
+    if (!element.constructor === Array || (typeof element === 'undefined' ? 'undefined' : _typeof(element)) === 'object') {
+      element = (0, _core2.default)(element);
+    }
+
+    var i = 0,
+        k = this.length;
+
+    for (; i < k; i++) {
+      if (element.length && typeof element === 'string') {
+        var obj = _core2.default.regexp.fragments.test(element) ? (0, _core2.default)(element) : undefined;
+
+        if (obj == undefined || !obj.length) {
+          obj = _helpers.document.createTextNode(element);
+        }
+
+        if (obj.constructor === _core2.default) {
+          var l = 0,
+              j = obj.length;
+
+          for (; l < j; l++) {
+            (0, _helpers.documentFragments)((0, _core2.default)(obj[l]), this[i], insert);
+          }
+        } else {
+          insert != undefined ? this[i].insertBefore(obj, this[i].firstChild) : this[i].appendChild(obj);
+        }
+      } else {
+        (0, _helpers.documentFragments)((0, _core2.default)(element), this[i], insert);
+      }
+    }
+
+    return this;
+  }
+});
+
+exports.default = _core2.default;
+
+},{"../../common/helpers":7,"../core":23}],26:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+var _helpers = require('../../common/helpers');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * DOM Maniuplation methods .before() .after()
+ * @param {Mixed} selector The CSS selector or DOM element to insert before/after
+ */
+(0, _helpers.each)(['before', 'after'], function (method, index) {
+  _core2.default.fn[method] = function (selector) {
+    selector = (0, _core2.default)(selector)[0];
+
+    if (!this.length || !selector) {
+      return this;
+    }
+
+    var i = 0,
+        k = this.length;
+
+    for (; i < k; i++) {
+      var element = this[i];
+
+      if (selector.nodeName.toLowerCase() === 'script') {
+        selector = (0, _helpers.addScript)(selector);
+      }
+
+      if (element.parentNode) {
+        element.parentNode.insertBefore(selector, method === 'before' ? element : element.nextSibling);
+      }
+    }
+
+    return this;
+  };
+});
+
+exports.default = _core2.default;
+
+},{"../../common/helpers":7,"../core":23}],27:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+var _helpers = require('../../common/helpers');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * DOM Maniuplation methods .appendTo() .prependTo() .prepend()
+ * @param  {Mixed}  selector The CSS selector or DOM element to append/prepend
+ * @return {Object}          The passed selector
+ */
+(0, _helpers.each)(['appendTo', 'prependTo', 'prepend'], function (method, index) {
+  _core2.default.fn[method] = function (selector) {
+    var target = this,
+        selector = (0, _core2.default)(selector);
+
+    if (index !== 2) {
+      target = (0, _core2.default)(selector);
+      selector = this;
+    }
+
+    target.append(selector, index !== 0);
+
+    return selector;
+  };
+});
+
+exports.default = _core2.default;
+
+},{"../../common/helpers":7,"../core":23}],28:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('./core');
+
+var _core2 = _interopRequireDefault(_core);
+
+require('./attributes/attr');
+
+require('./attributes/css');
+
+require('./attributes/data');
+
+require('./events');
+
+require('./manipulation/append');
+
+require('./manipulation/beforeAfter');
+
+require('./manipulation/prepend');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = _core2.default;
+
+},{"./attributes/attr":20,"./attributes/css":21,"./attributes/data":22,"./core":23,"./events":24,"./manipulation/append":25,"./manipulation/beforeAfter":26,"./manipulation/prepend":27}],29:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1399,7 +3780,7 @@ _core2.default.speak = function (text) {
 
 exports.default = _core2.default;
 
-},{"../core":9,"./speechSynthesis":15}],13:[function(require,module,exports){
+},{"../core":13,"./speechSynthesis":32}],30:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1541,7 +3922,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../core":9}],14:[function(require,module,exports){
+},{"../core":13}],31:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1556,7 +3937,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _window2.default.SpeechRecognition || _window2.default.webkitSpeechRecognition || _window2.default.mozSpeechRecognition || _window2.default.msSpeechRecognition || _window2.default.oSpeechRecognition;
 
-},{"../common/window":8}],15:[function(require,module,exports){
+},{"../common/window":12}],32:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1571,7 +3952,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _window2.default.speechSynthesis;
 
-},{"../common/window":8}],16:[function(require,module,exports){
+},{"../common/window":12}],33:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1648,7 +4029,7 @@ var configs = {
 
 exports.default = configs;
 
-},{}],17:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1704,7 +4085,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../core":9,"./speechSynthesis":15,"./speechSynthesisOverrides":16}],18:[function(require,module,exports){
+},{"../core":13,"./speechSynthesis":32,"./speechSynthesisOverrides":33}],35:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1940,5 +4321,5 @@ _core2.default.apply(Visualizer.prototype, {
 
 exports.default = _core2.default;
 
-},{"./core":9}]},{},[2])
+},{"./core":13}]},{},[2])
 //# sourceMappingURL=eleven.js.map
