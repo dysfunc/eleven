@@ -1,7 +1,10 @@
-import document from './common/document';
 import window from './common/window';
 import SpeechRecognition from './speech/speechRecognition';
-import { each, indexOf, slice, toString, trim } from './common/helpers';
+import { document } from './common/document';
+import { each, indexOf } from './common/helpers';
+import { toString } from './common/objects';
+import { trim } from './common/strings';
+import { slice } from './common/arrays';
 
 var initialized = null;
 
@@ -106,6 +109,14 @@ const class2type = {};
 
 $.apply($, {
   /**
+   * Converts a dasherized strings to camelCase
+   * @param  {String} str The string to modify
+   * @return {String}     The modified string
+   */
+  camelCase: function(str){
+    return str.trim().replace($.regexp.camel, (match, chr) => chr ? chr.toUpperCase() : '');
+  },
+  /**
    * Iterates over an Array or Object executing a callback function on each item
    * @param  {Mixed}    collection Array or Object to iterate over
    * @param  {Function} fn         Function to execute on each item
@@ -132,6 +143,49 @@ $.apply($, {
     return this;
   },
   /**
+   * Converts a camelCase string to a dasherized one
+   * @param  {String} str The string to convert
+   * @return {String}     The dasherized version of the string
+   */
+  dasherize: function(str){
+    return str.trim().replace(/([A-Z])/g, '-$1').replace(/[-_\s]+/g, '-').toLowerCase();
+  },
+  /**
+   * Sets a timer to delay the execution of a function
+   * @param  {Function} fn        The function to execute
+   * @param  {Object}   context   The object that will set the context (this) of the function
+   * @param  {Integer}  wait      The delay before executing the function (Defaults to 100)
+   * @param  {Boolean}  immediate Execute the function immediately -> overrides delay
+   */
+  debounce: function(fn, context, delay, immediate){
+    var timer = null,
+        args = arguments;
+
+    if(typeof(context) === 'number'){
+      immediate = delay;
+      delay = context;
+      context = null;
+    }
+
+    return function(){
+      var scope = context || this,
+          delayed, now;
+
+      delayed = function(){
+        timer = null;
+        !now && fn.apply(scope, args);
+      };
+
+      now = immediate && !timer;
+
+      clearTimeout(timer);
+
+      timer = setTimeout(delayed, delay || 200);
+
+      now && fn.apply(scope, args);
+    }
+  },
+  /**
    * Merge the contents of two or more objects into the target object
    * @param  {Boolean} deep      If true, the merge becomes recursive (optional)
    * @param  {Object}  target    Object receiving the new properties
@@ -155,7 +209,7 @@ $.apply($, {
       i--;
     }
 
-    $.each(slice.call(arguments, i), (obj) => {
+    each(slice.call(arguments, i), (obj) => {
       var src, copy, isArray, clone;
 
       if(obj === target){
@@ -193,6 +247,31 @@ $.apply($, {
     return target;
   },
   /**
+   * Returns a "flat" one-dimensional array
+   * @param  {Array} array The multidimensional array to flatten
+   * @return {Array}       The flattened array
+   */
+  flatten: function(array){
+    return concat.apply([], array);
+  },
+  /**
+   * Returns a formatted string template from the values of the passed argument
+   * @param  {String} template The string template containing the place-holders
+   * @param  {Mixed}  values   The argument containing the indexed values or property keys
+   * @return {String}          The formatted string
+   */
+  format: function(template, values){
+    if(!values || !($.isObject(values) || $.isArray(values))){
+      return undefined;
+    }
+
+    var match = $.isObject(values) ? 'keys' : 'indexed';
+
+    return template.replace($.regexp.templates[match], function(match, key){
+      return values[key] || '';
+    });
+  },
+  /**
    * Determines whether the array contains a specific value
    * @param  {Mixed}   item     The item to look for in the array
    * @param  {String}  array    The array of items
@@ -201,6 +280,37 @@ $.apply($, {
    */
   inArray(item, array, position){
     return array.includes(item, position);
+  },
+  /**
+   * Determines if the passed obj is an array or array-like object (NodeList, Arguments, etc...)
+   * @param  {Object}  obj Object to type check
+   * @return {Boolean}     The true/false result
+   */
+  isArrayLike: function(obj){
+    var type = $.type(obj),
+        length = obj.length;
+
+    if(type === 'function' || obj === window || type === 'string'){
+      return false;
+    }
+
+    if(obj.nodeType === 1 && length){
+      return true;
+    }
+
+    return type === 'array' || length === 0 || typeof(length) === 'number' && length > 0 && (length - 1) in obj;
+  },
+  /**
+   * Determines if the passed obj is empty
+   * @param  {Object}  obj Object to check the contents of
+   * @return {Boolean}     The true/false result
+   */
+  isEmptyObject: function(obj){
+    for(var key in obj){
+      return false;
+    }
+
+    return true;
   },
   /**
    * Determines whether the passed object is a number
@@ -233,6 +343,64 @@ $.apply($, {
    */
   isWindow(obj){
     return obj !== null && obj === global;
+  },
+  /**
+   * Returns a new array from the results of the mapping
+   * @param  {Array}    elements The array to map
+   * @param  {Function} fn       The function to execute on each item
+   * @return {Array}             The new array
+   */
+  map: function(elements, fn){
+    var k = elements.length,
+        key,
+        value,
+        values = [],
+        i = 0;
+
+    if(elements.length){
+      for(; i < k; i++){
+        value = fn(elements[i], i);
+
+        if(value != null){
+          values.push(value);
+        }
+      }
+    }else{
+      for(key in elements){
+        value = fn(elements[key], key);
+
+        if(value != null){
+          values.push(value);
+        }
+      }
+    }
+
+    return $.flatten(values);
+  },
+  /**
+   * Merge arrays - second into the first
+   * @param  {Array} first   The array that will receive the new values
+   * @param  {Array} second  The array that will be merged into the first - unaltered
+   * @return {Array}         The modified array
+   */
+  merge: function(first, second){
+    var total = second.length,
+        length = first.length,
+        i = 0;
+
+    if(typeof(total) === 'number'){
+      for(; i < total; i++){
+        first[length++] = second[i];
+      }
+    }else{
+      while(second[i] !== undefined){
+        first[length++] = second[i++];
+      }
+    }
+
+    first.length = length;
+
+    return first;
   },
   /**
    * Parses a string as JSON, optionally transforming the value produced by parsing
@@ -334,12 +502,51 @@ $.apply($, {
     }
   },
   /**
+   * Converts anything that can be iterated over into a real JavaScript Array
+   * @param  {Mixed}   item  Can be a string, array or arugments object
+   * @param  {Integer} start Zero-based index to start the array at (optional)
+   * @param  {Integer} end   Zero-based index to end the array at (optional)
+   * @return {Array}         The new array
+   */
+  toArray: function(item, start, end){
+    const array = [];
+
+    if(!item || !item.length){
+      return array;
+    }
+
+    $.isString(item) && (item = item.split(''));
+
+    end = (end && end < 0 && item.length + end || end) || item.length;
+
+    for(var i = (start || 0); i < end; i++){
+      array.push(item[i]);
+    }
+
+    return array;
+  },
+  /**
    * Returns the internal JavaScript [Class]] of an Object
    * @param  {Object} obj Object to check the class property of
    * @return {String}     Only the class property of the Object
    */
   type(obj){
     return obj === null ? String(obj) : class2type[toString.call(obj)];
+  },
+  /**
+   * Filters an array and by removing duplicates items
+   * @param  {Array} collection The array to filter
+   * @return {Array}            The modified array
+   */
+  unique: function(collection){
+    for(var i = 0; i < collection.length; i++){
+      if(indexOf(collection, collection[i]) !== i){
+        collection.splice(i, 1);
+        i--;
+      }
+    }
+
+    return collection;
   },
   /**
    * Generates a random RFC4122 UUID
@@ -359,7 +566,7 @@ $.apply($, {
  * @param  {Object}  obj The Object to type check
  * @return {Boolean}     The value of true or false
  */
-$.each(['Array', 'Boolean', 'Date', 'Error', 'Function', 'Object', 'RegExp', 'String'], function(name){
+each(['Array', 'Boolean', 'Date', 'Error', 'Function', 'Object', 'RegExp', 'String'], function(name){
   class2type[`[object ${name}]`] = name.toLowerCase();
 
   $[`is${name}`] = (obj) => $.type(obj) === name.toLowerCase();

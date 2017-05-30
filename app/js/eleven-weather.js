@@ -1,15 +1,15 @@
-;(function(window, $$, $){
+;(function(window, Eleven, $){
 
-  $$.plugin('weather', function(options){
+  Eleven.plugin('weather', function(options){
     return new weather(options);
   });
 
   var weather = function(options){
-    this.options = $$.extend(true, {}, options || {});
+    this.options = $.extend(true, {}, options || {});
     return this;
   }
 
-  $$.extend(weather.prototype, {
+  $.extend(weather.prototype, {
     createList: function(data, total){
       var query = data.query.results;
       var forecast = query.channel.item.forecast;
@@ -105,13 +105,16 @@
     fetch: function(city, callback, total){
       var self = this;
 
-      $$.ajax({
+      // clear any results from previous commands
+      Eleven.resetView();
+
+      $.ajax({
         url: 'https://query.yahooapis.com/v1/public/yql?q=select * from weather.forecast where woeid in (select woeid from geo.places(1) where text="'+ city + '")&format=json',
         dataType: 'json',
         success: function(data){
           self.createList(data, total);
 
-          if($$.isFunction(callback)){
+          if($.isFunction(callback)){
             callback(data);
           }
         },
@@ -131,4 +134,4 @@
       this.fetch(city, callback, 1);
     }
   });
-})(window, Eleven, $);
+})(window, Eleven, Eleven.query);
