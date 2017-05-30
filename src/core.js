@@ -328,7 +328,11 @@ $.apply($, {
    * @return {String}          The JSON string
    */
   stringify(value, replacer, spaces){
-    return JSON.stringify(value, replacer, spaces);
+    try {
+      return JSON.stringify(value, replacer, spaces);
+    }catch(error){
+      throw `Error occurred while trying to stringify JSON: ${error}`;
+    }
   },
   /**
    * Returns the internal JavaScript [Class]] of an Object

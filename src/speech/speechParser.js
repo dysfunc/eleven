@@ -61,7 +61,7 @@ $.fn.extend({
           console.debug(`[Eleven] Command match: ${name} - ${phrase}`);
 
           if(parameters.length){
-            console.debug(`[Eleven] Command results contain parameters: ${JSON.stringify(parameters, null, 2)}`);
+            console.debug(`[Eleven] Command results contain parameters: ${$.stringify(parameters, null, 2)}`);
           }
         }
 
