@@ -1,5 +1,4 @@
 import $ from '../core';
-import Eleven from '../../core';
 import { getComputedStyle } from '../../common/helpers';
 
 const cssNumber = { 'columns': 1, 'columnCount': 1, 'fillOpacity': 1, 'flexGrow': 1, 'flexShrink': 1, 'fontWeight': 1, 'lineHeight': 1, 'opacity': 1, 'order': 1, 'orphans': 1, 'widows': 1, 'zIndex': 1, 'zoom': 1 };
@@ -22,7 +21,7 @@ $.fn.extend({
             return;
           }
 
-          var camelCase = Eleven.camelCase(prop);
+          var camelCase = $.camelCase(prop);
 
           if(get){
             value = element.style[camelCase] || getComputedStyle(element, null)[camelCase];
@@ -43,7 +42,7 @@ $.fn.extend({
           }
 
           if(get){
-            return Eleven.regexp.cssNumbers.test(camelCase) ? parseFloat(value) : value;
+            return $.regexp.cssNumbers.test(camelCase) ? parseFloat(value) : value;
           }else{
             element.style[camelCase] = formatValue(camelCase, value);
           }

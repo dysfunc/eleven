@@ -1,5 +1,4 @@
 import $ from '../core';
-import Eleven from '../../core';
 import { document, documentFragments } from '../../common/helpers';
 
 $.fn.extend({
@@ -22,7 +21,7 @@ $.fn.extend({
 
     for(; i < k; i++){
       if(element.length && typeof(element) === 'string'){
-        var obj = (Eleven.regexp.fragments).test(element) ? $(element) : undefined;
+        var obj = ($.regexp.fragments).test(element) ? $(element) : undefined;
 
         if(obj == undefined || !obj.length){
           obj = document.createTextNode(element);

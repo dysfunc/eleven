@@ -1,4 +1,4 @@
-(function(Eleven, $){
+(function($){
   /**
    * @plugin $.fn.carousel
    * @param  {Object} options The configuration of the carousel instance
@@ -56,9 +56,9 @@
 
       if(this.config.data){
         // build each item in the carousel from the passed dataset
-        Eleven.each(this.config.data, function(item, index){
+        $.each(this.config.data, function(item, index){
           items.push(
-            Eleven.format(self.config.itemTemplate, item)
+            $.format(self.config.itemTemplate, item)
           );
         });
       }
@@ -66,7 +66,7 @@
       // append carousel template to container element
       var carousel = this.container.append(
         // inject our carousel items into the carousel template
-        Eleven.format(this.config.template, {
+        $.format(this.config.template, {
           items: items.join('')
         })
       );
@@ -150,4 +150,4 @@
       this.content.css('left', this.position + 'px');
     }
   });
-})(Eleven, Eleven.query)
+})(Eleven.query)

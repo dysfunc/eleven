@@ -6,7 +6,7 @@ import './detection/browser';
 import './detection/device';
 import './detection/feature';
 import './detection/os';
-import './pixels/pixels';
+import './query/query';
 import './plugins';
 import './speech/speak';
 import './speech/speechParser';

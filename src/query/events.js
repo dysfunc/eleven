@@ -1,4 +1,3 @@
-import Eleven from '../core';
 import $ from './core';
 import { each } from '../common/helpers';
 
@@ -42,7 +41,7 @@ each(['on', 'off', 'bind', 'unbind'], function(method, index){
   }
 });
 
-Eleven.apply($.fn, {
+$.fn.extend({
   /**
    * Binds to both the mouseenter/mouseover and mouseleave/mouseout of an element
    * @param  {Function} over The function to execute when the mouse enters the element
@@ -76,7 +75,7 @@ Eleven.apply($.fn, {
           fn = null;
         }
 
-        Eleven.each(events, function(key, value){
+        $.each(events, function(key, value){
           element.one(key, value, data);
         });
       }else{
@@ -124,8 +123,8 @@ Eleven.apply($.fn, {
  */
 var eventAlias = function(event){
   var alias = {
-      blur       : Eleven.supports.focusin ? 'focusout' : 'blur',
-      focus      : Eleven.supports.focusin ? 'focusin' : 'focus',
+      blur       : $.supports.focusin ? 'focusout' : 'blur',
+      focus      : $.supports.focusin ? 'focusin' : 'focus',
       mouseenter : 'mouseover',
       mouseleave : 'mouseout',
       turn       : 'orientationchange'
@@ -161,15 +160,15 @@ $.events = {
    * @param {Boolean}     capture The flag to determine if we capture the event or not
    */
   add(element, events, data, fn, capture){
-    const unique = element.uid || (element.uid = Eleven.uuid());
+    const unique = element.uid || (element.uid = $.uuid());
     const handler = eventsCache[unique] || (eventsCache[unique] = []);
 
-    each(('' + events).split(Eleven.regexp.space), function(event){
+    each(('' + events).split($.regexp.space), function(event){
       const e = $.events.namespace(event);
       const type = eventAlias[e.type];
       const proxy = $.events.proxy(element, event, data, fn);
 
-      capture = Eleven.supports.focusin && (/focusin|focusout/i).test(event) || capture;
+      capture = $.supports.focusin && (/focusin|focusout/i).test(event) || capture;
 
       handler.push({
         data: data,
@@ -192,7 +191,7 @@ $.events = {
    * @param {Function}    fn      The function that maps to the event
    */
   remove(element, events, data, fn){
-    each(('' + events).split(Eleven.regexp.space), function(event){
+    each(('' + events).split($.regexp.space), function(event){
       each($.events.find(element, event, fn), function(handler){
         try {
           delete eventsCache[element.uid][handler.index];

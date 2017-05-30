@@ -5,24 +5,26 @@
   });
 
   var news = function(options){
-    this.options = Eleven.extend(true, {}, options || {});
+    this.options = $.extend(true, {}, options || {});
   };
 
-  Eleven.extend(news.prototype, {
+  $.extend(news.prototype, {
     createList: function(data, total){
       var articles = data.articles.slice(2);
       var data = [];
 
       Eleven.resetView();
 
-      var container = document.createElement('div'),
-          ul = document.createElement('ul');
-
       articles.forEach(function(article){
         var description = article.description || '';
 
         if(description && description.length > 120){
           description = article.description.substr(0, 300).split(' ').slice(0, -1).join(' ') + ' ...';
+        }
+
+        if(article.urlToImage){
+          const img = new Image();
+          img.src = article.urlToImage;
         }
 
         data.push({
@@ -33,18 +35,14 @@
       });
 
       setTimeout(function(){
-        var wrapper = document.createElement('div');
+        var container = $('<div id="news-results"><ul></ul></div>'),
+            wrapper = $('<div id="carousel" class="results"></div>');
 
-        wrapper.id = 'carousel';
-        wrapper.className = 'results';
+        wrapper.append(container);
 
-        container.id = 'news-results';
-        container.appendChild(ul);
-        wrapper.appendChild(container);
+        $(document.body).append(wrapper);
 
-        document.body.appendChild(wrapper);
-        wrapper.classList.add('show');
-console.log($('#carousel'));
+        wrapper.addClass('show');
 
         $('#carousel').carousel({
           template: [
@@ -88,7 +86,7 @@ console.log($('#carousel'));
     fetch: function(source, callback){
       var self = this;
 
-      Eleven.ajax({
+      $.ajax({
         url: 'https://newsapi.org/v1/articles',
         dataType: 'json',
         data: {
@@ -97,13 +95,9 @@ console.log($('#carousel'));
           source: 'cnn'
         },
         success: function(data){
-          if(Eleven.debug){
-            console.log(data, '--- FETCHING NEWS');
-          }
-
           self.createList(data);
 
-          if(Eleven.isFunction(callback)){
+          if($.isFunction(callback)){
             callback(data);
           }
         },

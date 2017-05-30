@@ -1,7 +1,7 @@
 import $ from './core';
 import './attributes/attr';
 import './attributes/css';
-import './data';
+import './attributes/data';
 import './events';
 import './manipulation/append';
 import './manipulation/beforeAfter';

@@ -5,11 +5,11 @@
   });
 
   var weather = function(options){
-    this.options = Eleven.extend(true, {}, options || {});
+    this.options = $.extend(true, {}, options || {});
     return this;
   }
 
-  Eleven.extend(weather.prototype, {
+  $.extend(weather.prototype, {
     createList: function(data, total){
       var query = data.query.results;
       var forecast = query.channel.item.forecast;
@@ -105,13 +105,16 @@
     fetch: function(city, callback, total){
       var self = this;
 
-      Eleven.ajax({
+      // clear any results from previous commands
+      Eleven.resetView();
+
+      $.ajax({
         url: 'https://query.yahooapis.com/v1/public/yql?q=select * from weather.forecast where woeid in (select woeid from geo.places(1) where text="'+ city + '")&format=json',
         dataType: 'json',
         success: function(data){
           self.createList(data, total);
 
-          if(Eleven.isFunction(callback)){
+          if($.isFunction(callback)){
             callback(data);
           }
         },

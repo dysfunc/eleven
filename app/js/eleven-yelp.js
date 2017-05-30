@@ -10,12 +10,12 @@
       }
     };
 
-    this.options = Eleven.extend(true, defaultOptions, options || {});
+    this.options = $.extend(true, defaultOptions, options || {});
 
     return this;
   };
 
-  Eleven.extend(yelp.prototype, {
+  $.extend(yelp.prototype, {
     createList: function(data, speech){
       // clear any results from previous commands
       Eleven.resetView();
@@ -67,7 +67,7 @@
         return result;
       };
 
-      return Eleven.extend({}, {
+      return $.extend({}, {
         callback: 'jsonpCallback1',
         oauth_signature_method: 'HMAC-SHA1',
         oauth_timestamp: new Date().getTime(),
@@ -80,14 +80,14 @@
     search: function(params, speech, callback){
       var self = this,
           url = 'https://api.yelp.com/v2/search',
-          params = Eleven.extend({}, this.getConfig(), params);
+          params = $.extend({}, this.getConfig(), params);
 
       document.body.classList.add('interactive');
 
       // add our signature
       params.oauth_signature = this.generateSignature('GET', url, params, params.consumerSecret, params.tokenSecret, { encodeSignature: false });
 
-      Eleven.ajax({
+      $.ajax({
         url: url,
         dataType: 'jsonp',
         jsonp: 'jsonpCallback1',
@@ -95,7 +95,7 @@
         success: function(data){
           self.createList(data.businesses, speech);
 
-          if(Eleven.isFunction(callback)){
+          if($.isFunction(callback)){
             callback(data);
           }
 
@@ -108,4 +108,5 @@
       });
     }
   });
+
 })(window, Eleven, Eleven.query, oauthSignature);

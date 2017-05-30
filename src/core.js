@@ -261,11 +261,11 @@ $.apply($, {
    * @return {String}          The formatted string
    */
   format: function(template, values){
-    if(!values || !(Eleven.isObject(values) || Eleven.isArray(values))){
+    if(!values || !($.isObject(values) || $.isArray(values))){
       return undefined;
     }
 
-    var match = Eleven.isObject(values) ? 'keys' : 'indexed';
+    var match = $.isObject(values) ? 'keys' : 'indexed';
 
     return template.replace($.regexp.templates[match], function(match, key){
       return values[key] || '';
@@ -375,7 +375,7 @@ $.apply($, {
       }
     }
 
-    return Eleven.flatten(values);
+    return $.flatten(values);
   },
   /**
    * Merge arrays - second into the first
@@ -515,7 +515,7 @@ $.apply($, {
       return array;
     }
 
-    Eleven.isString(item) && (item = item.split(''));
+    $.isString(item) && (item = item.split(''));
 
     end = (end && end < 0 && item.length + end || end) || item.length;
 

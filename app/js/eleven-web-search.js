@@ -5,11 +5,11 @@
   });
 
   var webSearch = function(options){
-    this.options = Eleven.extend(true, {}, options || {});
+    this.options = $.extend(true, {}, options || {});
     return this;
   };
 
-  Eleven.extend(webSearch.prototype, {
+  $.extend(webSearch.prototype, {
     createList: function(data, total){
       var articles = data.items.slice(0, 1)
 
@@ -52,7 +52,7 @@
 
     fetch: function(query, callback){
       var self = this;
-      Eleven.ajax({
+      $.ajax({
         url: 'https://www.googleapis.com/customsearch/v1',
         dataType: 'json',
         data: {
@@ -64,7 +64,7 @@
           console.log(data, '--- WEB SEARCH');
           self.createList(data);
 
-          if(Eleven.isFunction(callback)){
+          if($.isFunction(callback)){
             callback(data);
           }
         },

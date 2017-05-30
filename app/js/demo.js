@@ -142,8 +142,6 @@ Eleven.ready(function(){
     //   Eleven.speak('hello world! how are you doing?');
     // }, 12000);
 
-    //
-    //
     // setTimeout(function(){
     //   Eleven().removeCommands(['hello :name', 'stop']);
     //   console.log(Eleven());

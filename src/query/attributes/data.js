@@ -1,5 +1,4 @@
-import Eleven from '../core';
-import $ from './core';
+import $ from '../core';
 
 /**
  * Data cache
@@ -55,7 +54,7 @@ $.extend({
         if(key === 'destroy' && 'uid' in elements[i]){
           removeDataCache(elements[i]);
         }else{
-          id = (elements[i].uid || (elements[i].uid = Eleven.uuid()));
+          id = (elements[i].uid || (elements[i].uid = $.uuid()));
 
           if(!cache[id]){
             cache[id] = {};

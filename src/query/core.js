@@ -58,7 +58,7 @@ $.fn = $.prototype = {
     if(type === 'string'){
       selector = selector.trim()
 
-      if(selector[0] === '<' && selector[selector.length - 1] === '>' && (Eleven.regexp.fragments).test(selector)){
+      if(selector[0] === '<' && selector[selector.length - 1] === '>' && ($.regexp.fragments).test(selector)){
         selector = $.fragment(document.createElement(fragmentContainer[RegExp.$1] || 'div'), selector);
         this.selector = selector;
       }
@@ -81,7 +81,7 @@ $.fn = $.prototype = {
       context = $(this.context)[0];
     }
 
-    return Eleven.merge(this, $.query(selector, context));
+    return $.merge(this, $.query(selector, context));
   }
 };
 
@@ -128,7 +128,7 @@ $.query = (selector, context) => {
     if(context.nodeType === 1 || context.nodeType === 9){
       if(selector[0] === '.' && noSpace){
         query = context.getElementsByClassName(selector.slice(1));
-      }else if((Eleven.regexp.tags).test(selector)){
+      }else if(($.regexp.tags).test(selector)){
         query = context.getElementsByTagName(selector);
       }else{
         query = context.querySelectorAll(selector);
@@ -140,7 +140,6 @@ $.query = (selector, context) => {
 };
 
 Eleven.apply($, {
-  extend: Eleven.extend,
   /**
    * Determines if a DOM element is a descendant of another DOM element
    * @param  {Object}  container The DOM element or Y object that may contain the child element
@@ -204,6 +203,49 @@ Eleven.apply($, {
   }
 });
 
+/**
+ * Map select methods from Eleven
+ */
+each([
+  'ajax',
+  'ajaxSettings',
+  'appendQuery',
+  'camelCase',
+  'dasherize',
+  'debounce',
+  'deparam',
+  'each',
+  'extend',
+  'format',
+  'get',
+  'getJSON',
+  'inArray',
+  'isArray',
+  'isArrayLike',
+  'isEmptyObject',
+  'isFunction',
+  'isNumber',
+  'isNumeric',
+  'isObject',
+  'isPlainObject',
+  'isString',
+  'isWindow',
+  'jsonP',
+  'map',
+  'merge',
+  'params',
+  'proxy',
+  'regexp',
+  'ready',
+  'serialize',
+  'supports',
+  'toArray',
+  'unique',
+  'uuid'
+], (item) => {
+  $[item] = Eleven[item];
+});
+
 $.fn.init.prototype = $.fn;
 
 Eleven.apply($.fn, {
@@ -212,8 +254,8 @@ Eleven.apply($.fn, {
   indexOf : indexOf,
   reduce  : reduce,
   splice  : splice,
-  each    : Eleven.each,
-  extend  : Eleven.extend,
+  each    : $.each,
+  extend  : $.extend,
   /**
    * Add additional items to an existing Y collection
    * @param  {Mixed}  selector The Object or CSS selector
@@ -221,7 +263,7 @@ Eleven.apply($.fn, {
    * @return {Object}          The modified Y Object
    */
   add(selector, context){
-    return this.chain(Eleven.unique(Eleven.merge(this, $(selector, context))));
+    return this.chain($.unique($.merge(this, $(selector, context))));
   },
   /**
    * Creates a reference to the original matched collection for chain breaking (e.g. using .end())
@@ -297,7 +339,7 @@ Eleven.apply($.fn, {
    * @return {Boolean}        The true or false value
    */
   contains(selector){
-    return Eleven.contains(this, selector);
+    return $.contains(this, selector);
   },
   /**
    * Get the children of each element in the set of matched elements, including text and comment nodes.
@@ -369,7 +411,7 @@ Eleven.apply($.fn, {
       );
     }else{
       search = $(
-        Eleven.map(this, function(node){
+        $.map(this, function(node){
           return $.query(selector, node);
         })
       );
@@ -477,7 +519,7 @@ Eleven.apply($.fn, {
    * @param {Function} fn The function to process each item against in the collection
    */
   map(fn){
-    return $(Eleven.map(this, (element, index) => fn.call(element, index, element)));
+    return $($.map(this, (element, index) => fn.call(element, index, element)));
   },
   /**
    * Returns the offset object for the first matched element in a collection
@@ -508,7 +550,7 @@ Eleven.apply($.fn, {
     return this.map(function(){
       var offsetParent = this.offsetParent || document.body;
 
-      while(offsetParent && (!(Eleven.regexp.root).test(offsetParent.nodeName) && $(offsetParent).css('position') === 'static')){
+      while(offsetParent && (!($.regexp.root).test(offsetParent.nodeName) && $(offsetParent).css('position') === 'static')){
         offsetParent = offsetParent.offsetParent;
       }
 
@@ -556,7 +598,7 @@ Eleven.apply($.fn, {
         offsetParent = $(this.offsetParent()),
         offset = this.offset(),
         first = offsetParent.eq(0),
-        parentOffset = (Eleven.regexp.root).test(offsetParent[0].nodeName) ? { top: 0, left: 0 } : offsetParent.offset();
+        parentOffset = ($.regexp.root).test(offsetParent[0].nodeName) ? { top: 0, left: 0 } : offsetParent.offset();
 
     offset.top  -= parseFloat(element.css('marginTop')) || 0,
     offset.left -= parseFloat(element.css('marginLeft')) || 0,
@@ -574,7 +616,7 @@ Eleven.apply($.fn, {
    * @param {Function} fn The function to execute
    */
   ready(fn){
-    if((Eleven.regexp.ready).test(document.readyState)){
+    if(($.regexp.ready).test(document.readyState)){
       fn.call();
     }else{
       document.addEventListener('DOMContentLoaded', fn, false);
@@ -703,7 +745,7 @@ Eleven.apply($.fn, {
    * @return {Array}         The new array
    */
   toArray(start, end){
-    return Eleven.toArray(this, start, end);
+    return $.toArray(this, start, end);
   },
   /**
    * Toggles a specific class on one or more elements
@@ -854,7 +896,7 @@ each(['detach', 'remove'], function(method, index){
  * @param  {String} selector The selector to filter the elements against
  * @return {Object}          The matched element(s)
  */
-Eleven.each({ parents: 'parentNode', next: 'nextElementSibling', prev: 'previousElementSibling' }, function(method, property){
+$.each({ parents: 'parentNode', next: 'nextElementSibling', prev: 'previousElementSibling' }, function(method, property){
   $.fn[method] = function(selector){
     if(!this.length){
       return undefined;
@@ -864,7 +906,7 @@ Eleven.each({ parents: 'parentNode', next: 'nextElementSibling', prev: 'previous
         elements = this;
 
     while(elements.length > 0){
-      elements = Eleven.map(elements, function(element){
+      elements = $.map(elements, function(element){
         element = element[property];
 
         if(element && element.nodeType === 1 && indexOf(collection, element) < 0){
@@ -928,7 +970,7 @@ each(['width', 'height', 'outerWidth', 'outerHeight'], function(method){
       return undefined;
     }
 
-    if(Eleven.isWindow(element)){
+    if($.isWindow(element)){
       return element['inner' + property];
     }
 
@@ -946,14 +988,12 @@ each(['width', 'height', 'outerWidth', 'outerHeight'], function(method){
 
     if(value === undefined && method.indexOf('outer') < 0){
       return this.css(method);
-    }
-    else if(method.indexOf('outer') !== -1){
+    }else if(method.indexOf('outer') !== -1){
       padding = dimension === 'width' ? (this.css('paddingLeft') + this.css('paddingRight')) : (this.css('paddingTop') + this.css('paddingBottom'));
       margin = value === true ? (dimension === 'width' ? (this.css('marginLeft') + this.css('marginRight')) : (this.css('marginTop') + this.css('marginBottom'))) : (dimension === 'width' ? (this.css('borderLeftWidth') + this.css('borderRightWidth')) : (this.css('borderTopWidth') + this.css('borderBottomWidth')));
 
       return this.css(dimension) + padding + margin + extra;
-    }
-    else{
+    }else{
       return this.css(method, value);
     }
   };
@@ -974,7 +1014,7 @@ each(['scrollLeft', 'scrollTop'], function(method, index){
     }
 
     var elem = this[0],
-        win = Eleven.isWindow(elem) ? elem : elem.nodeType === 9 ? elem.defaultView || elem.parentWindow : false;
+        win = $.isWindow(elem) ? elem : elem.nodeType === 9 ? elem.defaultView || elem.parentWindow : false;
 
     return value === undefined ? win ? (property in win) ? win[property] : documentElement[method] : elem[method] : win ? win.scrollTo(!top ? value : $(win).scrollLeft(), top ? value : $(win).scrollTop()) : elem[method] = value;
   }
