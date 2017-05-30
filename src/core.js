@@ -200,8 +200,7 @@ $.apply($, {
    * @return {Mixed}            The value of true or false, or the index at which the value can be found
    */
   inArray(item, array, position){
-    var result;
-    return $.isArray(array) ? (result = indexOf(array, item)) && (position ? result : result !== -1) : -1;
+    return array.includes(item, position);
   },
   /**
    * Determines whether the passed object is a number
