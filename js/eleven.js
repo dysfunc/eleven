@@ -819,8 +819,7 @@ $.apply($, {
    * @return {Mixed}            The value of true or false, or the index at which the value can be found
    */
   inArray: function inArray(item, array, position) {
-    var result;
-    return $.isArray(array) ? (result = (0, _helpers.indexOf)(array, item)) && (position ? result : result !== -1) : -1;
+    return array.includes(item, position);
   },
 
   /**
@@ -962,7 +961,11 @@ $.apply($, {
    * @return {String}          The JSON string
    */
   stringify: function stringify(value, replacer, spaces) {
-    return JSON.stringify(value, replacer, spaces);
+    try {
+      return JSON.stringify(value, replacer, spaces);
+    } catch (error) {
+      throw 'Error occurred while trying to stringify JSON: ' + error;
+    }
   },
 
   /**
@@ -1473,7 +1476,7 @@ _core2.default.fn.extend({
           console.debug('[Eleven] Command match: ' + name + ' - ' + phrase);
 
           if (parameters.length) {
-            console.debug('[Eleven] Command results contain parameters: ' + JSON.stringify(parameters, null, 2));
+            console.debug('[Eleven] Command results contain parameters: ' + _core2.default.stringify(parameters, null, 2));
           }
         }
 
