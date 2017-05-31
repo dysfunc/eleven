@@ -442,14 +442,6 @@ Eleven.apply($.fn, {
     return index !== undefined ? (index < 0 ? this[this.length + index] : this[index]) : slice.call(this);
   },
   /**
-   * Determines whether an element has a specific CSS class
-   * @param  {String}  name String containing the CSS class name to search
-   * @return {Boolean}      True/false result
-   */
-  hasClass(name){
-    return this[0].classList.contains(name);
-  },
-  /**
    * Hides each element in the matched set of elements
    * @return {Object} The Y object
    */
@@ -683,19 +675,6 @@ Eleven.apply($.fn, {
     return $(slice.apply(this, arguments));
   },
   /**
-   * Swaps one CSS class name for another
-   * @param  {String} remove String containing the class name to remove
-   * @param  {String} add    String containing the class name to add
-   * @return {Object}        The Y collection
-   */
-  swapClass(remove, add){
-    if(!this.length){
-      return undefined;
-    }
-
-    return this.removeClass(remove).addClass(add);
-  },
-  /**
    * Returns the text from the first element in the matched set, or sets the
    * text value for one or more elements
    * @param  {String} text The text content to set
@@ -741,17 +720,6 @@ Eleven.apply($.fn, {
     return $.toArray(this, start, end);
   },
   /**
-   * Toggles a specific class on one or more elements
-   * @param {Mixed} cls The CSS class to toggle or the function to execute
-   */
-  toggleClass(cls, fn){
-    if(!this.length){
-      return undefined;
-    }
-
-    return this[(this.hasClass(cls) ? 'removeClass' : 'addClass')](fn && fn(cls) || cls);
-  },
-  /**
    * Gets the value for the first element in the matched set or sets the value for one or more elements
    * @param  {Mixed} value The value to set
    * @return {Mixed}       The property value
@@ -788,44 +756,6 @@ Eleven.apply($.fn, {
     for(; i < k; i++){
       element = $(this[i]);
       element.before(node) && node.append(element);
-    }
-
-    return this;
-  }
-});
-
-/**
- * Add or remove one or more CSS classes from one or more elements
- * @param {Mixed} cls The CSS class to add/remove or the function to execute
- */
-each(['addClass', 'removeClass'], (method, index) => {
-  $.fn[method] = function(name){
-    if(this[0] === undefined){
-      return undefined;
-    }
-
-    var i = 0,
-        k = this.length,
-        type = typeof(name),
-        names = type === 'string' ? name.split(' ') : [],
-        remove = method === 'removeClass';
-
-    for(; i < k; i++){
-      const element = this[i];
-
-      if(type === 'function'){
-        name.call(element, element.classList, i);
-      }else{
-        if(remove && name === undefined){
-          element.className = '';
-        }else{
-          if(remove){
-            element.classList.remove(...names);
-          }else{
-            element.classList.add(...names);
-          }
-        }
-      }
     }
 
     return this;

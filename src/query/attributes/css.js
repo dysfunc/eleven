@@ -1,5 +1,5 @@
 import $ from '../core';
-import { getComputedStyle } from '../../common/helpers';
+import { each, getComputedStyle } from '../../common/helpers';
 
 const cssNumber = { 'columns': 1, 'columnCount': 1, 'fillOpacity': 1, 'flexGrow': 1, 'flexShrink': 1, 'fontWeight': 1, 'lineHeight': 1, 'opacity': 1, 'order': 1, 'orphans': 1, 'widows': 1, 'zIndex': 1, 'zoom': 1 };
 const formatValue = (prop, value) => typeof(value) === 'number' && !cssNumber[prop] && (parseFloat(value) + 'px') || value;
@@ -71,6 +71,76 @@ $.fn.extend({
       }else{
         for(var key in property){
           process(element, key, property[key]);
+        }
+      }
+    }
+
+    return this;
+  },
+  /**
+   * Determines whether an element has a specific CSS class
+   * @param  {String}  name String containing the CSS class name to search
+   * @return {Boolean}      True/false result
+   */
+  hasClass(name){
+    return this[0].classList.contains(name);
+  },
+  /**
+   * Swaps one CSS class name for another
+   * @param  {String} remove String containing the class name to remove
+   * @param  {String} add    String containing the class name to add
+   * @return {Object}        The Y collection
+   */
+  swapClass(remove, add){
+    if(!this.length){
+      return undefined;
+    }
+
+    return this.removeClass(remove).addClass(add);
+  },
+  /**
+   * Toggles a specific class on one or more elements
+   * @param {Mixed} cls The CSS class to toggle or the function to execute
+   */
+  toggleClass(cls, fn){
+    if(!this.length){
+      return undefined;
+    }
+
+    return this[(this.hasClass(cls) ? 'removeClass' : 'addClass')](fn && fn(cls) || cls);
+  }
+});
+
+/**
+ * Add or remove one or more CSS classes from one or more elements
+ * @param {Mixed} cls The CSS class to add/remove or the function to execute
+ */
+each(['addClass', 'removeClass'], (method, index) => {
+  $.fn[method] = function(name){
+    if(this[0] === undefined){
+      return undefined;
+    }
+
+    var i = 0,
+        k = this.length,
+        type = typeof(name),
+        names = type === 'string' ? name.split(' ') : [],
+        remove = method === 'removeClass';
+
+    for(; i < k; i++){
+      const element = this[i];
+
+      if(type === 'function'){
+        name.call(element, element.classList, i);
+      }else{
+        if(remove && name === undefined){
+          element.className = '';
+        }else{
+          if(remove){
+            element.classList.remove(...names);
+          }else{
+            element.classList.add(...names);
+          }
         }
       }
     }
