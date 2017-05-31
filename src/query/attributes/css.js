@@ -89,7 +89,7 @@ $.fn.extend({
    * Swaps one CSS class name for another
    * @param  {String} remove String containing the class name to remove
    * @param  {String} add    String containing the class name to add
-   * @return {Object}        The Y collection
+   * @return {Object}        Query collection
    */
   swapClass(remove, add){
     if(!this.length){

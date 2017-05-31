@@ -4,7 +4,8 @@ import { addScript, documentFragments, each } from '../../common/helpers';
 
 /**
  * DOM Maniuplation methods .before() .after()
- * @param {Mixed} selector The CSS selector or DOM element to insert before/after
+ * @param  {Mixed}  selector The CSS selector or DOM element to insert before/after
+ * @return {Object}          Query object
  */
 each(['before', 'after'], function(method, index){
   $.fn[method] = function(selector){

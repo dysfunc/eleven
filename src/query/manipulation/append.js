@@ -5,8 +5,9 @@ import { documentFragments } from '../../common/helpers';
 $.fn.extend({
   /**
    * Insert content to the end of each element in the matched set
-   * @param {Mixed}   element DOM element, array of elements, HTML string, or Y object
+   * @param {Mixed}   element DOM element, array of elements, HTML string, or Query object
    * @param {Boolean} insert  Flag for managing the insertion point (internal)
+   * @return {Object}         Query object
    */
   append(element, insert){
     if(element && element.length != undefined && !element.length){

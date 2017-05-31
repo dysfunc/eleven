@@ -135,8 +135,8 @@ $.query = (selector, context) => {
 Eleven.apply($, {
   /**
    * Determines if a DOM element is a descendant of another DOM element
-   * @param  {Object}  container The DOM element or Y object that may contain the child element
-   * @param  {Object}  contained The DOM element or Y object that may be a descendant of the parent
+   * @param  {Object}  container The DOM element or Query object that may contain the child element
+   * @param  {Object}  contained The DOM element or Query object that may be a descendant of the parent
    * @return {Boolean}           True if the child element is a descendant of the parent, otherwise false
    */
   contains(container, contained){
@@ -148,9 +148,7 @@ Eleven.apply($, {
    * @return {Object}      The collection of matched elements
    */
   contents(element){
-    var name = function(o, n){
-      return o.nodeName && o.nodeName.toUpperCase() === n.toUpperCase();
-    };
+    var name = (o, n) => o.nodeName && o.nodeName.toUpperCase() === n.toUpperCase();
 
     return name(element, 'iframe') ? $(element.contentDocument || element.contentWindow.document) : $(slice.call(element.childNodes));
   },
@@ -250,10 +248,10 @@ Eleven.apply($.fn, {
   each    : $.each,
   extend  : $.extend,
   /**
-   * Add additional items to an existing Y collection
+   * Add additional items to an existing Query collection
    * @param  {Mixed}  selector The Object or CSS selector
    * @param  {Mixed}  context  The context of the selector
-   * @return {Object}          The modified Y Object
+   * @return {Object}          The modified Query Object
    */
   add(selector, context){
     return this.chain($.unique($.merge(this, $(selector, context))));
@@ -278,14 +276,14 @@ Eleven.apply($.fn, {
       return undefined;
     }
 
-    var i = 0,
-        k = this.length;
-
     if(this.length === 1){
       collection = $.siblings(this[0].firstChild);
     }else{
+      var i = 0,
+          k = this.length;
+
       for(; i < k; i++){
-        collection = collection.concat($.siblings(this[i].firstChild));
+        collection = [...collection, ...$.siblings(this[i].firstChild)];
       }
     }
 
@@ -296,10 +294,7 @@ Eleven.apply($.fn, {
    * @param {Boolean} deep If true, the children of the node will also be cloned
    */
   clone(deep){
-    var collection = this.map(function(){
-      return this.cloneNode(!!deep);
-    });
-
+    var collection = this.map((item) => item.cloneNode(!!deep));
     return $(collection);
   },
   /**
@@ -343,7 +338,7 @@ Eleven.apply($.fn, {
   },
   /**
    * Remove all child nodes from each parent element in the matched set
-   * @return {Object} The Y object
+   * @return {Object} Query object
    */
   empty(){
 
@@ -432,7 +427,7 @@ Eleven.apply($.fn, {
     return $(filter.call(this, (element) => $.match(element, selector)));
   },
   /**
-   * Retrieve the DOM element at the specified index the Y object collection
+   * Retrieve the DOM element at the specified index the Query object collection
    * @param  {Integer} index A zero-based index indicating which element to retrieve
    * @return {Mixed}         A matched DOM element. If no index is specified all of the matched DOM elements are returned.
    */
@@ -441,7 +436,7 @@ Eleven.apply($.fn, {
   },
   /**
    * Hides each element in the matched set of elements
-   * @return {Object} The Y object
+   * @return {Object} Query object
    */
   hide(){
     if(this[0] === undefined){
@@ -609,7 +604,7 @@ Eleven.apply($.fn, {
   },
   /**
    * Shows each element in the matched set of elements
-   * @return {Object} The Y object
+   * @return {Object} Query object
    */
   show(){
     if(!this.length || this[0] === undefined){
@@ -658,7 +653,7 @@ Eleven.apply($.fn, {
     }else{
       for(; i < k; i++){
         if(this[i].nodeType == 1){
-          this[i].parentNode && (collection = collection.concat($.siblings(this[i].parentNode.firstChild, this[i])));
+          this[i].parentNode && (collection = [...collection, $.siblings(this[i].parentNode.firstChild, this[i])]);
         }
       }
     }
@@ -891,14 +886,16 @@ each(['width', 'height', 'outerWidth', 'outerHeight'], function(method){
 
     if(value === undefined && method.indexOf('outer') < 0){
       return this.css(method);
-    }else if(method.indexOf('outer') !== -1){
+    }
+
+    if(method.indexOf('outer') !== -1){
       padding = dimension === 'width' ? (this.css('paddingLeft') + this.css('paddingRight')) : (this.css('paddingTop') + this.css('paddingBottom'));
       margin = value === true ? (dimension === 'width' ? (this.css('marginLeft') + this.css('marginRight')) : (this.css('marginTop') + this.css('marginBottom'))) : (dimension === 'width' ? (this.css('borderLeftWidth') + this.css('borderRightWidth')) : (this.css('borderTopWidth') + this.css('borderBottomWidth')));
 
       return this.css(dimension) + padding + margin + extra;
-    }else{
-      return this.css(method, value);
     }
+
+    return this.css(method, value);
   };
 });
 

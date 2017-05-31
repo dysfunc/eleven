@@ -4,7 +4,7 @@ import { each } from '../../common/helpers';
 /**
  * DOM Maniuplation methods .appendTo() .prependTo() .prepend()
  * @param  {Mixed}  selector The CSS selector or DOM element to append/prepend
- * @return {Object}          The passed selector
+ * @return {Object}          Selector Query object
  */
 each(['appendTo', 'prependTo', 'prepend'], function(method, index){
   $.fn[method] = function(selector){
