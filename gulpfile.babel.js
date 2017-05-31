@@ -18,7 +18,7 @@ watchify.args.debug = true;
 
 const sync = browserSync.create();
 
-const bundler = browserify('src/bundle.js', {
+const bundler = browserify('src/eleven.js', {
   extensions: ['.js'],
   debug: true
 });
@@ -63,7 +63,7 @@ gulp.task('publish', ['build'], function(){
 
 // watch for changes to files
 gulp.task('watch', ['serve'], () => {
-  gulp.watch(['src/**/*.js'], ['build', sync.reload]);
+  gulp.watch(['gulpfile.babel.js', 'src/**/*.js'], ['build', sync.reload]);
   gulp.watch(['app/js/**.js', '!app/js/eleven.js.map', 'app/js/eleven.js'], sync.reload);
   gulp.watch(['app/scss/**/*.scss', '!app/scss/_mixins.scss', '!app/scss/_reset.scss'], ['sass', 'lint-style', sync.reload]);
   gulp.watch('app/css/app.css', sync.reload);

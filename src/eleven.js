@@ -13,4 +13,4 @@ import './speech/speechParser';
 import './speech/speechVoices';
 import './visualizer';
 
-export default $;
+((root) => (root.Eleven = $))(window);

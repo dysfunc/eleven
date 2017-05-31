@@ -1,5 +1,6 @@
 import $ from '../core';
-import { addScript, document, documentFragments, each } from '../../common/helpers';
+import { document } from '../../common/document';
+import { addScript, documentFragments, each } from '../../common/helpers';
 
 /**
  * DOM Maniuplation methods .before() .after()

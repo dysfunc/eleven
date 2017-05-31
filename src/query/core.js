@@ -6,12 +6,7 @@ import { trim } from '../common/strings';
 import { concat, filter, forEach, pop, push, reduce, slice, splice, reverse, shift, unshift } from '../common/arrays';
 import { each, getComputedStyle, indexOf } from '../common/helpers';
 
-const classCache = {};
-const channels = {};
 const fragmentContainer = {};
-const classRE = (name) => {
-  return name in classCache ? classCache[name] : (classCache[name] = new RegExp('(^|\\s)' + name + '(\\s|$)'));
-};
 
 var _channelsUID = -1;
 
@@ -452,7 +447,7 @@ Eleven.apply($.fn, {
    * @return {Boolean}      True/false result
    */
   hasClass(name){
-    return classRE(name).test(this[0].className);
+    return this[0].classList.contains(name);
   },
   /**
    * Hides each element in the matched set of elements
@@ -494,9 +489,7 @@ Eleven.apply($.fn, {
       return this[0].innerHTML;
     }
 
-    return this.empty().each(function(){
-      $(this).append(html);
-    })
+    return this.empty().each(() => $(this).append(html));
   },
   /**
    * Returns the position of an element. If no element is provided, returns position of the current element among its siblings else -1 if not found.
@@ -764,7 +757,6 @@ Eleven.apply($.fn, {
    * @return {Mixed}       The property value
    */
   val(value){
-
     if(this[0] === undefined){
       return;
     }
@@ -773,10 +765,7 @@ Eleven.apply($.fn, {
       return this[0].value;
     }
 
-    var i = 0,
-        k = this.length;
-
-    for(; i < k; i++){
+    for(var i = 0, k = this.length; i < k; i++){
       this[i].value = value;
     }
 
@@ -787,7 +776,6 @@ Eleven.apply($.fn, {
    * @param {Array} node The element(s) to wrap
    */
   wrap(node){
-
     if(this[0] === undefined){
       return;
     }
@@ -810,7 +798,7 @@ Eleven.apply($.fn, {
  * Add or remove one or more CSS classes from one or more elements
  * @param {Mixed} cls The CSS class to add/remove or the function to execute
  */
-each(['addClass', 'removeClass'], function(method, index){
+each(['addClass', 'removeClass'], (method, index) => {
   $.fn[method] = function(name){
     if(this[0] === undefined){
       return undefined;
@@ -818,37 +806,24 @@ each(['addClass', 'removeClass'], function(method, index){
 
     var i = 0,
         k = this.length,
-        self = this,
         type = typeof(name),
         names = type === 'string' ? name.split(' ') : [],
-        l = names.length,
         remove = method === 'removeClass';
 
     for(; i < k; i++){
-      if(remove && (name === undefined || name.length === 0)){
-        this[i].className = '';
+      const element = this[i];
+
+      if(type === 'function'){
+        name.call(element, element.classList, i);
       }else{
-        var element = this[i],
-            classnames = element.className,
-            classes = ('' + classnames).split(' '),
-            j = 0;
-
-        if(type === 'function'){
-          name.call(element, classnames, i);
+        if(remove && name === undefined){
+          element.className = '';
         }else{
-          for(; j < l; j++){
-            var index = indexOf(classes, names[j]);
-
-            if(remove && index !== -1){
-              element.className = element.className.replace(classRE(names[j]), '');
-            }else{
-              if(index < 0){
-                element.className = (element.className + ' ' + names[j]);
-              }
-            }
+          if(remove){
+            element.classList.remove(...names);
+          }else{
+            element.classList.add(...names);
           }
-
-          element.className = element.className.trim();
         }
       }
     }

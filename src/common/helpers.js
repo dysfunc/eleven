@@ -31,6 +31,26 @@ const noop = () => {};
 
 const getComputedStyle = window.getComputedStyle || defaultView && defaultView.getComputedStyle;
 
+const addScript = (node) => {
+  var src = node.src && node.src.length > 0;
+
+  try{
+    if(!src){
+      (1, eval)(node.innerHTML);
+      return node;
+    }
+
+    var script = document.createElement('script');
+
+    script.type = 'text/javascript';
+    script.src = node.src;
+
+    return script;
+  }catch(error){
+    console.log('There was an error with the script:' + error);
+  }
+};
+
 /**
  * Use document fragments for faster DOM manipulation
  * @param {Array}   elements  The elements to append to the fragement
@@ -72,24 +92,5 @@ const documentFragments = (elements, container, insert) => {
   fragment = null;
 };
 
-const addScript = (node) => {
-  var src = node.src && node.src.length > 0;
-
-  try{
-    if(!src){
-      (1, eval)(node.innerHTML);
-      return node;
-    }
-
-    var script = document.createElement('script');
-
-    script.type = 'text/javascript';
-    script.src = node.src;
-
-    return script;
-  }catch(error){
-    console.log('There was an error with the script:' + error);
-  }
-};
 
 export { addScript, documentFragments, each, getComputedStyle, indexOf, noop };

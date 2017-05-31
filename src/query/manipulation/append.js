@@ -1,5 +1,6 @@
 import $ from '../core';
-import { document, documentFragments } from '../../common/helpers';
+import { document } from '../../common/document';
+import { documentFragments } from '../../common/helpers';
 
 $.fn.extend({
   /**
