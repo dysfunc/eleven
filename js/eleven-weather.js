@@ -112,6 +112,7 @@
         url: 'https://query.yahooapis.com/v1/public/yql?q=select * from weather.forecast where woeid in (select woeid from geo.places(1) where text="'+ city + '")&format=json',
         dataType: 'json',
         success: function(data){
+
           self.createList(data, total);
 
           if($.isFunction(callback)){
@@ -125,11 +126,13 @@
     },
 
     forecast: function(city, callback){
+      console.log(city, '-----FORECAST');
       document.body.classList.add('interactive');
       this.fetch(city, callback, 5);
     },
 
     temperature: function(city, callback){
+      console.log(city, '-----temperature');
       document.body.classList.add('interactive');
       this.fetch(city, callback, 1);
     }

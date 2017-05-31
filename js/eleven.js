@@ -849,7 +849,7 @@ $.fn = $.prototype = {
       autoRestart: true,
       continuous: true,
       interimResults: true,
-      maxAlternatives: 5,
+      maxAlternatives: 1,
       requiresWakeWord: true,
       speechAgent: 'Google UK English Female',
       useEngine: false,
