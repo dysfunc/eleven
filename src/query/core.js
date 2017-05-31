@@ -8,8 +8,6 @@ import { each, getComputedStyle, indexOf } from '../common/helpers';
 
 const fragmentContainer = {};
 
-var _channelsUID = -1;
-
 /**
  * Define a local copy of $
  * @param {Mixed} selector String containing CSS selector(s), HTML tags to create, or DOM Element
