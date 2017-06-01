@@ -49,9 +49,7 @@ _core2.default.fn.extend({
     // reference to SpeechRecognition instance
     this.recognition = new _speechRecognition2.default();
     // set language
-    if (options.lang) {
-      this.recognition.lang = options.lang;
-    }
+    this.recognition.lang = options.language;
     // set max alternative results
     this.recognition.maxAlternatives = options.maxAlternatives;
     // set continuous listening
@@ -1001,7 +999,7 @@ $.fn = $.prototype = {
   init: function init(selector, options) {
     var defaultConfig = {
       debug: false,
-      language: 'en-US',
+      lang: 'en-US',
       commands: [],
       continuous: true,
       interimResults: true,
