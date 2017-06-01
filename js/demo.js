@@ -147,6 +147,9 @@
       //   Eleven().removeCommands(['hello :name', 'stop']);
       //   console.log(Eleven());
       // }, 2000);
+
+      // Eleven().getPlugin('news').headlines()
+      // Eleven().getPlugin('weather').forecast('Los Angeles');
     }
   })
 })(Eleven, Eleven.query);

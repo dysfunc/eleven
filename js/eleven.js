@@ -11,9 +11,11 @@ var _core = require('../core');
 
 var _core2 = _interopRequireDefault(_core);
 
-var _document = require('../common/document');
+var _window = require('../common/window');
 
-var _document2 = _interopRequireDefault(_document);
+var _window2 = _interopRequireDefault(_window);
+
+var _document = require('../common/document');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -37,7 +39,7 @@ _core2.default.extend({
     async: true,
     beforeSend: emptyFn,
     complete: emptyFn,
-    context: _document2.default,
+    context: _document.document,
     crossDomain: false,
     error: emptyFn,
     global: true,
@@ -64,10 +66,10 @@ _core2.default.extend({
         headers = config.headers,
         method = config.type.toUpperCase(),
         mimeType = config.accepts[config.dataType],
-        protocol = /^((http|ftp|file)(s?)\:)?/.test(config.url) ? RegExp.$1 : window.location.protocol,
+        protocol = /^((http|ftp|file)(s?)\:)?/.test(config.url) ? RegExp.$1 : _window2.default.location.protocol,
         type = config.dataType,
-        url = config.url || !config.url && (config.url = window.location.toString()),
-        xhr = config.xhr = new window.XMLHttpRequest();
+        url = config.url || !config.url && (config.url = _window2.default.location.toString()),
+        xhr = config.xhr = new _window2.default.XMLHttpRequest();
 
     if (method === 'GET' && data) {
       config.url += (config.url.indexOf('?') < 0 ? '?' : '&') + data;
@@ -183,7 +185,7 @@ _core2.default.extend({
         success = _ref.success,
         timeout = _ref.timeout;
 
-    var script = _document2.default.createElement('script');
+    var script = _document.document.createElement('script');
     var fn = jsonp || 'jsonpCallback' + jsonPUID++;
 
     var data, timeout;
@@ -205,17 +207,17 @@ _core2.default.extend({
       timeout && clearTimeout(timeout) && (timeout = null);
 
       try {
-        delete window[fn];
+        delete _window2.default[fn];
       } catch (e) {
-        window[fn] = null;
+        _window2.default[fn] = null;
       }
 
       data = null;
     };
 
-    _document2.default.head.appendChild(script);
+    _document.document.head.appendChild(script);
 
-    window[fn] = function () {
+    _window2.default[fn] = function () {
       data = arguments;
     };
 
@@ -223,8 +225,8 @@ _core2.default.extend({
       timeout = setTimeout(function () {
         script.parentNode.removeChild(script);
 
-        if (fn in window) {
-          window[fn] = emptyFn;
+        if (fn in _window2.default) {
+          _window2.default[fn] = emptyFn;
         }
 
         error.call(context, null, 'timeout');
@@ -327,20 +329,7 @@ _core2.default.extend({
 
 exports.default = _core2.default;
 
-},{"../common/document":6,"../core":13}],2:[function(require,module,exports){
-'use strict';
-
-var _eleven = require('./eleven');
-
-var _eleven2 = _interopRequireDefault(_eleven);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-(function (root) {
-  return root.Eleven = _eleven2.default;
-})(window);
-
-},{"./eleven":18}],3:[function(require,module,exports){
+},{"../common/document":5,"../common/window":11,"../core":12}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -482,7 +471,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../core":13,"./commandsParser":4}],4:[function(require,module,exports){
+},{"../core":12,"./commandsParser":3}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -505,7 +494,7 @@ var parser = function parser(command) {
 
 exports.default = parser;
 
-},{"../core":13}],5:[function(require,module,exports){
+},{"../core":12}],4:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -541,7 +530,7 @@ exports.reverse = reverse;
 exports.shift = shift;
 exports.unshift = unshift;
 
-},{}],6:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -563,7 +552,7 @@ exports.document = document;
 exports.documentElement = documentElement;
 exports.defaultView = defaultView;
 
-},{"./window":12}],7:[function(require,module,exports){
+},{"./window":11}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -609,6 +598,26 @@ var noop = function noop() {};
 
 var getComputedStyle = _window2.default.getComputedStyle || _document.defaultView && _document.defaultView.getComputedStyle;
 
+var addScript = function addScript(node) {
+  var src = node.src && node.src.length > 0;
+
+  try {
+    if (!src) {
+      (1, eval)(node.innerHTML);
+      return node;
+    }
+
+    var script = document.createElement('script');
+
+    script.type = 'text/javascript';
+    script.src = node.src;
+
+    return script;
+  } catch (error) {
+    console.log('There was an error with the script:' + error);
+  }
+};
+
 /**
  * Use document fragments for faster DOM manipulation
  * @param {Array}   elements  The elements to append to the fragement
@@ -650,26 +659,6 @@ var documentFragments = function documentFragments(elements, container, insert) 
   fragment = null;
 };
 
-var addScript = function addScript(node) {
-  var src = node.src && node.src.length > 0;
-
-  try {
-    if (!src) {
-      (1, eval)(node.innerHTML);
-      return node;
-    }
-
-    var script = document.createElement('script');
-
-    script.type = 'text/javascript';
-    script.src = node.src;
-
-    return script;
-  } catch (error) {
-    console.log('There was an error with the script:' + error);
-  }
-};
-
 exports.addScript = addScript;
 exports.documentFragments = documentFragments;
 exports.each = each;
@@ -677,7 +666,7 @@ exports.getComputedStyle = getComputedStyle;
 exports.indexOf = indexOf;
 exports.noop = noop;
 
-},{"../common/document":6,"../common/window":12}],8:[function(require,module,exports){
+},{"../common/document":5,"../common/window":11}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -701,7 +690,7 @@ exports.navigator = navigator;
 exports.userAgent = userAgent;
 exports.vendor = vendor;
 
-},{"./window":12}],9:[function(require,module,exports){
+},{"./window":11}],8:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -713,7 +702,7 @@ var _ref = {},
 exports.hasOwnProperty = hasOwnProperty;
 exports.toString = toString;
 
-},{}],10:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -774,7 +763,7 @@ _core2.default.regexp = {
 
 exports.default = _core2.default;
 
-},{"../core":13}],11:[function(require,module,exports){
+},{"../core":12}],10:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -783,7 +772,7 @@ Object.defineProperty(exports, "__esModule", {
 var trim = String.prototype.trim;
 exports.trim = trim;
 
-},{}],12:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -794,7 +783,7 @@ exports.default = global;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{}],13:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -1001,6 +990,7 @@ $.apply($, {
       now && fn.apply(scope, args);
     };
   },
+
   /**
    * Merge the contents of two or more objects into the target object
    * @param  {Boolean} deep      If true, the merge becomes recursive (optional)
@@ -1068,7 +1058,7 @@ $.apply($, {
    * @return {Array}       The flattened array
    */
   flatten: function flatten(array) {
-    return concat.apply([], array);
+    return [].concat(_toConsumableArray(array));
   },
   /**
    * Returns a formatted string template from the values of the passed argument
@@ -1087,6 +1077,7 @@ $.apply($, {
       return values[key] || '';
     });
   },
+
   /**
    * Determines whether the array contains a specific value
    * @param  {Mixed}   item     The item to look for in the array
@@ -1097,15 +1088,14 @@ $.apply($, {
   inArray: function inArray(item, array, position) {
     return array.includes(item, position);
   },
-
   /**
    * Determines if the passed obj is an array or array-like object (NodeList, Arguments, etc...)
    * @param  {Object}  obj Object to type check
    * @return {Boolean}     The true/false result
    */
   isArrayLike: function isArrayLike(obj) {
-    var type = $.type(obj),
-        length = obj.length;
+    var type = $.type(obj);
+    var length = obj.length;
 
     if (type === 'function' || obj === _window2.default || type === 'string') {
       return false;
@@ -1117,6 +1107,7 @@ $.apply($, {
 
     return type === 'array' || length === 0 || typeof length === 'number' && length > 0 && length - 1 in obj;
   },
+
   /**
    * Determines if the passed obj is empty
    * @param  {Object}  obj Object to check the contents of
@@ -1129,6 +1120,7 @@ $.apply($, {
 
     return true;
   },
+
   /**
    * Determines whether the passed object is a number
    * @param  {Object}  obj Object to type check
@@ -1137,7 +1129,6 @@ $.apply($, {
   isNumber: function isNumber(obj) {
     return !isNaN(parseFloat(obj)) && isFinite(obj);
   },
-
   /**
    * Determines whether the passed object is numeric
    * @param  {Object}  obj Object to type check
@@ -1146,7 +1137,6 @@ $.apply($, {
   isNumeric: function isNumeric(obj) {
     return !$.isArray(obj) && obj - parseFloat(obj) >= 0;
   },
-
   /**
    * Determine whether an Object is a plain object or not (created using "{}" or "new Object")
    * @param  {Object}  obj Object to type check
@@ -1155,7 +1145,6 @@ $.apply($, {
   isPlainObject: function isPlainObject(obj) {
     return $.isObject(obj) && !$.isWindow(obj) && !obj.nodeType && Object.getPrototypeOf(obj) === Object.prototype;
   },
-
   /**
    * Determines whether the passed object is the Window object
    * @param  {Object}  obj Object to type check
@@ -1164,7 +1153,6 @@ $.apply($, {
   isWindow: function isWindow(obj) {
     return obj !== null && obj === global;
   },
-
   /**
    * Returns a new array from the results of the mapping
    * @param  {Array}    elements The array to map
@@ -1172,32 +1160,32 @@ $.apply($, {
    * @return {Array}             The new array
    */
   map: function map(elements, fn) {
-    var k = elements.length,
-        key,
-        value,
-        values = [],
-        i = 0;
+    var k = elements.length;
+    var values = [];
 
     if (elements.length) {
-      for (; i < k; i++) {
-        value = fn(elements[i], i);
+      var i = 0;
 
-        if (value != null) {
+      for (; i < k; i++) {
+        var value = fn(elements[i], i);
+
+        if (value !== null) {
           values.push(value);
         }
       }
     } else {
-      for (key in elements) {
-        value = fn(elements[key], key);
+      for (var key in elements) {
+        var _value = fn(elements[key], key);
 
-        if (value != null) {
-          values.push(value);
+        if (_value !== null) {
+          values.push(_value);
         }
       }
     }
 
     return $.flatten(values);
   },
+
   /**
    * Merge arrays - second into the first
    * @param  {Array} first   The array that will receive the new values
@@ -1205,9 +1193,9 @@ $.apply($, {
    * @return {Array}         The modified array
    */
   merge: function merge(first, second) {
-    var total = second.length,
-        length = first.length,
-        i = 0;
+    var total = second.length;
+    var length = first.length;
+    var i = 0;
 
     if (typeof total === 'number') {
       for (; i < total; i++) {
@@ -1223,6 +1211,7 @@ $.apply($, {
 
     return first;
   },
+
   /**
    * Parses a string as JSON, optionally transforming the value produced by parsing
    * @param  {String}   text    The string to parse as JSON
@@ -1357,6 +1346,7 @@ $.apply($, {
 
     return array;
   },
+
   /**
    * Returns the internal JavaScript [Class]] of an Object
    * @param  {Object} obj Object to check the class property of
@@ -1365,7 +1355,6 @@ $.apply($, {
   type: function type(obj) {
     return obj === null ? String(obj) : class2type[_objects.toString.call(obj)];
   },
-
   /**
    * Filters an array and by removing duplicates items
    * @param  {Array} collection The array to filter
@@ -1381,6 +1370,7 @@ $.apply($, {
 
     return collection;
   },
+
   /**
    * Generates a random RFC4122 UUID
    * @return {String} String containing the unique hash
@@ -1486,32 +1476,15 @@ $.apply($.fn, {
       options.onActivate.call(this);
     }
 
-    var autoRestartConfig = options.autoRestart;
-
-    _document.document.addEventListener('visibilitychange', function () {
-      if (_document.document.hidden) {
-        if (_this.recognition && _this.recognition.abort && _this.listening) {
-          if (_this.debug) {
-            console.debug('[Eleven] User switched to another tab. Disabling listeners.');
-          }
-
-          _this.options.autoRestart = false;
-          _this.stop();
-          _this.recognition.abort();
-        }
-      } else {
-        if (_this.recognition && !_this.listening) {
-          if (_this.debug) {
-            console.debug('[Eleven] User switched back to this tab. Enabling listeners.');
-          }
-
-          _this.options.autoRestart = autoRestartConfig;
-          _this.start();
-        }
+    try {
+      this.recognition.start();
+    } catch (e) {
+      if (this.options.debug) {
+        console.warn('[Eleven] Error trying to start SpeechRecognition: ' + e.message);
       }
-    });
+    }
 
-    this.restart();
+    this.start();
 
     return this;
   },
@@ -1533,41 +1506,32 @@ $.apply($.fn, {
         _this2.options.onStart.call(_this2);
       }
     };
-  },
-  restart: function restart() {
-    var _this3 = this;
 
-    var timeSinceLastStart = new Date().getTime() - this.lastStartTime;
+    _document.document.addEventListener('visibilitychange', function () {
+      if (_document.document.hidden) {
+        if (_this2.recognition && _this2.recognition.abort && _this2.listening) {
+          if (_this2.debug) {
+            console.debug('[Eleven] User switched to another tab. Disabling listeners.');
+          }
 
-    this.restartCount += 1;
+          _this2.options.autoRestart = false;
+          _this2.stop();
+          _this2.recognition.abort();
+        }
+      } else {
+        if (_this2.recognition && !_this2.listening) {
+          if (_this2.debug) {
+            console.debug('[Eleven] User switched back to this tab. Enabling listeners.');
+          }
 
-    if (this.restartCount % 10 === 0) {
-      if (this.options.debug) {
-        console.debug('[Eleven] Speech Recognition is repeatedly stopping and starting.');
+          _this2.recognition.start();
+        }
       }
-    }
-
-    if (timeSinceLastStart < 1000) {
-      setTimeout(function () {
-        _this3.start();
-      }, 1000 - timeSinceLastStart);
-    } else {
-      this.start();
-    }
+    });
   },
   start: function start() {
     if (!this.listening) {
       this.listening = true;
-
-      this.lastStartTime = new Date().getTime();
-
-      try {
-        this.recognition.start();
-      } catch (e) {
-        if (this.options.debug) {
-          console.warn('[Eleven] Error trying to start SpeechRecognition: ' + e.message);
-        }
-      }
     }
 
     return this;
@@ -1584,10 +1548,6 @@ $.apply($.fn, {
       if ($.isFunction(this.options.onEnd)) {
         this.options.onEnd.call(this);
       }
-
-      if (this.options.autoRestart) {
-        this.restart();
-      }
     }
 
     return this;
@@ -1598,7 +1558,7 @@ exports.default = $;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{"./common/arrays":5,"./common/document":6,"./common/helpers":7,"./common/objects":9,"./common/strings":11,"./common/window":12,"./speech/speechRecognition":31}],14:[function(require,module,exports){
+},{"./common/arrays":4,"./common/document":5,"./common/helpers":6,"./common/objects":8,"./common/strings":10,"./common/window":11,"./speech/speechRecognition":30}],13:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1649,7 +1609,7 @@ _core2.default.browser = function () {
 
 exports.default = _core2.default;
 
-},{"../common/navigator":8,"../common/window":12,"../core":13}],15:[function(require,module,exports){
+},{"../common/navigator":7,"../common/window":11,"../core":12}],14:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1692,7 +1652,7 @@ _core2.default.device = function () {
 
 exports.default = _core2.default;
 
-},{"../common/navigator":8,"../common/window":12,"../core":13}],16:[function(require,module,exports){
+},{"../common/navigator":7,"../common/window":11,"../core":12}],15:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1734,7 +1694,7 @@ _core2.default.supports = {
 
 exports.default = _core2.default;
 
-},{"../common/document":6,"../common/navigator":8,"../common/window":12,"../core":13}],17:[function(require,module,exports){
+},{"../common/document":5,"../common/navigator":7,"../common/window":11,"../core":12}],16:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1771,12 +1731,8 @@ _core2.default.os = function () {
 
 exports.default = _core2.default;
 
-},{"../common/navigator":8,"../core":13}],18:[function(require,module,exports){
+},{"../common/navigator":7,"../core":12}],17:[function(require,module,exports){
 'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
 
 var _core = require('./core');
 
@@ -1810,9 +1766,11 @@ require('./visualizer');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-exports.default = _core2.default;
+(function (root) {
+  return root.Eleven = _core2.default;
+})(window);
 
-},{"./ajax/ajax":1,"./commands/commands":3,"./common/regexp":10,"./core":13,"./detection/browser":14,"./detection/device":15,"./detection/feature":16,"./detection/os":17,"./plugins":19,"./query/query":28,"./speech/speak":29,"./speech/speechParser":30,"./speech/speechVoices":34,"./visualizer":35}],19:[function(require,module,exports){
+},{"./ajax/ajax":1,"./commands/commands":2,"./common/regexp":9,"./core":12,"./detection/browser":13,"./detection/device":14,"./detection/feature":15,"./detection/os":16,"./plugins":18,"./query/query":27,"./speech/speak":28,"./speech/speechParser":29,"./speech/speechVoices":33,"./visualizer":34}],18:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1892,7 +1850,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"./core":13}],20:[function(require,module,exports){
+},{"./core":12}],19:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1999,12 +1957,14 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../core":23}],21:[function(require,module,exports){
+},{"../core":22}],20:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var _core = require('../core');
 
@@ -2013,6 +1973,8 @@ var _core2 = _interopRequireDefault(_core);
 var _helpers = require('../../common/helpers');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 var cssNumber = { 'columns': 1, 'columnCount': 1, 'fillOpacity': 1, 'flexGrow': 1, 'flexShrink': 1, 'fontWeight': 1, 'lineHeight': 1, 'opacity': 1, 'order': 1, 'orphans': 1, 'widows': 1, 'zIndex': 1, 'zoom': 1 };
 var formatValue = function formatValue(prop, value) {
@@ -2091,12 +2053,81 @@ _core2.default.fn.extend({
     }
 
     return this;
+  },
+
+  /**
+   * Determines whether an element has a specific CSS class
+   * @param  {String}  name String containing the CSS class name to search
+   * @return {Boolean}      True/false result
+   */
+  hasClass: function hasClass(name) {
+    return this[0].classList.contains(name);
+  },
+
+  /**
+   * Swaps one CSS className for another
+   * @param  {String} remove String containing the class name to remove
+   * @param  {String} add    String containing the class name to add
+   * @return {Object}        Query collection
+   */
+  swapClass: function swapClass(remove, add) {
+    return this.length ? this.removeClass(remove).addClass(add) : undefined;
+  },
+
+  /**
+   * Toggles a specific class on one or more elements
+   * @param {Mixed} cls The CSS class to toggle or the function to execute
+   */
+  toggleClass: function toggleClass(cls, fn) {
+    return this.length ? this[this.hasClass(cls) ? 'removeClass' : 'addClass'](fn && fn(cls) || cls) : undefined;
   }
+});
+
+/**
+ * Add or remove one or more CSS classes from one or more elements
+ * @param {Mixed} cls The CSS class to add/remove or the function to execute
+ */
+(0, _helpers.each)(['addClass', 'removeClass'], function (method, index) {
+  _core2.default.fn[method] = function (name) {
+    if (this[0] === undefined) {
+      return undefined;
+    }
+
+    var i = 0,
+        k = this.length,
+        type = typeof name === 'undefined' ? 'undefined' : _typeof(name),
+        names = type === 'string' ? name.split(' ') : [],
+        remove = method === 'removeClass';
+
+    for (; i < k; i++) {
+      var element = this[i];
+
+      if (type === 'function') {
+        name.call(element, element.classList, i);
+      } else {
+        if (remove && name === undefined) {
+          element.className = '';
+        } else {
+          if (remove) {
+            var _element$classList;
+
+            (_element$classList = element.classList).remove.apply(_element$classList, _toConsumableArray(names));
+          } else {
+            var _element$classList2;
+
+            (_element$classList2 = element.classList).add.apply(_element$classList2, _toConsumableArray(names));
+          }
+        }
+      }
+    }
+
+    return this;
+  };
 });
 
 exports.default = _core2.default;
 
-},{"../../common/helpers":7,"../core":23}],22:[function(require,module,exports){
+},{"../../common/helpers":6,"../core":22}],21:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2200,7 +2231,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../core":23}],23:[function(require,module,exports){
+},{"../core":22}],22:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2229,14 +2260,9 @@ var _helpers = require('../common/helpers');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var classCache = {};
-var channels = {};
-var fragmentContainer = {};
-var classRE = function classRE(name) {
-  return name in classCache ? classCache[name] : classCache[name] = new RegExp('(^|\\s)' + name + '(\\s|$)');
-};
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-var _channelsUID = -1;
+var fragmentContainer = {};
 
 /**
  * Define a local copy of $
@@ -2369,8 +2395,8 @@ $.query = function (selector, context) {
 _core2.default.apply($, {
   /**
    * Determines if a DOM element is a descendant of another DOM element
-   * @param  {Object}  container The DOM element or Y object that may contain the child element
-   * @param  {Object}  contained The DOM element or Y object that may be a descendant of the parent
+   * @param  {Object}  container The DOM element or Query object that may contain the child element
+   * @param  {Object}  contained The DOM element or Query object that may be a descendant of the parent
    * @return {Boolean}           True if the child element is a descendant of the parent, otherwise false
    */
   contains: function contains(container, contained) {
@@ -2451,10 +2477,10 @@ _core2.default.apply($.fn, {
   each: $.each,
   extend: $.extend,
   /**
-   * Add additional items to an existing Y collection
+   * Add additional items to an existing Query collection
    * @param  {Mixed}  selector The Object or CSS selector
    * @param  {Mixed}  context  The context of the selector
-   * @return {Object}          The modified Y Object
+   * @return {Object}          The modified Query Object
    */
   add: function add(selector, context) {
     return this.chain($.unique($.merge(this, $(selector, context))));
@@ -2481,14 +2507,14 @@ _core2.default.apply($.fn, {
       return undefined;
     }
 
-    var i = 0,
-        k = this.length;
-
     if (this.length === 1) {
       collection = $.siblings(this[0].firstChild);
     } else {
+      var i = 0,
+          k = this.length;
+
       for (; i < k; i++) {
-        collection = collection.concat($.siblings(this[i].firstChild));
+        collection = [].concat(_toConsumableArray(collection), _toConsumableArray($.siblings(this[i].firstChild)));
       }
     }
 
@@ -2500,10 +2526,9 @@ _core2.default.apply($.fn, {
    * @param {Boolean} deep If true, the children of the node will also be cloned
    */
   clone: function clone(deep) {
-    var collection = this.map(function () {
-      return this.cloneNode(!!deep);
+    var collection = this.map(function (item) {
+      return item.cloneNode(!!deep);
     });
-
     return $(collection);
   },
 
@@ -2551,7 +2576,7 @@ _core2.default.apply($.fn, {
 
   /**
    * Remove all child nodes from each parent element in the matched set
-   * @return {Object} The Y object
+   * @return {Object} Query object
    */
   empty: function empty() {
 
@@ -2644,7 +2669,7 @@ _core2.default.apply($.fn, {
   },
 
   /**
-   * Retrieve the DOM element at the specified index the Y object collection
+   * Retrieve the DOM element at the specified index the Query object collection
    * @param  {Integer} index A zero-based index indicating which element to retrieve
    * @return {Mixed}         A matched DOM element. If no index is specified all of the matched DOM elements are returned.
    */
@@ -2653,17 +2678,8 @@ _core2.default.apply($.fn, {
   },
 
   /**
-   * Determines whether an element has a specific CSS class
-   * @param  {String}  name String containing the CSS class name to search
-   * @return {Boolean}      True/false result
-   */
-  hasClass: function hasClass(name) {
-    return classRE(name).test(this[0].className);
-  },
-
-  /**
    * Hides each element in the matched set of elements
-   * @return {Object} The Y object
+   * @return {Object} Query object
    */
   hide: function hide() {
     if (this[0] === undefined) {
@@ -2694,6 +2710,8 @@ _core2.default.apply($.fn, {
    * @return {Mixed}       The contents of an individual element, or sets the contents for each element in the matched set
    */
   html: function html(_html) {
+    var _this = this;
+
     if (!this.length || this[0] === undefined) {
       return undefined;
     }
@@ -2703,7 +2721,7 @@ _core2.default.apply($.fn, {
     }
 
     return this.empty().each(function () {
-      $(this).append(_html);
+      return $(_this).append(_html);
     });
   },
 
@@ -2843,7 +2861,7 @@ _core2.default.apply($.fn, {
 
   /**
    * Shows each element in the matched set of elements
-   * @return {Object} The Y object
+   * @return {Object} Query object
    */
   show: function show() {
     if (!this.length || this[0] === undefined) {
@@ -2893,7 +2911,7 @@ _core2.default.apply($.fn, {
     } else {
       for (; i < k; i++) {
         if (this[i].nodeType == 1) {
-          this[i].parentNode && (collection = collection.concat($.siblings(this[i].parentNode.firstChild, this[i])));
+          this[i].parentNode && (collection = [].concat(_toConsumableArray(collection), [$.siblings(this[i].parentNode.firstChild, this[i])]));
         }
       }
     }
@@ -2907,20 +2925,6 @@ _core2.default.apply($.fn, {
    */
   slice: function slice() {
     return $(_arrays.slice.apply(this, arguments));
-  },
-
-  /**
-   * Swaps one CSS class name for another
-   * @param  {String} remove String containing the class name to remove
-   * @param  {String} add    String containing the class name to add
-   * @return {Object}        The Y collection
-   */
-  swapClass: function swapClass(remove, add) {
-    if (!this.length) {
-      return undefined;
-    }
-
-    return this.removeClass(remove).addClass(add);
   },
 
   /**
@@ -2971,24 +2975,11 @@ _core2.default.apply($.fn, {
   },
 
   /**
-   * Toggles a specific class on one or more elements
-   * @param {Mixed} cls The CSS class to toggle or the function to execute
-   */
-  toggleClass: function toggleClass(cls, fn) {
-    if (!this.length) {
-      return undefined;
-    }
-
-    return this[this.hasClass(cls) ? 'removeClass' : 'addClass'](fn && fn(cls) || cls);
-  },
-
-  /**
    * Gets the value for the first element in the matched set or sets the value for one or more elements
    * @param  {Mixed} value The value to set
    * @return {Mixed}       The property value
    */
   val: function val(value) {
-
     if (this[0] === undefined) {
       return;
     }
@@ -2997,10 +2988,7 @@ _core2.default.apply($.fn, {
       return this[0].value;
     }
 
-    var i = 0,
-        k = this.length;
-
-    for (; i < k; i++) {
+    for (var i = 0, k = this.length; i < k; i++) {
       this[i].value = value;
     }
 
@@ -3012,7 +3000,6 @@ _core2.default.apply($.fn, {
    * @param {Array} node The element(s) to wrap
    */
   wrap: function wrap(node) {
-
     if (this[0] === undefined) {
       return;
     }
@@ -3029,57 +3016,6 @@ _core2.default.apply($.fn, {
 
     return this;
   }
-});
-
-/**
- * Add or remove one or more CSS classes from one or more elements
- * @param {Mixed} cls The CSS class to add/remove or the function to execute
- */
-(0, _helpers.each)(['addClass', 'removeClass'], function (method, index) {
-  $.fn[method] = function (name) {
-    if (this[0] === undefined) {
-      return undefined;
-    }
-
-    var i = 0,
-        k = this.length,
-        self = this,
-        type = typeof name === 'undefined' ? 'undefined' : _typeof(name),
-        names = type === 'string' ? name.split(' ') : [],
-        l = names.length,
-        remove = method === 'removeClass';
-
-    for (; i < k; i++) {
-      if (remove && (name === undefined || name.length === 0)) {
-        this[i].className = '';
-      } else {
-        var element = this[i],
-            classnames = element.className,
-            classes = ('' + classnames).split(' '),
-            j = 0;
-
-        if (type === 'function') {
-          name.call(element, classnames, i);
-        } else {
-          for (; j < l; j++) {
-            var index = (0, _helpers.indexOf)(classes, names[j]);
-
-            if (remove && index !== -1) {
-              element.className = element.className.replace(classRE(names[j]), '');
-            } else {
-              if (index < 0) {
-                element.className = element.className + ' ' + names[j];
-              }
-            }
-          }
-
-          element.className = element.className.trim();
-        }
-      }
-    }
-
-    return this;
-  };
 });
 
 /**
@@ -3209,14 +3145,16 @@ $.each({ parents: 'parentNode', next: 'nextElementSibling', prev: 'previousEleme
 
     if (value === undefined && method.indexOf('outer') < 0) {
       return this.css(method);
-    } else if (method.indexOf('outer') !== -1) {
+    }
+
+    if (method.indexOf('outer') !== -1) {
       padding = dimension === 'width' ? this.css('paddingLeft') + this.css('paddingRight') : this.css('paddingTop') + this.css('paddingBottom');
       margin = value === true ? dimension === 'width' ? this.css('marginLeft') + this.css('marginRight') : this.css('marginTop') + this.css('marginBottom') : dimension === 'width' ? this.css('borderLeftWidth') + this.css('borderRightWidth') : this.css('borderTopWidth') + this.css('borderBottomWidth');
 
       return this.css(dimension) + padding + margin + extra;
-    } else {
-      return this.css(method, value);
     }
+
+    return this.css(method, value);
   };
 });
 
@@ -3245,7 +3183,7 @@ _core2.default.query = $;
 
 exports.default = $;
 
-},{"../common/arrays":5,"../common/document":6,"../common/helpers":7,"../common/objects":9,"../common/strings":11,"../common/window":12,"../core/":13}],24:[function(require,module,exports){
+},{"../common/arrays":4,"../common/document":5,"../common/helpers":6,"../common/objects":8,"../common/strings":10,"../common/window":11,"../core/":12}],23:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3507,7 +3445,7 @@ _core2.default.events = {
 
 exports.default = _core2.default;
 
-},{"../common/helpers":7,"./core":23}],25:[function(require,module,exports){
+},{"../common/helpers":6,"./core":22}],24:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3520,6 +3458,8 @@ var _core = require('../core');
 
 var _core2 = _interopRequireDefault(_core);
 
+var _document = require('../../common/document');
+
 var _helpers = require('../../common/helpers');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -3527,8 +3467,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 _core2.default.fn.extend({
   /**
    * Insert content to the end of each element in the matched set
-   * @param {Mixed}   element DOM element, array of elements, HTML string, or Y object
+   * @param {Mixed}   element DOM element, array of elements, HTML string, or Query object
    * @param {Boolean} insert  Flag for managing the insertion point (internal)
+   * @return {Object}         Query object
    */
   append: function append(element, insert) {
     if (element && element.length != undefined && !element.length) {
@@ -3547,7 +3488,7 @@ _core2.default.fn.extend({
         var obj = _core2.default.regexp.fragments.test(element) ? (0, _core2.default)(element) : undefined;
 
         if (obj == undefined || !obj.length) {
-          obj = _helpers.document.createTextNode(element);
+          obj = _document.document.createTextNode(element);
         }
 
         if (obj.constructor === _core2.default) {
@@ -3571,7 +3512,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../../common/helpers":7,"../core":23}],26:[function(require,module,exports){
+},{"../../common/document":5,"../../common/helpers":6,"../core":22}],25:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3582,13 +3523,16 @@ var _core = require('../core');
 
 var _core2 = _interopRequireDefault(_core);
 
+var _document = require('../../common/document');
+
 var _helpers = require('../../common/helpers');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /**
  * DOM Maniuplation methods .before() .after()
- * @param {Mixed} selector The CSS selector or DOM element to insert before/after
+ * @param  {Mixed}  selector The CSS selector or DOM element to insert before/after
+ * @return {Object}          Query object
  */
 (0, _helpers.each)(['before', 'after'], function (method, index) {
   _core2.default.fn[method] = function (selector) {
@@ -3619,7 +3563,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _core2.default;
 
-},{"../../common/helpers":7,"../core":23}],27:[function(require,module,exports){
+},{"../../common/document":5,"../../common/helpers":6,"../core":22}],26:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3637,7 +3581,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 /**
  * DOM Maniuplation methods .appendTo() .prependTo() .prepend()
  * @param  {Mixed}  selector The CSS selector or DOM element to append/prepend
- * @return {Object}          The passed selector
+ * @return {Object}          Selector Query object
  */
 (0, _helpers.each)(['appendTo', 'prependTo', 'prepend'], function (method, index) {
   _core2.default.fn[method] = function (selector) {
@@ -3657,7 +3601,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _core2.default;
 
-},{"../../common/helpers":7,"../core":23}],28:[function(require,module,exports){
+},{"../../common/helpers":6,"../core":22}],27:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3686,7 +3630,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _core2.default;
 
-},{"./attributes/attr":20,"./attributes/css":21,"./attributes/data":22,"./core":23,"./events":24,"./manipulation/append":25,"./manipulation/beforeAfter":26,"./manipulation/prepend":27}],29:[function(require,module,exports){
+},{"./attributes/attr":19,"./attributes/css":20,"./attributes/data":21,"./core":22,"./events":23,"./manipulation/append":24,"./manipulation/beforeAfter":25,"./manipulation/prepend":26}],28:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3780,7 +3724,7 @@ _core2.default.speak = function (text) {
 
 exports.default = _core2.default;
 
-},{"../core":13,"./speechSynthesis":32}],30:[function(require,module,exports){
+},{"../core":12,"./speechSynthesis":31}],29:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3922,7 +3866,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../core":13}],31:[function(require,module,exports){
+},{"../core":12}],30:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3937,7 +3881,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _window2.default.SpeechRecognition || _window2.default.webkitSpeechRecognition || _window2.default.mozSpeechRecognition || _window2.default.msSpeechRecognition || _window2.default.oSpeechRecognition;
 
-},{"../common/window":12}],32:[function(require,module,exports){
+},{"../common/window":11}],31:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3952,7 +3896,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _window2.default.speechSynthesis;
 
-},{"../common/window":12}],33:[function(require,module,exports){
+},{"../common/window":11}],32:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -4029,7 +3973,7 @@ var configs = {
 
 exports.default = configs;
 
-},{}],34:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -4085,7 +4029,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../core":13,"./speechSynthesis":32,"./speechSynthesisOverrides":33}],35:[function(require,module,exports){
+},{"../core":12,"./speechSynthesis":31,"./speechSynthesisOverrides":32}],34:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -4321,5 +4265,5 @@ _core2.default.apply(Visualizer.prototype, {
 
 exports.default = _core2.default;
 
-},{"./core":13}]},{},[2])
+},{"./core":12}]},{},[17])
 //# sourceMappingURL=eleven.js.map
