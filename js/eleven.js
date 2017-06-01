@@ -835,7 +835,6 @@ $.fn = $.prototype = {
       debug: false,
       language: 'en-US',
       commands: [],
-      autoRestart: true,
       continuous: true,
       interimResults: true,
       maxAlternatives: 1,
@@ -1410,16 +1409,12 @@ $.apply($.fn, {
     var error = event.error;
 
 
-    if (error === 'not-allowed' || error === 'network') {
-      this.options.autoRestart = false;
-    }
-
     if (error === 'no-speech') {
       this.start();
-    }
-
-    if (this.options.debug) {
-      console.warn('[Eleven] SpeechRecognition event error: ' + error);
+    } else {
+      if (this.options.debug) {
+        console.warn('[Eleven] SpeechRecognition event error: ' + error);
+      }
     }
   },
 
@@ -1518,7 +1513,6 @@ $.apply($.fn, {
             console.debug('[Eleven] User switched to another tab. Disabling listeners.');
           }
 
-          _this2.options.autoRestart = false;
           _this2.stop();
           _this2.recognition.abort();
         }
