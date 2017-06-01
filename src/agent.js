@@ -1,5 +1,6 @@
 import $ from './core';
 import SpeechRecognition from './speech/speechRecognition';
+import { document } from './common/document';
 
 $.fn.extend({
   /**
