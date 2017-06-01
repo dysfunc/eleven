@@ -5,6 +5,178 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _core = require('./core');
+
+var _core2 = _interopRequireDefault(_core);
+
+var _speechRecognition = require('./speech/speechRecognition');
+
+var _speechRecognition2 = _interopRequireDefault(_speechRecognition);
+
+var _document = require('./common/document');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_core2.default.fn.extend({
+  /**
+   * Iterates over a collection of objects
+   * @param {Mixed}    collection Collection to iterate over
+   * @param {Function} fn         Callback function
+   */
+  error: function error(event) {
+    var error = event.error;
+
+
+    if (error === 'no-speech' || error === 'aborted') {
+      this.start();
+    } else {
+      if (this.options.debug) {
+        console.warn('[Eleven] SpeechRecognition event error: ' + error);
+      }
+    }
+  },
+
+  /**
+   * Initializes the SpeechRecognition API, adds commands and binds event
+   * listeners. To avoid overlap with other tabs listening we used the
+   * `pagevisibility` API to abort the inactive tab instance.
+   * @return {Object} Eleven instance
+   */
+  enable: function enable() {
+    var _this = this;
+
+    var options = this.options;
+    // reference to SpeechRecognition instance
+    this.recognition = new _speechRecognition2.default();
+    // set language
+    if (options.lang) {
+      this.recognition.lang = options.lang;
+    }
+    // set max alternative results
+    this.recognition.maxAlternatives = options.maxAlternatives;
+    // set continuous listening
+    this.recognition.continuous = options.continuous;
+    // return results immediately so we can emulate audio waves
+    this.recognition.interimResults = options.interimResults;
+    // if true, this will pass all speech back to the onCommand callback
+    if (options.useEngine) {
+      this.addCommands({
+        '*msg': options.onCommand
+      });
+    }
+    // add commands
+    this.addCommands('eleven', {
+      'stop': function stop() {
+        if (_this.listening) {
+          _this.stop();
+
+          setTimeout(function () {
+            _core2.default.resetView(function () {
+              _document.document.body.classList.remove('interactive');
+            });
+          }, 500);
+        }
+
+        if (_core2.default.isFunction(options.onStop)) {
+          _this.context = null;
+          options.onStop.call(_this);
+        }
+      }
+    });
+    // load user defined commands
+    if (options.commands) {
+      this.addCommands('eleven', options.commands);
+    }
+    // check if wake commands exist. if so, create regexp to strip from speech matches
+    if (options.wakeCommands.length) {
+      _core2.default.regexp.wakeCommands = new RegExp('^(' + options.wakeCommands.join('|') + ')\\s+', 'i');
+    }
+    // setup all SpeechRecognition event listeners
+    this.listen();
+    // fire activation event
+    if (_core2.default.isFunction(options.onActivate)) {
+      options.onActivate.call(this);
+    }
+
+    try {
+      this.recognition.start();
+    } catch (e) {
+      if (this.options.debug) {
+        console.warn('[Eleven] Error trying to start SpeechRecognition: ' + e.message);
+      }
+    }
+
+    this.start();
+
+    return this;
+  },
+
+  /**
+   * Binds callback functions to `onstart`, `onerror`, `onresult`,
+   * `onend` and `onaudioend` of SpeechRecognition API.
+   */
+  listen: function listen() {
+    var _this2 = this;
+
+    this.recognition.onend = _core2.default.proxy(this.stop, this);
+    this.recognition.onerror = _core2.default.proxy(this.error, this);
+    this.recognition.onresult = _core2.default.proxy(this.result, this);
+    this.recognition.onstart = _core2.default.proxy(this.start, this);
+    this.recognition.onaudioend = _core2.default.proxy(this.stop, this);
+    this.recognition.onaudiostart = function () {
+      if (_core2.default.isFunction(_this2.options.onStart)) {
+        _this2.options.onStart.call(_this2);
+      }
+    };
+
+    _document.document.addEventListener('visibilitychange', function () {
+      if (_document.document.hidden) {
+        if (_this2.recognition && _this2.recognition.abort && _this2.listening) {
+          if (_this2.debug) {
+            console.debug('[Eleven] User switched to another tab. Disabling listeners.');
+          }
+
+          _this2.stop();
+          _this2.recognition.abort();
+        }
+      } else {
+        _this2.recognition.start();
+        _this2.stop();
+        _this2.start();
+      }
+    });
+  },
+  start: function start() {
+    if (!this.listening) {
+      this.listening = true;
+    }
+
+    return this;
+  },
+  stop: function stop() {
+    if (this.visualizer) {
+      this.running = false;
+      this.visualizer.stop();
+      this.container.classList.remove('ready');
+    }
+
+    if (_core2.default.isFunction(this.options.onEnd)) {
+      this.options.onEnd.call(this);
+    }
+
+    return this;
+  }
+});
+
+exports.default = _core2.default;
+
+},{"./common/document":6,"./core":13,"./speech/speechRecognition":31}],2:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var _core = require('../core');
@@ -329,7 +501,7 @@ _core2.default.extend({
 
 exports.default = _core2.default;
 
-},{"../common/document":5,"../common/window":11,"../core":12}],2:[function(require,module,exports){
+},{"../common/document":6,"../common/window":12,"../core":13}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -471,7 +643,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../core":12,"./commandsParser":3}],3:[function(require,module,exports){
+},{"../core":13,"./commandsParser":4}],4:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -494,7 +666,7 @@ var parser = function parser(command) {
 
 exports.default = parser;
 
-},{"../core":12}],4:[function(require,module,exports){
+},{"../core":13}],5:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -530,7 +702,7 @@ exports.reverse = reverse;
 exports.shift = shift;
 exports.unshift = unshift;
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -552,7 +724,7 @@ exports.document = document;
 exports.documentElement = documentElement;
 exports.defaultView = defaultView;
 
-},{"./window":11}],6:[function(require,module,exports){
+},{"./window":12}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -666,7 +838,7 @@ exports.getComputedStyle = getComputedStyle;
 exports.indexOf = indexOf;
 exports.noop = noop;
 
-},{"../common/document":5,"../common/window":11}],7:[function(require,module,exports){
+},{"../common/document":6,"../common/window":12}],8:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -690,7 +862,7 @@ exports.navigator = navigator;
 exports.userAgent = userAgent;
 exports.vendor = vendor;
 
-},{"./window":11}],8:[function(require,module,exports){
+},{"./window":12}],9:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -702,7 +874,7 @@ var _ref = {},
 exports.hasOwnProperty = hasOwnProperty;
 exports.toString = toString;
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -763,7 +935,7 @@ _core2.default.regexp = {
 
 exports.default = _core2.default;
 
-},{"../core":12}],10:[function(require,module,exports){
+},{"../core":13}],11:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -772,7 +944,7 @@ Object.defineProperty(exports, "__esModule", {
 var trim = String.prototype.trim;
 exports.trim = trim;
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -783,7 +955,7 @@ exports.default = global;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -796,10 +968,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 var _window = require('./common/window');
 
 var _window2 = _interopRequireDefault(_window);
-
-var _speechRecognition = require('./speech/speechRecognition');
-
-var _speechRecognition2 = _interopRequireDefault(_speechRecognition);
 
 var _document = require('./common/document');
 
@@ -837,7 +1005,7 @@ $.fn = $.prototype = {
       commands: [],
       continuous: true,
       interimResults: true,
-      maxAlternatives: 3,
+      maxAlternatives: 1,
       requiresWakeWord: true,
       speechAgent: 'Google UK English Female',
       useEngine: false,
@@ -1398,160 +1566,13 @@ $.apply($, {
 
 $.fn.init.prototype = $.fn;
 
-$.apply($.fn, {
-  extend: $.extend,
-  /**
-   * Iterates over a collection of objects
-   * @param {Mixed}    collection Collection to iterate over
-   * @param {Function} fn         Callback function
-   */
-  error: function error(event) {
-    var error = event.error;
-
-
-    if (error === 'no-speech' || error === 'aborted') {
-      this.start();
-    } else {
-      if (this.options.debug) {
-        console.warn('[Eleven] SpeechRecognition event error: ' + error);
-      }
-    }
-  },
-
-  /**
-   * Initializes the SpeechRecognition API, adds commands and binds event
-   * listeners. To avoid overlap with other tabs listening we used the
-   * `pagevisibility` API to abort the inactive tab instance.
-   * @return {Object} Eleven instance
-   */
-  enable: function enable() {
-    var _this = this;
-
-    var options = this.options;
-    // reference to SpeechRecognition instance
-    this.recognition = new _speechRecognition2.default();
-    // set language
-    if (options.lang) {
-      this.recognition.lang = options.lang;
-    }
-    // set max alternative results
-    this.recognition.maxAlternatives = options.maxAlternatives;
-    // set continuous listening
-    this.recognition.continuous = options.continuous;
-    // return results immediately so we can emulate audio waves
-    this.recognition.interimResults = options.interimResults;
-    // if true, this will pass all speech back to the onCommand callback
-    if (options.useEngine) {
-      this.addCommands({
-        '*msg': options.onCommand
-      });
-    }
-    // add commands
-    this.addCommands('eleven', {
-      'stop': function stop() {
-        if (_this.listening) {
-          _this.stop();
-
-          setTimeout(function () {
-            $.resetView(function () {
-              _document.document.body.classList.remove('interactive');
-            });
-          }, 500);
-        }
-
-        if ($.isFunction(options.onStop)) {
-          _this.context = null;
-          options.onStop.call(_this);
-        }
-      }
-    });
-
-    // load user defined commands
-    if (options.commands) {
-      this.addCommands('eleven', options.commands);
-    }
-    // setup all SpeechRecognition event listeners
-    this.listen();
-    // fire activation event
-    if ($.isFunction(options.onActivate)) {
-      options.onActivate.call(this);
-    }
-
-    try {
-      this.recognition.start();
-    } catch (e) {
-      if (this.options.debug) {
-        console.warn('[Eleven] Error trying to start SpeechRecognition: ' + e.message);
-      }
-    }
-
-    this.start();
-
-    return this;
-  },
-
-  /**
-   * Binds callback functions to `onstart`, `onerror`, `onresult`,
-   * `onend` and `onaudioend` of SpeechRecognition API.
-   */
-  listen: function listen() {
-    var _this2 = this;
-
-    this.recognition.onend = $.proxy(this.stop, this);
-    this.recognition.onerror = $.proxy(this.error, this);
-    this.recognition.onresult = $.proxy(this.result, this);
-    this.recognition.onstart = $.proxy(this.start, this);
-    this.recognition.onaudioend = $.proxy(this.stop, this);
-    this.recognition.onaudiostart = function () {
-      if ($.isFunction(_this2.options.onStart)) {
-        _this2.options.onStart.call(_this2);
-      }
-    };
-
-    _document.document.addEventListener('visibilitychange', function () {
-      if (_document.document.hidden) {
-        if (_this2.recognition && _this2.recognition.abort && _this2.listening) {
-          if (_this2.debug) {
-            console.debug('[Eleven] User switched to another tab. Disabling listeners.');
-          }
-
-          _this2.stop();
-          _this2.recognition.abort();
-        }
-      } else {
-        _this2.recognition.start();
-        _this2.stop();
-        _this2.start();
-      }
-    });
-  },
-  start: function start() {
-    if (!this.listening) {
-      this.listening = true;
-    }
-
-    return this;
-  },
-  stop: function stop() {
-    if (this.visualizer) {
-      this.running = false;
-      this.visualizer.stop();
-      this.container.classList.remove('ready');
-    }
-
-    if ($.isFunction(this.options.onEnd)) {
-      this.options.onEnd.call(this);
-    }
-
-    return this;
-  }
-});
+$.fn.extend = $.extend;
 
 exports.default = $;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{"./common/arrays":4,"./common/document":5,"./common/helpers":6,"./common/objects":8,"./common/strings":10,"./common/window":11,"./speech/speechRecognition":30}],13:[function(require,module,exports){
+},{"./common/arrays":5,"./common/document":6,"./common/helpers":7,"./common/objects":9,"./common/strings":11,"./common/window":12}],14:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1602,7 +1623,7 @@ _core2.default.browser = function () {
 
 exports.default = _core2.default;
 
-},{"../common/navigator":7,"../common/window":11,"../core":12}],14:[function(require,module,exports){
+},{"../common/navigator":8,"../common/window":12,"../core":13}],15:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1645,7 +1666,7 @@ _core2.default.device = function () {
 
 exports.default = _core2.default;
 
-},{"../common/navigator":7,"../common/window":11,"../core":12}],15:[function(require,module,exports){
+},{"../common/navigator":8,"../common/window":12,"../core":13}],16:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1687,7 +1708,7 @@ _core2.default.supports = {
 
 exports.default = _core2.default;
 
-},{"../common/document":5,"../common/navigator":7,"../common/window":11,"../core":12}],16:[function(require,module,exports){
+},{"../common/document":6,"../common/navigator":8,"../common/window":12,"../core":13}],17:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1724,12 +1745,14 @@ _core2.default.os = function () {
 
 exports.default = _core2.default;
 
-},{"../common/navigator":7,"../core":12}],17:[function(require,module,exports){
+},{"../common/navigator":8,"../core":13}],18:[function(require,module,exports){
 'use strict';
 
 var _core = require('./core');
 
 var _core2 = _interopRequireDefault(_core);
+
+require('./agent');
 
 require('./ajax/ajax');
 
@@ -1763,7 +1786,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   return root.Eleven = _core2.default;
 })(window);
 
-},{"./ajax/ajax":1,"./commands/commands":2,"./common/regexp":9,"./core":12,"./detection/browser":13,"./detection/device":14,"./detection/feature":15,"./detection/os":16,"./plugins":18,"./query/query":27,"./speech/speak":28,"./speech/speechParser":29,"./speech/speechVoices":33,"./visualizer":34}],18:[function(require,module,exports){
+},{"./agent":1,"./ajax/ajax":2,"./commands/commands":3,"./common/regexp":10,"./core":13,"./detection/browser":14,"./detection/device":15,"./detection/feature":16,"./detection/os":17,"./plugins":19,"./query/query":28,"./speech/speak":29,"./speech/speechParser":30,"./speech/speechVoices":34,"./visualizer":35}],19:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1843,7 +1866,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"./core":12}],19:[function(require,module,exports){
+},{"./core":13}],20:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1950,7 +1973,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../core":22}],20:[function(require,module,exports){
+},{"../core":23}],21:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2120,7 +2143,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../../common/helpers":6,"../core":22}],21:[function(require,module,exports){
+},{"../../common/helpers":7,"../core":23}],22:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2224,7 +2247,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../core":22}],22:[function(require,module,exports){
+},{"../core":23}],23:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3176,7 +3199,7 @@ _core2.default.query = $;
 
 exports.default = $;
 
-},{"../common/arrays":4,"../common/document":5,"../common/helpers":6,"../common/objects":8,"../common/strings":10,"../common/window":11,"../core/":12}],23:[function(require,module,exports){
+},{"../common/arrays":5,"../common/document":6,"../common/helpers":7,"../common/objects":9,"../common/strings":11,"../common/window":12,"../core/":13}],24:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3438,7 +3461,7 @@ _core2.default.events = {
 
 exports.default = _core2.default;
 
-},{"../common/helpers":6,"./core":22}],24:[function(require,module,exports){
+},{"../common/helpers":7,"./core":23}],25:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3505,7 +3528,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../../common/document":5,"../../common/helpers":6,"../core":22}],25:[function(require,module,exports){
+},{"../../common/document":6,"../../common/helpers":7,"../core":23}],26:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3556,7 +3579,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _core2.default;
 
-},{"../../common/document":5,"../../common/helpers":6,"../core":22}],26:[function(require,module,exports){
+},{"../../common/document":6,"../../common/helpers":7,"../core":23}],27:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3594,7 +3617,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _core2.default;
 
-},{"../../common/helpers":6,"../core":22}],27:[function(require,module,exports){
+},{"../../common/helpers":7,"../core":23}],28:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3623,7 +3646,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _core2.default;
 
-},{"./attributes/attr":19,"./attributes/css":20,"./attributes/data":21,"./core":22,"./events":23,"./manipulation/append":24,"./manipulation/beforeAfter":25,"./manipulation/prepend":26}],28:[function(require,module,exports){
+},{"./attributes/attr":20,"./attributes/css":21,"./attributes/data":22,"./core":23,"./events":24,"./manipulation/append":25,"./manipulation/beforeAfter":26,"./manipulation/prepend":27}],29:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3717,7 +3740,7 @@ _core2.default.speak = function (text) {
 
 exports.default = _core2.default;
 
-},{"../core":12,"./speechSynthesis":31}],29:[function(require,module,exports){
+},{"../core":13,"./speechSynthesis":32}],30:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3751,7 +3774,7 @@ _core2.default.fn.extend({
     }, 750);
 
     _core2.default.each(results, function (result) {
-      var speech = result.trim();
+      var speech = result.replace(_core2.default.regexp.wakeCommands, '').trim();
 
       if (_this.options.debug) {
         console.debug('[Eleven] Recognized speech: ' + speech);
@@ -3859,7 +3882,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../core":12}],30:[function(require,module,exports){
+},{"../core":13}],31:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3874,7 +3897,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _window2.default.SpeechRecognition || _window2.default.webkitSpeechRecognition || _window2.default.mozSpeechRecognition || _window2.default.msSpeechRecognition || _window2.default.oSpeechRecognition;
 
-},{"../common/window":11}],31:[function(require,module,exports){
+},{"../common/window":12}],32:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3889,7 +3912,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _window2.default.speechSynthesis;
 
-},{"../common/window":11}],32:[function(require,module,exports){
+},{"../common/window":12}],33:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3966,7 +3989,7 @@ var configs = {
 
 exports.default = configs;
 
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -4022,7 +4045,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../core":12,"./speechSynthesis":31,"./speechSynthesisOverrides":32}],34:[function(require,module,exports){
+},{"../core":13,"./speechSynthesis":32,"./speechSynthesisOverrides":33}],35:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -4258,5 +4281,5 @@ _core2.default.apply(Visualizer.prototype, {
 
 exports.default = _core2.default;
 
-},{"./core":12}]},{},[17])
+},{"./core":13}]},{},[18])
 //# sourceMappingURL=eleven.js.map
