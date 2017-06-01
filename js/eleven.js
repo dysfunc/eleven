@@ -1777,7 +1777,7 @@ require('./visualizer');
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 (function (root) {
-  return root.Eleven = _core2.default;
+  return (root.Eleven = _core2.default) && ('$' in window ? window.Q = _core2.default.query : window.$ = _core2.default.query);
 })(window);
 
 },{"./agent":1,"./ajax/ajax":2,"./commands/commands":3,"./common/regexp":10,"./core":13,"./detection/browser":14,"./detection/device":15,"./detection/feature":16,"./detection/os":17,"./plugins":19,"./query/query":28,"./speech/speak":29,"./speech/speechParser":30,"./speech/speechVoices":34,"./visualizer":35}],19:[function(require,module,exports){
