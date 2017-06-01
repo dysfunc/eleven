@@ -21,7 +21,7 @@ $.fn = $.prototype = {
   init(selector, options){
     const defaultConfig = {
       debug: false,
-      language: 'en-US',
+      lang: 'en-US',
       commands: [],
       continuous: true,
       interimResults: true,

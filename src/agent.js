@@ -30,9 +30,7 @@ $.fn.extend({
     // reference to SpeechRecognition instance
     this.recognition = new SpeechRecognition();
     // set language
-    if(options.lang){
-      this.recognition.lang = options.lang;
-    }
+    this.recognition.lang = options.language;
     // set max alternative results
     this.recognition.maxAlternatives = options.maxAlternatives;
     // set continuous listening
