@@ -4,7 +4,7 @@ import { document } from './common/document';
 import { each, indexOf } from './common/helpers';
 import { toString } from './common/objects';
 import { trim } from './common/strings';
-import { slice } from './common/arrays';
+import { concat, slice } from './common/arrays';
 
 var initialized = null;
 
@@ -113,9 +113,7 @@ $.apply($, {
    * @param  {String} str The string to modify
    * @return {String}     The modified string
    */
-  camelCase: function(str){
-    return str.trim().replace($.regexp.camel, (match, chr) => chr ? chr.toUpperCase() : '');
-  },
+  camelCase: (str) => str.trim().replace($.regexp.camel, (match, chr) => chr ? chr.toUpperCase() : ''),
   /**
    * Iterates over an Array or Object executing a callback function on each item
    * @param  {Mixed}    collection Array or Object to iterate over
@@ -147,9 +145,7 @@ $.apply($, {
    * @param  {String} str The string to convert
    * @return {String}     The dasherized version of the string
    */
-  dasherize: function(str){
-    return str.trim().replace(/([A-Z])/g, '-$1').replace(/[-_\s]+/g, '-').toLowerCase();
-  },
+  dasherize: (str) => str.trim().replace(/([A-Z])/g, '-$1').replace(/[-_\s]+/g, '-').toLowerCase(),
   /**
    * Sets a timer to delay the execution of a function
    * @param  {Function} fn        The function to execute
@@ -157,7 +153,7 @@ $.apply($, {
    * @param  {Integer}  wait      The delay before executing the function (Defaults to 100)
    * @param  {Boolean}  immediate Execute the function immediately -> overrides delay
    */
-  debounce: function(fn, context, delay, immediate){
+  debounce(fn, context, delay, immediate){
     var timer = null,
         args = arguments;
 
@@ -251,25 +247,21 @@ $.apply($, {
    * @param  {Array} array The multidimensional array to flatten
    * @return {Array}       The flattened array
    */
-  flatten: function(array){
-    return concat.apply([], array);
-  },
+  flatten: (array) => [...array],
   /**
    * Returns a formatted string template from the values of the passed argument
    * @param  {String} template The string template containing the place-holders
    * @param  {Mixed}  values   The argument containing the indexed values or property keys
    * @return {String}          The formatted string
    */
-  format: function(template, values){
+  format(template, values){
     if(!values || !($.isObject(values) || $.isArray(values))){
       return undefined;
     }
 
-    var match = $.isObject(values) ? 'keys' : 'indexed';
+    const match = $.isObject(values) ? 'keys' : 'indexed';
 
-    return template.replace($.regexp.templates[match], function(match, key){
-      return values[key] || '';
-    });
+    return template.replace($.regexp.templates[match], (match, key) => values[key] || '');
   },
   /**
    * Determines whether the array contains a specific value
@@ -278,17 +270,15 @@ $.apply($, {
    * @param  {Boolean} position Set true to return the index of the matched item or -1
    * @return {Mixed}            The value of true or false, or the index at which the value can be found
    */
-  inArray(item, array, position){
-    return array.includes(item, position);
-  },
+  inArray: (item, array, position) => array.includes(item, position),
   /**
    * Determines if the passed obj is an array or array-like object (NodeList, Arguments, etc...)
    * @param  {Object}  obj Object to type check
    * @return {Boolean}     The true/false result
    */
-  isArrayLike: function(obj){
-    var type = $.type(obj),
-        length = obj.length;
+  isArrayLike(obj){
+    const type = $.type(obj);
+    const length = obj.length;
 
     if(type === 'function' || obj === window || type === 'string'){
       return false;
@@ -305,8 +295,8 @@ $.apply($, {
    * @param  {Object}  obj Object to check the contents of
    * @return {Boolean}     The true/false result
    */
-  isEmptyObject: function(obj){
-    for(var key in obj){
+  isEmptyObject(obj){
+    for(const key in obj){
       return false;
     }
 
@@ -317,59 +307,50 @@ $.apply($, {
    * @param  {Object}  obj Object to type check
    * @return {Boolean}     The true/false result
    */
-  isNumber(obj){
-    return !isNaN(parseFloat(obj)) && isFinite(obj);
-  },
+  isNumber: (obj) => !isNaN(parseFloat(obj)) && isFinite(obj),
   /**
    * Determines whether the passed object is numeric
    * @param  {Object}  obj Object to type check
    * @return {Boolean}     The true/false result
    */
-  isNumeric(obj){
-    return !$.isArray(obj) && obj - parseFloat(obj) >= 0;
-  },
+  isNumeric: (obj) => !$.isArray(obj) && obj - parseFloat(obj) >= 0,
   /**
    * Determine whether an Object is a plain object or not (created using "{}" or "new Object")
    * @param  {Object}  obj Object to type check
    * @return {Boolean}     The true/false result
    */
-  isPlainObject(obj){
-    return $.isObject(obj) && !$.isWindow(obj) && !obj.nodeType && Object.getPrototypeOf(obj) === Object.prototype;
-  },
+  isPlainObject: (obj) => $.isObject(obj) && !$.isWindow(obj) && !obj.nodeType && Object.getPrototypeOf(obj) === Object.prototype,
   /**
    * Determines whether the passed object is the Window object
    * @param  {Object}  obj Object to type check
    * @return {Boolean}     The true/false result
    */
-  isWindow(obj){
-    return obj !== null && obj === global;
-  },
+  isWindow: (obj) => obj !== null && obj === global,
   /**
    * Returns a new array from the results of the mapping
    * @param  {Array}    elements The array to map
    * @param  {Function} fn       The function to execute on each item
    * @return {Array}             The new array
    */
-  map: function(elements, fn){
-    var k = elements.length,
-        key,
-        value,
-        values = [],
-        i = 0;
+  map(elements, fn){
+    const k = elements.length;
+    const values = [];
 
     if(elements.length){
-      for(; i < k; i++){
-        value = fn(elements[i], i);
+      var i = 0;
 
-        if(value != null){
+      for(; i < k; i++){
+        const value = fn(elements[i], i);
+
+        if(value !== null){
           values.push(value);
         }
       }
     }else{
-      for(key in elements){
-        value = fn(elements[key], key);
+      for(const key in elements){
+        const value = fn(elements[key], key);
 
-        if(value != null){
+        if(value !== null){
           values.push(value);
         }
       }
@@ -383,10 +364,10 @@ $.apply($, {
    * @param  {Array} second  The array that will be merged into the first - unaltered
    * @return {Array}         The modified array
    */
-  merge: function(first, second){
-    var total = second.length,
-        length = first.length,
-        i = 0;
+  merge(first, second){
+    const total = second.length;
+    var length = first.length;
+    var i = 0;
 
     if(typeof(total) === 'number'){
       for(; i < total; i++){
@@ -508,7 +489,7 @@ $.apply($, {
    * @param  {Integer} end   Zero-based index to end the array at (optional)
    * @return {Array}         The new array
    */
-  toArray: function(item, start, end){
+  toArray(item, start, end){
     const array = [];
 
     if(!item || !item.length){
@@ -530,15 +511,13 @@ $.apply($, {
    * @param  {Object} obj Object to check the class property of
    * @return {String}     Only the class property of the Object
    */
-  type(obj){
-    return obj === null ? String(obj) : class2type[toString.call(obj)];
-  },
+  type: (obj) => obj === null ? String(obj) : class2type[toString.call(obj)],
   /**
    * Filters an array and by removing duplicates items
    * @param  {Array} collection The array to filter
    * @return {Array}            The modified array
    */
-  unique: function(collection){
+  unique(collection){
     for(var i = 0; i < collection.length; i++){
       if(indexOf(collection, collection[i]) !== i){
         collection.splice(i, 1);
