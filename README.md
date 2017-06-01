@@ -16,10 +16,11 @@ Eleven was started as an exploratory hacking project after some development in t
 This uses experimental APIs which means you will need to use the latest version of Chrome. When viewing the demo you need to enable the microphone and speak clearly when issuing voice commands.
 
 ## Features
-* **Pluggable** Provides an easy interface to quickly build plugins for any Eleven agent.
+* **Pluggable** Easy interface to quickly build plugins for any Eleven agent.
 * **Rules** Supports explicit rule-based command matching and AI engines (api.ai, wit.ai, ... etc).
 * **Flexible** APIs are highly configurable, extensible and customizable.
 * **Speech APIs** Powered by [SpeechRecognition](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition) and [SpeechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis) interface of the Web Speech APIs.
+* **Query Language** A light-weight jQuery-like solution but with a smaller footprint, faster performance, and designed for modern browsers. Provides a larger jQuery-compatible API which supports the majority of existing plugins out-of-the-box. If you know how to use jQuery then you already know how to use this query library. 
 
 ## TODO
 - [ ] Configure Karma, Mocha, Chai and Sinon
