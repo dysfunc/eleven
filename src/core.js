@@ -626,32 +626,16 @@ $.apply($.fn, {
       options.onActivate.call(this);
     }
 
-    const autoRestartConfig = options.autoRestart;
-
-    document.addEventListener('visibilitychange', () => {
-      if(document.hidden){
-        if(this.recognition && this.recognition.abort && this.listening){
-          if(this.debug){
-            console.debug('[Eleven] User switched to another tab. Disabling listeners.');
-          }
-
-          this.options.autoRestart = false;
-          this.stop();
-          this.recognition.abort();
-        }
-      }else{
-        if(this.recognition && !this.listening){
-          if(this.debug){
-            console.debug('[Eleven] User switched back to this tab. Enabling listeners.');
-          }
-
-          this.options.autoRestart = autoRestartConfig;
-          this.start();
-        }
+    try {
+      this.recognition.start();
+    }
+    catch(e){
+      if(this.options.debug){
+        console.warn(`[Eleven] Error trying to start SpeechRecognition: ${e.message}`);
       }
-    });
+    }
 
-    this.restart();
+    this.start();
 
     return this;
   },
@@ -670,42 +654,34 @@ $.apply($.fn, {
         this.options.onStart.call(this);
       }
     };
-  },
 
-  restart(){
-    const timeSinceLastStart = new Date().getTime() - this.lastStartTime;
+    document.addEventListener('visibilitychange', () => {
+      if(document.hidden){
+        if(this.recognition && this.recognition.abort && this.listening){
+          if(this.debug){
+            console.debug('[Eleven] User switched to another tab. Disabling listeners.');
+          }
 
-    this.restartCount += 1;
+          this.options.autoRestart = false;
+          this.stop();
+          this.recognition.abort();
+        }
+      }else{
+        if(this.recognition && !this.listening){
+          if(this.debug){
+            console.debug('[Eleven] User switched back to this tab. Enabling listeners.');
+          }
 
-    if(this.restartCount % 10 === 0){
-      if(this.options.debug){
-        console.debug('[Eleven] Speech Recognition is repeatedly stopping and starting.');
+          this.recognition.start();
+        }
       }
-    }
+    });
 
-    if(timeSinceLastStart < 1000){
-      setTimeout(() => {
-        this.start();
-      }, 1000 - timeSinceLastStart);
-    }else{
-      this.start();
-    }
   },
 
   start(){
     if(!this.listening){
       this.listening = true;
-
-      this.lastStartTime = new Date().getTime();
-
-      try {
-        this.recognition.start();
-      }
-      catch(e){
-        if(this.options.debug){
-          console.warn(`[Eleven] Error trying to start SpeechRecognition: ${e.message}`);
-        }
-      }
     }
 
     return this;
@@ -722,10 +698,6 @@ $.apply($.fn, {
 
       if($.isFunction(this.options.onEnd)){
         this.options.onEnd.call(this);
-      }
-
-      if(this.options.autoRestart){
-        this.restart();
       }
     }
 
