@@ -64,10 +64,13 @@ $.fn.extend({
         }
       }
     });
-
     // load user defined commands
     if(options.commands){
       this.addCommands('eleven', options.commands);
+    }
+    // check if wake commands exist. if so, create regexp to strip from speech matches
+    if(options.wakeCommands.length){
+      $.regexp.wakeCommands = new RegExp(`^(${options.wakeCommands.join('|')})\\s+`, 'i');
     }
     // setup all SpeechRecognition event listeners
     this.listen();

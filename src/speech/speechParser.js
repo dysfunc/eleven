@@ -19,8 +19,7 @@ $.fn.extend({
     }, 750);
 
     $.each(results, (result) => {
-      // create a regexp from specified wake words to strip
-      const speech = result.replace('11', '').trim();
+      const speech = result.replace($.regexp.wakeCommands, '').trim();
 
       if(this.options.debug){
         console.debug(`[Eleven] Recognized speech: ${speech}`);
