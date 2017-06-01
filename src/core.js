@@ -58,8 +58,6 @@ $.fn = $.prototype = {
     this.plugins = {};
     // create audio sound
     this.wakeSound = new Audio(this.options.wakeSound);
-    // used to manage eventing
-    this.listening = false;
     // create interactive audio wave orb (aka Eleven)
     this.visualize();
     // prevent initialize until called
