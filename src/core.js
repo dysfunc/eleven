@@ -21,7 +21,7 @@ $.fn = $.prototype = {
   init(selector, options){
     const defaultConfig = {
       debug: false,
-      lang: 'en-US',
+      language: 'en-US',
       commands: [],
       continuous: true,
       interimResults: true,
@@ -58,8 +58,6 @@ $.fn = $.prototype = {
     this.plugins = {};
     // create audio sound
     this.wakeSound = new Audio(this.options.wakeSound);
-    // buffer restarts and prevent insanity
-    this.lastStartTime = this.restartCount = 0;
     // used to manage eventing
     this.listening = false;
     // create interactive audio wave orb (aka Eleven)
