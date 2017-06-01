@@ -1,4 +1,5 @@
 import $ from './core';
+import './agent';
 import './ajax/ajax';
 import './commands/commands';
 import './common/regexp';
