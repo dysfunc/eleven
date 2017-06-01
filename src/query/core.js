@@ -140,7 +140,7 @@ Eleven.apply($, {
    * @return {Boolean}           True if the child element is a descendant of the parent, otherwise false
    */
   contains(container, contained){
-   return (!container || !contained) ? false : !!((container = $(container)[0]) && (contained = $(contained)[0]) && container.contains(contained));
+    return (!container || !contained) ? false : !!((container = $(container)[0]) && (contained = $(contained)[0]) && container.contains(contained));
   },
   /**
    * Get the children of each element in the set of matched elements, including text and comment nodes
@@ -148,7 +148,7 @@ Eleven.apply($, {
    * @return {Object}      The collection of matched elements
    */
   contents(element){
-    var name = (o, n) => o.nodeName && o.nodeName.toUpperCase() === n.toUpperCase();
+    const name = (o, n) => o.nodeName && o.nodeName.toUpperCase() === n.toUpperCase();
 
     return name(element, 'iframe') ? $(element.contentDocument || element.contentWindow.document) : $(slice.call(element.childNodes));
   },
@@ -159,7 +159,6 @@ Eleven.apply($, {
    * @return {Boolean}              The value true or false
    */
   match(element, selector){
-
     if(!element || element.nodeType !== 1){
       return;
     }
@@ -178,7 +177,7 @@ Eleven.apply($, {
    * @return {Array}       The collection of siblings
    */
   siblings(nodes, element){
-    var collection = [];
+    const collection = [];
 
     if(nodes == undefined){
       return collection;
@@ -201,10 +200,12 @@ each([
   'ajax',
   'ajaxSettings',
   'appendQuery',
+  'browser',
   'camelCase',
   'dasherize',
   'debounce',
   'deparam',
+  'device',
   'each',
   'extend',
   'format',
@@ -224,6 +225,7 @@ each([
   'jsonP',
   'map',
   'merge',
+  'os',
   'params',
   'proxy',
   'regexp',
