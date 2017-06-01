@@ -55,7 +55,7 @@ gulp.task('lint', ['lint-js', 'lint-style'], () => bundle());
 gulp.task('serve', ['build'], () => sync.init({ server: 'app' }));
 
 // publish the demo to github
-gulp.task('publish', ['build'], function(){
+gulp.task('github', ['build'], function(){
   return gulp
     .src('./app/**/*')
     .pipe(github());
