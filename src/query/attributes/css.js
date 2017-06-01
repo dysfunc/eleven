@@ -86,28 +86,20 @@ $.fn.extend({
     return this[0].classList.contains(name);
   },
   /**
-   * Swaps one CSS class name for another
+   * Swaps one CSS className for another
    * @param  {String} remove String containing the class name to remove
    * @param  {String} add    String containing the class name to add
    * @return {Object}        Query collection
    */
   swapClass(remove, add){
-    if(!this.length){
-      return undefined;
-    }
-
-    return this.removeClass(remove).addClass(add);
+    return this.length ? this.removeClass(remove).addClass(add) : undefined;
   },
   /**
    * Toggles a specific class on one or more elements
    * @param {Mixed} cls The CSS class to toggle or the function to execute
    */
   toggleClass(cls, fn){
-    if(!this.length){
-      return undefined;
-    }
-
-    return this[(this.hasClass(cls) ? 'removeClass' : 'addClass')](fn && fn(cls) || cls);
+    return this.length ? (this[(this.hasClass(cls) ? 'removeClass' : 'addClass')](fn && fn(cls) || cls)) : undefined;
   }
 });
 
