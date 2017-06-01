@@ -999,7 +999,7 @@ $.fn = $.prototype = {
   init: function init(selector, options) {
     var defaultConfig = {
       debug: false,
-      lang: 'en-US',
+      language: 'en-US',
       commands: [],
       continuous: true,
       interimResults: true,
@@ -1024,10 +1024,6 @@ $.fn = $.prototype = {
     this.plugins = {};
     // create audio sound
     this.wakeSound = new Audio(this.options.wakeSound);
-    // buffer restarts and prevent insanity
-    this.lastStartTime = this.restartCount = 0;
-    // used to manage eventing
-    this.listening = false;
     // create interactive audio wave orb (aka Eleven)
     this.visualize();
     // prevent initialize until called
@@ -2437,7 +2433,6 @@ _core2.default.apply($, {
    * @return {Boolean}              The value true or false
    */
   match: function match(element, selector) {
-
     if (!element || element.nodeType !== 1) {
       return;
     }
@@ -2476,7 +2471,7 @@ _core2.default.apply($, {
 /**
  * Map select methods from Eleven
  */
-(0, _helpers.each)(['ajax', 'ajaxSettings', 'appendQuery', 'camelCase', 'dasherize', 'debounce', 'deparam', 'each', 'extend', 'format', 'get', 'getJSON', 'inArray', 'isArray', 'isArrayLike', 'isEmptyObject', 'isFunction', 'isNumber', 'isNumeric', 'isObject', 'isPlainObject', 'isString', 'isWindow', 'jsonP', 'map', 'merge', 'params', 'proxy', 'regexp', 'ready', 'serialize', 'supports', 'toArray', 'unique', 'uuid'], function (item) {
+(0, _helpers.each)(['ajax', 'ajaxSettings', 'appendQuery', 'browser', 'camelCase', 'dasherize', 'debounce', 'deparam', 'device', 'each', 'extend', 'format', 'get', 'getJSON', 'inArray', 'isArray', 'isArrayLike', 'isEmptyObject', 'isFunction', 'isNumber', 'isNumeric', 'isObject', 'isPlainObject', 'isString', 'isWindow', 'jsonP', 'map', 'merge', 'os', 'params', 'proxy', 'regexp', 'ready', 'serialize', 'supports', 'toArray', 'unique', 'uuid'], function (item) {
   $[item] = _core2.default[item];
 });
 
