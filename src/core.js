@@ -26,7 +26,7 @@ $.fn = $.prototype = {
       commands: [],
       continuous: true,
       interimResults: true,
-      maxAlternatives: 1,
+      maxAlternatives: 3,
       requiresWakeWord: true,
       speechAgent: 'Google UK English Female',
       useEngine: false,
@@ -562,7 +562,7 @@ $.apply($.fn, {
   error(event){
     const { error } = event;
 
-    if(error === 'no-speech'){
+    if(error === 'no-speech' || error === 'aborted'){
       this.start();
     }else{
       if(this.options.debug){
@@ -600,11 +600,13 @@ $.apply($.fn, {
     this.addCommands('eleven', {
       'stop': () => {
         if(this.listening){
-          $.resetView(() => {
-            document.body.classList.remove('interactive');
-          });
-
           this.stop();
+
+          setTimeout(() => {
+            $.resetView(() => {
+              document.body.classList.remove('interactive');
+            });
+          }, 500);
         }
 
         if($.isFunction(options.onStop)){
@@ -664,13 +666,9 @@ $.apply($.fn, {
           this.recognition.abort();
         }
       }else{
-        if(this.recognition && !this.listening){
-          if(this.debug){
-            console.debug('[Eleven] User switched back to this tab. Enabling listeners.');
-          }
-
-          this.recognition.start();
-        }
+        this.recognition.start();
+        this.stop();
+        this.start();
       }
     });
 
@@ -685,9 +683,10 @@ $.apply($.fn, {
   },
 
   stop(){
-    if(this.running && this.visualizer){
+    if(this.visualizer){
       this.running = false;
       this.visualizer.stop();
+      this.container.classList.remove('ready');
     }
 
     if($.isFunction(this.options.onEnd)){
