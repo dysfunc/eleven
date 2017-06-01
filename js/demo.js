@@ -45,12 +45,16 @@
                   var parameters = result.parameters,
                       city = parameters.address.city;
 
+                    console.log(city, parameters);
+
                   weather.forecast(city);
                 }
 
                 if(result.action === 'weather.temperature'){
                   var parameters = result.parameters,
                       city = parameters.address.city;
+
+                  console.log(city, parameters);
 
                   weather.temperature(city);
                 }

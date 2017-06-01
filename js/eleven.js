@@ -837,7 +837,7 @@ $.fn = $.prototype = {
       commands: [],
       continuous: true,
       interimResults: true,
-      maxAlternatives: 1,
+      maxAlternatives: 3,
       requiresWakeWord: true,
       speechAgent: 'Google UK English Female',
       useEngine: false,
@@ -1409,7 +1409,7 @@ $.apply($.fn, {
     var error = event.error;
 
 
-    if (error === 'no-speech') {
+    if (error === 'no-speech' || error === 'aborted') {
       this.start();
     } else {
       if (this.options.debug) {
@@ -1450,11 +1450,13 @@ $.apply($.fn, {
     this.addCommands('eleven', {
       'stop': function stop() {
         if (_this.listening) {
-          $.resetView(function () {
-            _document.document.body.classList.remove('interactive');
-          });
-
           _this.stop();
+
+          setTimeout(function () {
+            $.resetView(function () {
+              _document.document.body.classList.remove('interactive');
+            });
+          }, 500);
         }
 
         if ($.isFunction(options.onStop)) {
@@ -1517,13 +1519,9 @@ $.apply($.fn, {
           _this2.recognition.abort();
         }
       } else {
-        if (_this2.recognition && !_this2.listening) {
-          if (_this2.debug) {
-            console.debug('[Eleven] User switched back to this tab. Enabling listeners.');
-          }
-
-          _this2.recognition.start();
-        }
+        _this2.recognition.start();
+        _this2.stop();
+        _this2.start();
       }
     });
   },
@@ -1535,9 +1533,10 @@ $.apply($.fn, {
     return this;
   },
   stop: function stop() {
-    if (this.running && this.visualizer) {
+    if (this.visualizer) {
       this.running = false;
       this.visualizer.stop();
+      this.container.classList.remove('ready');
     }
 
     if ($.isFunction(this.options.onEnd)) {
