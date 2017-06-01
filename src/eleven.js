@@ -14,4 +14,4 @@ import './speech/speechParser';
 import './speech/speechVoices';
 import './visualizer';
 
-((root) => (root.Eleven = $))(window);
+((root) => (root.Eleven = $) && ('$' in window ? (window.Q = $.query) : (window.$ = $.query)))(window);
