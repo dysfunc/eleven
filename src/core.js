@@ -567,6 +567,10 @@ $.apply($.fn, {
       this.options.autoRestart = false;
     }
 
+    if(error === 'no-speech'){
+      this.start();
+    }
+
     if(this.options.debug){
       console.warn(`[Eleven] SpeechRecognition event error: ${error}`);
     }
@@ -688,17 +692,13 @@ $.apply($.fn, {
   },
 
   stop(){
-    if(this.listening){
-      this.listening = false;
+    if(this.running && this.visualizer){
+      this.running = false;
+      this.visualizer.stop();
+    }
 
-      if(this.running && this.visualizer){
-        this.running = false;
-        this.visualizer.stop();
-      }
-
-      if($.isFunction(this.options.onEnd)){
-        this.options.onEnd.call(this);
-      }
+    if($.isFunction(this.options.onEnd)){
+      this.options.onEnd.call(this);
     }
 
     return this;
