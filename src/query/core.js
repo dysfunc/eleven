@@ -67,13 +67,13 @@ $.fn = $.prototype = {
       return this;
     }
 
-    if(!this.context && this.context !== document){
-      context = this.context = document;
+    if(this.context === undefined){
+      this.context = document;
     }else{
-      context = $(this.context)[0];
+      this.context = $(this.context)[0];
     }
 
-    return $.merge(this, $.query(selector, context));
+    return $.merge(this, $.query(this.selector, this.context));
   }
 };
 
