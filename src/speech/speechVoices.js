@@ -1,30 +1,30 @@
-import $ from '../core';
+import Eleven from '../core';
 import SpeechSynthesis from './speechSynthesis';
 import SpeechSynthesisOverrides from './speechSynthesisOverrides';
 
-$.fn.extend({
+Eleven.fn.extend({
   voices(){
     // setup speech synthesis
     SpeechSynthesis.onvoiceschanged = () => {
-      $.supportedVoices = SpeechSynthesis.getVoices();
+      Eleven.supportedVoices = SpeechSynthesis.getVoices();
     };
     // hack to fix issues with Chrome
     setTimeout(() => {
       if(!SpeechSynthesis){
         console.warn('[Eleven] Voice synthesis is not supported.');
       }else{
-        $.supportedVoices = SpeechSynthesis.getVoices();
+        Eleven.supportedVoices = SpeechSynthesis.getVoices();
 
-        if($.supportedVoices.length > 0){
-          $.mappedSupportedVoices = $.supportedVoices.slice().reduce((obj, item) => {
+        if(Eleven.supportedVoices.length > 0){
+          Eleven.mappedSupportedVoices = Eleven.supportedVoices.slice().reduce((obj, item) => {
             const overrides = SpeechSynthesisOverrides[item.name] || {};
 
-            obj[item.name] = $.extend({}, item, overrides, { suppportedVoice: item });
+            obj[item.name] = Eleven.extend({}, item, overrides, { suppportedVoice: item });
 
             return obj;
           }, {});
 
-          $.speechAgent = $.mappedSupportedVoices[this.options.speechAgent] || $.mappedSupportedVoices['Alex'];
+          Eleven.speechAgent = Eleven.mappedSupportedVoices[this.options.speechAgent] || Eleven.mappedSupportedVoices['Alex'];
         }
       }
     }, 500);
@@ -33,4 +33,4 @@ $.fn.extend({
   }
 });
 
-export default $;
+export default Eleven;

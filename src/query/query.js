@@ -1,6 +1,10 @@
 import $ from './core';
+import './ajax/ajax';
 import './attributes/attr';
 import './attributes/val';
+import './core/chain';
+import './core/regexp';
+import './core/utils';
 import './css/classes';
 import './css/css';
 import './css/dimensions';
@@ -19,11 +23,13 @@ import './manipulation/html';
 import './manipulation/prepend';
 import './manipulation/text';
 import './manipulation/wrap';
+import './support/browser';
+import './support/device';
+import './support/feature';
+import './support/os';
 import './traversing/ancestors';
 import './traversing/descendants';
 import './traversing/position';
 import './traversing/traversing';
-import './utils/chain';
-import './utils/utils';
 
 export default $;

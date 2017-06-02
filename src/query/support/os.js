@@ -1,5 +1,5 @@
 import $ from '../core';
-import { userAgent } from '../common/navigator';
+import { userAgent } from '../../common/navigator';
 
 $.os = (() => {
   const match = userAgent.match($.regexp.os);

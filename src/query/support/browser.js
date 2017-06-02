@@ -1,6 +1,6 @@
 import $ from '../core';
-import window from '../common/window';
-import { language, userAgent, vendor } from '../common/navigator';
+import window from '../../common/window';
+import { language, userAgent, vendor } from '../../common/navigator';
 
 $.browser = (() => {
   const match = userAgent.match($.regexp.browser);

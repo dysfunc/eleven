@@ -1,8 +1,9 @@
-import $ from './core';
-import SpeechRecognition from './speech/speechRecognition';
-import { document } from './common/document';
+import Eleven from '../core';
+import SpeechRecognition from '../speech/speechRecognition';
+import { document } from '../common/document';
+import { each } from '../common/helpers';
 
-$.fn.extend({
+Eleven.fn.extend({
   /**
    * Iterates over a collection of objects
    * @param {Mixed}    collection Collection to iterate over
@@ -50,13 +51,13 @@ $.fn.extend({
           this.stop();
 
           setTimeout(() => {
-            $.resetView(() => {
+            Eleven.resetView(() => {
               document.body.classList.remove('interactive');
             });
           }, 500);
         }
 
-        if($.isFunction(options.onStop)){
+        if(Eleven.isFunction(options.onStop)){
           this.context = null;
           options.onStop.call(this);
         }
@@ -68,12 +69,12 @@ $.fn.extend({
     }
     // check if wake commands exist. if so, create regexp to strip from speech matches
     if(options.wakeCommands.length){
-      $.regexp.wakeCommands = new RegExp(`^(${options.wakeCommands.join('|')})\\s+`, 'i');
+      Eleven.regexp.wakeCommands = new RegExp(`^(${options.wakeCommands.join('|')})\\s+`, 'i');
     }
     // setup all SpeechRecognition event listeners
     this.listen();
     // fire activation event
-    if($.isFunction(options.onActivate)){
+    if(Eleven.isFunction(options.onActivate)){
       options.onActivate.call(this);
     }
 
@@ -94,13 +95,13 @@ $.fn.extend({
    * `onend` and `onaudioend` of SpeechRecognition API.
    */
   listen(){
-    this.recognition.onend = $.proxy(this.stop, this);
-    this.recognition.onerror = $.proxy(this.error, this);
-    this.recognition.onresult = $.proxy(this.result, this);
-    this.recognition.onstart = $.proxy(this.start, this);
-    this.recognition.onaudioend = $.proxy(this.stop, this);
+    this.recognition.onend = Eleven.proxy(this.stop, this);
+    this.recognition.onerror = Eleven.proxy(this.error, this);
+    this.recognition.onresult = Eleven.proxy(this.result, this);
+    this.recognition.onstart = Eleven.proxy(this.start, this);
+    this.recognition.onaudioend = Eleven.proxy(this.stop, this);
     this.recognition.onaudiostart = () => {
-      if($.isFunction(this.options.onStart)){
+      if(Eleven.isFunction(this.options.onStart)){
         this.options.onStart.call(this);
       }
     };
@@ -139,7 +140,7 @@ $.fn.extend({
       this.container.classList.remove('ready');
     }
 
-    if($.isFunction(this.options.onEnd)){
+    if(Eleven.isFunction(this.options.onEnd)){
       this.options.onEnd.call(this);
     }
 
@@ -147,4 +148,30 @@ $.fn.extend({
   }
 });
 
-export default $;
+
+Eleven.extend(Eleven, {
+  /**
+   * Removes all rendered elements from the viewport and executes a callback
+   * @param  {Function} fn Function to execute once the view has been cleared
+   */
+  resetView(selector = '.results', fn){
+    if(Eleven.isFunction(selector)){
+      fn = selector;
+      selector = '.results';
+    }
+
+    const results = document.querySelectorAll(selector);
+
+    if(results && results.length){
+      results.forEach((element) => element.parentNode && element.parentNode.removeChild(element));
+    }
+
+    if(Eleven.isFunction(fn)){
+      fn();
+    }
+
+    return this;
+  }
+});
+
+export default Eleven;

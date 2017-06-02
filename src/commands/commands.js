@@ -1,7 +1,7 @@
-import $ from '../core';
+import Eleven from '../core';
 import Parser from './commandsParser';
 
-$.fn.extend({
+Eleven.fn.extend({
   /**
    * Add one or more commands to Eleven's registry
    *
@@ -42,10 +42,10 @@ $.fn.extend({
       command[context] = commands[phrase];
 
       if(command[context]){
-        if($.isFunction(command[context])){
+        if(Eleven.isFunction(command[context])){
           this.registerCommands(context, phrase, Parser(phrase), command[context]);
         }
-        else if($.isObject(command[context]) && $.isRegExp(command[context].regexp)){
+        else if(Eleven.isObject(command[context]) && Eleven.isRegExp(command[context].regexp)){
           this.registerCommands(context, phrase, new RegExp(command[context].regexp.source, 'i'), command[context].callback);
         }
         else{
@@ -114,7 +114,7 @@ $.fn.extend({
       commands = [commands];
     }
 
-    $.each(commands, (command) => {
+    Eleven.each(commands, (command) => {
       if(currentCommmands[command]){
         delete currentCommmands[command];
       }
@@ -124,4 +124,4 @@ $.fn.extend({
   }
 });
 
-export default $;
+export default Eleven;

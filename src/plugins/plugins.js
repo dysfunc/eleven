@@ -1,4 +1,4 @@
-import $ from './core';
+import Eleven from '../core';
 
 // plugin registry cache
 const plugins = {};
@@ -8,9 +8,9 @@ const plugins = {};
  * @param {String}  name String containing the plugins unique name
  * @param {Functio} fn   Constructor function of plugin
  */
-$.plugin = (name, fn) => {
+Eleven.plugin = (name, fn) => {
   if(!plugins[name]){
-    if(!$.isFunction(fn)){
+    if(!Eleven.isFunction(fn)){
       throw `"${name}" does not have a constructor.`;
     }else{
       plugins[name] = fn;
@@ -20,7 +20,7 @@ $.plugin = (name, fn) => {
   return this;
 };
 
-$.fn.extend({
+Eleven.fn.extend({
   /**
    * Plugin cache
    * @type {Object}
@@ -62,4 +62,4 @@ $.fn.extend({
   }
 });
 
-export default $;
+export default Eleven;

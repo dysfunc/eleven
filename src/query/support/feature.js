@@ -1,7 +1,7 @@
 import $ from '../core';
-import window from '../common/window';
-import { navigator } from '../common/navigator';
-import { documentElement } from '../common/document';
+import window from '../../common/window';
+import { navigator } from '../../common/navigator';
+import { documentElement } from '../../common/document';
 
 const supports = function(name){
   return $.camelCase($.browser.prefix.replace($.regexp.ms, 'ms-')) + name;

@@ -1,6 +1,6 @@
-import $ from './core';
+import Eleven from '../core';
 
-$.fn.extend({
+Eleven.fn.extend({
   visualize(){
     this.visualizer = new Visualizer(this);
   },
@@ -30,7 +30,7 @@ function Curve(opt){
   this.respawn();
 }
 
-$.apply(Curve.prototype, {
+Eleven.apply(Curve.prototype, {
   respawn(){
     this.amplitude = .3 + Math.random() * .7;
     this.seed = Math.random();
@@ -149,7 +149,7 @@ function Visualizer(config){
   }
 }
 
-$.apply(Visualizer.prototype, {
+Eleven.apply(Visualizer.prototype, {
   colors: [
     [32, 133, 252],
     [94, 252, 169],
@@ -231,4 +231,4 @@ $.apply(Visualizer.prototype, {
   }
 });
 
-export default $;
+export default Eleven;
