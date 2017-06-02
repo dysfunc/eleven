@@ -1,6 +1,6 @@
 import $ from '../core';
-import window from '../common/window';
-import { document } from '../common/document';
+import window from '../../common/window';
+import { document } from '../../common/document';
 
 var activeXHR = 0,
     jsonPUID = 0,

@@ -1,10 +1,10 @@
-import $ from '../core';
+import Eleven from '../core';
 
-$.fn.extend({
+Eleven.fn.extend({
   parser(results){
     var match = false;
 
-    if($.isFunction(this.options.onResult)){
+    if(Eleven.isFunction(this.options.onResult)){
       this.options.onResult.call(this, results);
     }
 
@@ -18,8 +18,8 @@ $.fn.extend({
       this.activated = false;
     }, 750);
 
-    $.each(results, (result) => {
-      const speech = result.replace($.regexp.wakeCommands, '').trim();
+    Eleven.each(results, (result) => {
+      const speech = result.replace(Eleven.regexp.wakeCommands, '').trim();
 
       if(this.options.debug){
         console.debug(`[Eleven] Recognized speech: ${speech}`);
@@ -32,11 +32,11 @@ $.fn.extend({
       if(!match){
         this.context = null;
 
-        $.each(this.commands, (context) => !this.evaluate(context, this.commands[context], speech));
+        Eleven.each(this.commands, (context) => !this.evaluate(context, this.commands[context], speech));
       }
     });
 
-    if($.isFunction(this.options.onResultNoMatch)){
+    if(Eleven.isFunction(this.options.onResultNoMatch)){
       options.onResultNoMatch.call(this, results);
     }
 
@@ -61,13 +61,13 @@ $.fn.extend({
           console.debug(`[Eleven] Command match: ${name} - ${phrase}`);
 
           if(parameters.length){
-            console.debug(`[Eleven] Command results contain parameters: ${$.stringify(parameters, null, 2)}`);
+            console.debug(`[Eleven] Command results contain parameters: ${Eleven.stringify(parameters, null, 2)}`);
           }
         }
 
         command.callback.call(this, parameters, speech, phrase, plugin);
 
-        if($.isFunction(this.options.onResultMatch)){
+        if(Eleven.isFunction(this.options.onResultMatch)){
           this.options.onResultMatch.call(this, parameters, speech, phrase, results);
         }
 
@@ -123,4 +123,4 @@ $.fn.extend({
   }
 });
 
-export default $;
+export default Eleven;

@@ -1,6 +1,6 @@
 import $ from '../core';
-import window from '../common/window';
-import { userAgent, vendor } from '../common/navigator';
+import window from '../../common/window';
+import { userAgent, vendor } from '../../common/navigator';
 
 $.device = (() => {
   const match = userAgent.match($.regexp.device);

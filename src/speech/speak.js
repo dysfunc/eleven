@@ -1,16 +1,16 @@
-import $ from '../core';
+import Eleven from '../core';
 import SpeechSynthesis from './speechSynthesis';
 
-$.speak = function(text, config = {}){
+Eleven.speak = function(text, config = {}){
   var cancelled = false;
   // get instance
   const eleven = Eleven();
   // clean up text
   text = text.replace(/[\"\`]/gm, '\'');
   // split text into 140 character chunks
-  const chunks = text.match($.regexp.textChunks);
+  const chunks = text.match(Eleven.regexp.textChunks);
   // find voice profile
-  const agent = $.speechAgent;
+  const agent = Eleven.speechAgent;
 
   if(!SpeechSynthesis){
     throw '[Eleven] Speech Synthesis is not supported on this device.';
@@ -25,7 +25,7 @@ $.speak = function(text, config = {}){
     // create new utterance
     const speechUtterance = new SpeechSynthesisUtterance();
 
-    $.extend(speechUtterance, {
+    Eleven.extend(speechUtterance, {
       voice: agent.suppportedVoice,
       voiceURI: agent.voiceURI,
       volume: agent.volume || 1,
@@ -42,7 +42,7 @@ $.speak = function(text, config = {}){
         eleven.getVisualizer('container').classList.add('ready');
         eleven.getVisualizer().start();
 
-        if($.isFunction(config.onStart)){
+        if(Eleven.isFunction(config.onStart)){
           config.onStart();
         }
       };
@@ -58,14 +58,14 @@ $.speak = function(text, config = {}){
 
         eleven.getVisualizer().stop();
 
-        if($.isFunction(config.onEnd)){
+        if(Eleven.isFunction(config.onEnd)){
           config.onEnd();
         }
       };
     }
 
     speechUtterance.onerror = (error) => {
-      if($.debug){
+      if(Eleven.debug){
         console.error(`[Eleven] Unknow Error: ${error}`);
       }
     };
@@ -74,4 +74,4 @@ $.speak = function(text, config = {}){
   });
 };
 
-export default $;
+export default Eleven;
