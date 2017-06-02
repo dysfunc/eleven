@@ -38,7 +38,7 @@ $.fn.extend({
       context = 'eleven';
     }
 
-    for(var phrase in commands){
+    for(const phrase in commands){
       command[context] = commands[phrase];
 
       if(command[context]){
