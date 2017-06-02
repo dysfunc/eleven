@@ -1,6 +1,5 @@
 import $ from '../core';
-import { document } from '../../common/document';
-import { addScript, documentFragments, each } from '../../common/helpers';
+import { addScript, each } from '../../common/helpers';
 
 /**
  * DOM Maniuplation methods .before() .after()
@@ -19,7 +18,7 @@ each(['before', 'after'], function(method, index){
         k = this.length;
 
     for(; i < k; i++){
-      var element = this[i];
+      const element = this[i];
 
       if(selector.nodeName.toLowerCase() === 'script'){
         selector = addScript(selector);

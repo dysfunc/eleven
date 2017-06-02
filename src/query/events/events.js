@@ -1,5 +1,5 @@
-import $ from './core';
-import { each } from '../common/helpers';
+import $ from '../core';
+import { each } from '../../common/helpers';
 
 const eventsCache = {};
 
