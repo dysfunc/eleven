@@ -13,6 +13,9 @@ node_modules
 build
 .publish
 
+# testing
+test/unit/coverage
+
 # demo
 app/js/eleven.js
 app/js/eleven.js.map

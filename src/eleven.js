@@ -9,4 +9,4 @@ import './speech/speechParser';
 import './speech/speechVoices';
 import './visualizer/visualizer';
 
-((root) => (root.Eleven = Eleven) && ('$' in window ? (window.Q = Eleven.query) : (window.$ = Eleven.query)))(window);
+export default Eleven;

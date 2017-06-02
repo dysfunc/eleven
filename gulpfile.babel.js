@@ -8,6 +8,7 @@ import exorcist from 'exorcist';
 import github from 'gulp-gh-pages';
 import gulp from 'gulp';
 import ifElse from 'gulp-if-else';
+import { Server } from 'karma';
 import sass from 'gulp-sass';
 import scsslint from 'gulp-scss-lint';
 import source from 'vinyl-source-stream';
@@ -18,7 +19,7 @@ watchify.args.debug = true;
 
 const sync = browserSync.create();
 
-const bundler = browserify('src/eleven.js', {
+const bundler = browserify('src/index.js', {
   extensions: ['.js'],
   debug: true
 });
@@ -114,3 +115,14 @@ gulp.task('lint-style', function(done){
 
  return scsslintRunner({ failOnError: false });
 });
+
+gulp.task('karma', [], function(done){
+  var server = new Server({
+    configFile: __dirname + '/test/unit/karma.config.js',
+    singleRun: true
+  }, done);
+
+  server.start();
+});
+
+gulp.task('test', ['karma']);
