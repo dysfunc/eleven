@@ -168,7 +168,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"./common/document":6,"./core":13,"./speech/speechRecognition":31}],2:[function(require,module,exports){
+},{"./common/document":6,"./core":13,"./speech/speechRecognition":50}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1780,7 +1780,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   return (root.Eleven = _core2.default) && ('$' in window ? window.Q = _core2.default.query : window.$ = _core2.default.query);
 })(window);
 
-},{"./agent":1,"./ajax/ajax":2,"./commands/commands":3,"./common/regexp":10,"./core":13,"./detection/browser":14,"./detection/device":15,"./detection/feature":16,"./detection/os":17,"./plugins":19,"./query/query":28,"./speech/speak":29,"./speech/speechParser":30,"./speech/speechVoices":34,"./visualizer":35}],19:[function(require,module,exports){
+},{"./agent":1,"./ajax/ajax":2,"./commands/commands":3,"./common/regexp":10,"./core":13,"./detection/browser":14,"./detection/device":15,"./detection/feature":16,"./detection/os":17,"./plugins":19,"./query/query":41,"./speech/speak":48,"./speech/speechParser":49,"./speech/speechVoices":53,"./visualizer":54}],19:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1967,7 +1967,221 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../core":23}],21:[function(require,module,exports){
+},{"../core":22}],21:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * Returns the value for the first element in a matched
+ * set or sets the value for one or more elements
+ * @param  {Mixed} value The value to set
+ * @return {Mixed}       The property value
+ */
+_core2.default.fn.val = function (value) {
+  if (this[0] === undefined) {
+    return;
+  }
+
+  if (value === undefined) {
+    return this[0].value;
+  }
+
+  for (var i = 0, k = this.length; i < k; i++) {
+    this[i].value = value;
+  }
+
+  return this;
+};
+
+exports.default = _core2.default;
+
+},{"../core":22}],22:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _core = require('../core/');
+
+var _core2 = _interopRequireDefault(_core);
+
+var _window = require('../common/window');
+
+var _window2 = _interopRequireDefault(_window);
+
+var _document = require('../common/document');
+
+var _objects = require('../common/objects');
+
+var _arrays = require('../common/arrays');
+
+var _helpers = require('../common/helpers');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var fragmentContainer = {};
+
+/**
+ * Define a local copy of $
+ * @param {Mixed} selector String containing CSS selector(s), HTML tags to create, or DOM Element
+ * @param {Mixed} context  Context in which to perform the search (can be a CSS Selector or DOM Element)
+ */
+var $ = function $(selector, context) {
+  return new $.fn.init(selector, context);
+};
+
+$.fn = $.prototype = {
+  constructor: $,
+  version: '1.0.0',
+  init: function init(selector, context) {
+    this.length = 0;
+
+    if (!selector) {
+      return this;
+    }
+
+    if (selector.constructor === $) {
+      return selector;
+    }
+
+    var type = typeof selector === 'undefined' ? 'undefined' : _typeof(selector);
+
+    if (type === 'function') {
+      return $(_document.document).ready(selector);
+    }
+
+    this.selector = selector;
+    this.context = context;
+
+    if (selector === 'body' || selector === _document.document.body) {
+      this[this.length++] = this.context = _document.document.body;
+      return this;
+    }
+
+    if (selector === _window2.default || selector.nodeType || selector === 'body') {
+      this[this.length++] = this.context = selector;
+      return this;
+    }
+
+    if (type === 'string') {
+      selector = selector.trim();
+
+      if (selector[0] === '<' && selector[selector.length - 1] === '>' && $.regexp.fragments.test(selector)) {
+        selector = $.fragment(_document.document.createElement(fragmentContainer[RegExp.$1] || 'div'), selector);
+        this.selector = selector;
+      }
+    }
+
+    if (selector.length !== undefined && _objects.toString.call(selector) === '[object Array]') {
+      var i = 0,
+          k = selector.length;
+
+      for (; i < k; i++) {
+        this[this.length++] = selector[i] instanceof $ ? selector[i][0] : selector[i];
+      }
+
+      return this;
+    }
+
+    if (this.context === undefined) {
+      this.context = _document.document;
+    } else {
+      this.context = $(this.context)[0];
+    }
+
+    return $.merge(this, $.query(this.selector, this.context));
+  }
+};
+
+/**
+ * Creates a dictionary of fragment containers for
+ * proper DOM node creation when using $.fragment
+ */
+(0, _helpers.each)(['tbody', 'thead', 'tfoot', 'tr', 'th', 'td'], function (item) {
+  fragmentContainer[item] = item === 'th' || item === 'td' ? 'tr' : 'table';
+});
+
+/**
+ * Returns the created DOM node(s) from a passed HTML string
+ * @param  {String} html The string containing arbitrary HTML
+ * @return {Array}       The DOM node(s)
+ */
+$.fragment = function (container, html) {
+  container.innerHTML = '' + html;
+
+  var items = _arrays.slice.call(container.childNodes);
+
+  (0, _helpers.each)(items, function (element) {
+    return container.removeChild(element);
+  });
+
+  return items;
+};
+
+/**
+ * Traverses the DOM and returns matched elements
+ * @param  {Mixed} selector String containing CSS selector(s), HTML tags to create, or DOM Element
+ * @param  {Mixed} context  Context in which to perform the search (can be a CSS Selector or DOM Element)
+ * @return {Array}          NodeList of matched selectors
+ */
+$.query = function (selector, context) {
+  var query = [];
+  var noSpace = selector.length && selector.indexOf(' ') < 0;
+
+  if (selector[0] === '#' && context === _document.document && noSpace) {
+    var element = context.getElementById(selector.slice(1));
+
+    if (element) {
+      query = [element];
+    }
+  } else {
+    if (context.nodeType === 1 || context.nodeType === 9) {
+      if (selector[0] === '.' && noSpace) {
+        query = context.getElementsByClassName(selector.slice(1));
+      } else if ($.regexp.tags.test(selector)) {
+        query = context.getElementsByTagName(selector);
+      } else {
+        query = context.querySelectorAll(selector);
+      }
+    }
+  }
+
+  return _arrays.slice.call(query);
+};
+
+// extend $ with existing Eleven methods
+(0, _helpers.each)(['ajax', 'ajaxSettings', 'appendQuery', 'browser', 'camelCase', 'dasherize', 'debounce', 'deparam', 'device', 'each', 'extend', 'format', 'get', 'getJSON', 'inArray', 'isArray', 'isArrayLike', 'isEmptyObject', 'isFunction', 'isNumber', 'isNumeric', 'isObject', 'isPlainObject', 'isString', 'isWindow', 'jsonP', 'map', 'merge', 'os', 'params', 'proxy', 'regexp', 'ready', 'serialize', 'supports', 'toArray', 'unique', 'uuid'], function (item) {
+  $[item] = _core2.default[item];
+});
+
+$.fn.init.prototype = $.fn;
+
+$.extend($.fn, {
+  concat: _arrays.concat,
+  indexOf: _helpers.indexOf,
+  reduce: _arrays.reduce,
+  splice: _arrays.splice,
+  each: $.each,
+  extend: $.extend
+});
+
+_core2.default.query = $;
+
+exports.default = $;
+
+},{"../common/arrays":5,"../common/document":6,"../common/helpers":7,"../common/objects":9,"../common/window":12,"../core/":13}],23:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1985,6 +2199,94 @@ var _helpers = require('../../common/helpers');
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+_core2.default.fn.extend({
+  /**
+   * Determines whether an element has a specific CSS class
+   * @param  {String}  name String containing the CSS class name to search
+   * @return {Boolean}      True/false result
+   */
+  hasClass: function hasClass(name) {
+    return this[0].classList.contains(name);
+  },
+
+  /**
+   * Swaps one CSS className for another
+   * @param  {String} remove String containing the class name to remove
+   * @param  {String} add    String containing the class name to add
+   * @return {Object}        Query collection
+   */
+  swapClass: function swapClass(remove, add) {
+    return this.length ? this.removeClass(remove).addClass(add) : undefined;
+  },
+
+  /**
+   * Toggles a specific class on one or more elements
+   * @param {Mixed} cls The CSS class to toggle or the function to execute
+   */
+  toggleClass: function toggleClass(cls, fn) {
+    return this.length ? this[this.hasClass(cls) ? 'removeClass' : 'addClass'](fn && fn(cls) || cls) : undefined;
+  }
+});
+
+/**
+ * Add or remove one or more CSS classes from one or more elements
+ * @param {Mixed} cls The CSS class to add/remove or the function to execute
+ */
+(0, _helpers.each)(['addClass', 'removeClass'], function (method, index) {
+  _core2.default.fn[method] = function (name) {
+    if (this[0] === undefined) {
+      return undefined;
+    }
+
+    var i = 0,
+        k = this.length,
+        type = typeof name === 'undefined' ? 'undefined' : _typeof(name),
+        names = type === 'string' ? name.split(' ') : [],
+        remove = method === 'removeClass';
+
+    for (; i < k; i++) {
+      var element = this[i];
+
+      if (type === 'function') {
+        name.call(element, element.classList, i);
+      } else {
+        if (remove && name === undefined) {
+          element.className = '';
+        } else {
+          if (remove) {
+            var _element$classList;
+
+            (_element$classList = element.classList).remove.apply(_element$classList, _toConsumableArray(names));
+          } else {
+            var _element$classList2;
+
+            (_element$classList2 = element.classList).add.apply(_element$classList2, _toConsumableArray(names));
+          }
+        }
+      }
+    }
+
+    return this;
+  };
+});
+
+exports.default = _core2.default;
+
+},{"../../common/helpers":7,"../core":22}],24:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+var _helpers = require('../../common/helpers');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var cssNumber = { 'columns': 1, 'columnCount': 1, 'fillOpacity': 1, 'flexGrow': 1, 'flexShrink': 1, 'fontWeight': 1, 'lineHeight': 1, 'opacity': 1, 'order': 1, 'orphans': 1, 'widows': 1, 'zIndex': 1, 'zoom': 1 };
 var formatValue = function formatValue(prop, value) {
@@ -2063,81 +2365,260 @@ _core2.default.fn.extend({
     }
 
     return this;
-  },
-
-  /**
-   * Determines whether an element has a specific CSS class
-   * @param  {String}  name String containing the CSS class name to search
-   * @return {Boolean}      True/false result
-   */
-  hasClass: function hasClass(name) {
-    return this[0].classList.contains(name);
-  },
-
-  /**
-   * Swaps one CSS className for another
-   * @param  {String} remove String containing the class name to remove
-   * @param  {String} add    String containing the class name to add
-   * @return {Object}        Query collection
-   */
-  swapClass: function swapClass(remove, add) {
-    return this.length ? this.removeClass(remove).addClass(add) : undefined;
-  },
-
-  /**
-   * Toggles a specific class on one or more elements
-   * @param {Mixed} cls The CSS class to toggle or the function to execute
-   */
-  toggleClass: function toggleClass(cls, fn) {
-    return this.length ? this[this.hasClass(cls) ? 'removeClass' : 'addClass'](fn && fn(cls) || cls) : undefined;
   }
 });
 
+exports.default = _core2.default;
+
+},{"../../common/helpers":7,"../core":22}],25:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+var _document = require('../../common/document');
+
+var _helpers = require('../../common/helpers');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 /**
- * Add or remove one or more CSS classes from one or more elements
- * @param {Mixed} cls The CSS class to add/remove or the function to execute
+ * .width() and .height() methods; Returns width or height of the
+ * matched element or set the height and width of one or more elements
+ *
+ * .outerWidth and .outerHeight will return the elements
+ *  width + padding + borders + margins (optional, pass true as param)
+ * @param  {Mixed} value  If passed true, it will return the width/height including margins, otherwise, sets the value
+ * @return {Mixed}        The property value, or the matched set
  */
-(0, _helpers.each)(['addClass', 'removeClass'], function (method, index) {
-  _core2.default.fn[method] = function (name) {
-    if (this[0] === undefined) {
+(0, _helpers.each)(['width', 'height', 'outerWidth', 'outerHeight'], function (method) {
+  _core2.default.fn[method] = function (value) {
+    var element = this[0],
+        dimension = method.replace('outer', '').toLowerCase(),
+        property = dimension[0].toUpperCase() + dimension.slice(1),
+        scrollOffset = 'scroll' + property,
+        clientOffset = 'client' + property,
+        offsetProperty = 'offset' + property,
+        padding = 0,
+        margin = 0,
+        extra = 0;
+
+    if (!element) {
       return undefined;
     }
 
-    var i = 0,
-        k = this.length,
-        type = typeof name === 'undefined' ? 'undefined' : _typeof(name),
-        names = type === 'string' ? name.split(' ') : [],
-        remove = method === 'removeClass';
-
-    for (; i < k; i++) {
-      var element = this[i];
-
-      if (type === 'function') {
-        name.call(element, element.classList, i);
-      } else {
-        if (remove && name === undefined) {
-          element.className = '';
-        } else {
-          if (remove) {
-            var _element$classList;
-
-            (_element$classList = element.classList).remove.apply(_element$classList, _toConsumableArray(names));
-          } else {
-            var _element$classList2;
-
-            (_element$classList2 = element.classList).add.apply(_element$classList2, _toConsumableArray(names));
-          }
-        }
-      }
+    if (_core2.default.isWindow(element)) {
+      return element['inner' + property];
     }
 
-    return this;
+    if (element.nodeType === 9) {
+      var doc = _document.documentElement;
+
+      return Math.max(element.body[scrollOffset], element.body[offsetProperty], doc[scrollOffset], doc[offsetProperty], doc[clientOffset]);
+    }
+
+    if (value === undefined && method.indexOf('outer') < 0) {
+      return this.css(method);
+    }
+
+    if (method.indexOf('outer') !== -1) {
+      padding = dimension === 'width' ? this.css('paddingLeft') + this.css('paddingRight') : this.css('paddingTop') + this.css('paddingBottom');
+      margin = value === true ? dimension === 'width' ? this.css('marginLeft') + this.css('marginRight') : this.css('marginTop') + this.css('marginBottom') : dimension === 'width' ? this.css('borderLeftWidth') + this.css('borderRightWidth') : this.css('borderTopWidth') + this.css('borderBottomWidth');
+
+      return this.css(dimension) + padding + margin + extra;
+    }
+
+    return this.css(method, value);
   };
 });
 
 exports.default = _core2.default;
 
-},{"../../common/helpers":7,"../core":23}],22:[function(require,module,exports){
+},{"../../common/document":6,"../../common/helpers":7,"../core":22}],26:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_core2.default.fn.extend({
+  /**
+   * Returns the offset object for the first matched element in a collection
+   * @return {Object} The offset object: height, left, top, width
+   */
+  offset: function offset(properties) {
+
+    if (!this.length || this[0] === undefined) {
+      return undefined;
+    }
+
+    var element = this[0].getBoundingClientRect();
+
+    return {
+      bottom: element.top + element.height + window.pageYOffset,
+      height: element.height,
+      left: element.left + window.pageXOffset,
+      right: element.left + element.width + window.pageXOffset,
+      top: element.top + window.pageYOffset,
+      width: element.width
+    };
+  },
+
+  /**
+   * Returns the current position of an element relative to its offset parent
+   * @return {Object} The position object containing the top and left coordinates
+   */
+  position: function position() {
+    if (!this.length) {
+      return undefined;
+    }
+
+    var element = (0, _core2.default)(this[0]),
+        offsetParent = (0, _core2.default)(this.offsetParent()),
+        offset = this.offset(),
+        first = offsetParent.eq(0),
+        parentOffset = _core2.default.regexp.root.test(offsetParent[0].nodeName) ? { top: 0, left: 0 } : offsetParent.offset();
+
+    offset.top -= parseFloat(element.css('marginTop')) || 0, offset.left -= parseFloat(element.css('marginLeft')) || 0, parentOffset.top += parseFloat(first.css('borderTopWidth')) || 0;
+    parentOffset.left += parseFloat(first.css('borderLeftWidth')) || 0;
+
+    return {
+      top: offset.top - parentOffset.top,
+      left: offset.left - parentOffset.left
+    };
+  }
+});
+
+exports.default = _core2.default;
+
+},{"../core":22}],27:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+var _document = require('../../common/document');
+
+var _helpers = require('../../common/helpers');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * Sets or gets the scroll position for the first element - .scrollLeft() and .scrollTop()
+ * @return {Mixed} The current X/Y scroll position or this
+ */
+(0, _helpers.each)(['scrollLeft', 'scrollTop'], function (method, index) {
+  var top = index === 1,
+      property = top ? 'pageYOffset' : 'pageXOffset';
+
+  _core2.default.fn[method] = function (value) {
+
+    if (this[0] === undefined) {
+      return undefined;
+    }
+
+    var elem = this[0],
+        win = _core2.default.isWindow(elem) ? elem : elem.nodeType === 9 ? elem.defaultView || elem.parentWindow : false;
+
+    return value === undefined ? win ? property in win ? win[property] : _document.documentElement[method] : elem[method] : win ? win.scrollTo(!top ? value : (0, _core2.default)(win).scrollLeft(), top ? value : (0, _core2.default)(win).scrollTop()) : elem[method] = value;
+  };
+});
+
+exports.default = _core2.default;
+
+},{"../../common/document":6,"../../common/helpers":7,"../core":22}],28:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+var _helpers = require('../../common/helpers');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_core2.default.fn.extend({
+  /**
+   * Hides each element in the matched set of elements
+   * @return {Object} Query object
+   */
+  hide: function hide() {
+    if (this[0] === undefined) {
+      return this;
+    }
+
+    var i = 0,
+        k = this.length;
+
+    for (; i < k; i++) {
+      var element = this[i],
+          display = (0, _helpers.getComputedStyle)(element, null)['display'];
+
+      if (element.nodeType === 1 && display !== 'none') {
+        element.displayRef = display;
+        element.style.display = 'none';
+      }
+
+      element = display = null;
+    }
+
+    return this;
+  },
+
+  /**
+   * Shows each element in the matched set of elements
+   * @return {Object} Query object
+   */
+  show: function show() {
+    if (!this.length || this[0] === undefined) {
+      return this;
+    }
+
+    var i = 0,
+        k = this.length;
+
+    for (; i < k; i++) {
+      var element = this[i];
+
+      if (element.nodeType === 1 && (0, _helpers.getComputedStyle)(element, null)['display'] === 'none') {
+        element.style.display = element.displayRef || 'block';
+        try {
+          delete element.displayRef;
+        } catch (e) {
+          element.displayRef = null;
+        }
+      }
+
+      element = null;
+    }
+
+    return this;
+  }
+});
+
+exports.default = _core2.default;
+
+},{"../../common/helpers":7,"../core":22}],29:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2241,7 +2722,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../core":23}],23:[function(require,module,exports){
+},{"../core":22}],30:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2250,962 +2731,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _core = require('../core/');
+var _core = require('../core');
 
 var _core2 = _interopRequireDefault(_core);
 
-var _window = require('../common/window');
-
-var _window2 = _interopRequireDefault(_window);
-
-var _document = require('../common/document');
-
-var _objects = require('../common/objects');
-
-var _strings = require('../common/strings');
-
-var _arrays = require('../common/arrays');
-
-var _helpers = require('../common/helpers');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
-var fragmentContainer = {};
-
-/**
- * Define a local copy of $
- * @param {Mixed} selector String containing CSS selector(s), HTML tags to create, or DOM Element
- * @param {Mixed} context  Context in which to perform the search (can be a CSS Selector or DOM Element)
- */
-var $ = function $(selector, context) {
-  return new $.fn.init(selector, context);
-};
-
-$.fn = $.prototype = {
-  constructor: $,
-  version: '1.0.0',
-  init: function init(selector, context) {
-    this.length = 0;
-
-    if (!selector) {
-      return this;
-    }
-
-    if (selector.constructor === $) {
-      return selector;
-    }
-
-    var type = typeof selector === 'undefined' ? 'undefined' : _typeof(selector);
-
-    if (type === 'function') {
-      return $(_document.document).ready(selector);
-    }
-
-    this.selector = selector;
-    this.context = context;
-
-    if (selector === 'body' || selector === _document.document.body) {
-      this[this.length++] = this.context = _document.document.body;
-      return this;
-    }
-
-    if (selector === _window2.default || selector.nodeType || selector === 'body') {
-      this[this.length++] = this.context = selector;
-      return this;
-    }
-
-    if (type === 'string') {
-      selector = selector.trim();
-
-      if (selector[0] === '<' && selector[selector.length - 1] === '>' && $.regexp.fragments.test(selector)) {
-        selector = $.fragment(_document.document.createElement(fragmentContainer[RegExp.$1] || 'div'), selector);
-        this.selector = selector;
-      }
-    }
-
-    if (selector.length !== undefined && _objects.toString.call(selector) === '[object Array]') {
-      var i = 0,
-          k = selector.length;
-
-      for (; i < k; i++) {
-        this[this.length++] = selector[i] instanceof $ ? selector[i][0] : selector[i];
-      }
-
-      return this;
-    }
-
-    if (!this.context && this.context !== _document.document) {
-      context = this.context = _document.document;
-    } else {
-      context = $(this.context)[0];
-    }
-
-    return $.merge(this, $.query(selector, context));
-  }
-};
-
-/**
- * Creates a dictionary of fragment containers for
- * proper DOM node creation when using $.fragment
- */
-(0, _helpers.each)(['tbody', 'thead', 'tfoot', 'tr', 'th', 'td'], function (item) {
-  fragmentContainer[item] = item === 'th' || item === 'td' ? 'tr' : 'table';
-});
-
-/**
- * Returns the created DOM node(s) from a passed HTML string
- * @param  {String} html The string containing arbitrary HTML
- * @return {Array}       The DOM node(s)
- */
-$.fragment = function (container, html) {
-  container.innerHTML = '' + html;
-
-  var items = _arrays.slice.call(container.childNodes);
-
-  (0, _helpers.each)(items, function (element) {
-    return container.removeChild(element);
-  });
-
-  return items;
-};
-
-/**
- * Traverses the DOM and returns matched elements
- * @param  {Mixed} selector String containing CSS selector(s), HTML tags to create, or DOM Element
- * @param  {Mixed} context  Context in which to perform the search (can be a CSS Selector or DOM Element)
- * @return {Array}          NodeList of matched selectors
- */
-$.query = function (selector, context) {
-  var query = [];
-  var noSpace = selector.length && selector.indexOf(' ') < 0;
-
-  if (selector[0] === '#' && context === _document.document && noSpace) {
-    var element = context.getElementById(selector.slice(1));
-
-    if (element) {
-      query = [element];
-    }
-  } else {
-    if (context.nodeType === 1 || context.nodeType === 9) {
-      if (selector[0] === '.' && noSpace) {
-        query = context.getElementsByClassName(selector.slice(1));
-      } else if ($.regexp.tags.test(selector)) {
-        query = context.getElementsByTagName(selector);
-      } else {
-        query = context.querySelectorAll(selector);
-      }
-    }
-  }
-
-  return _arrays.slice.call(query);
-};
-
-_core2.default.apply($, {
-  /**
-   * Determines if a DOM element is a descendant of another DOM element
-   * @param  {Object}  container The DOM element or Query object that may contain the child element
-   * @param  {Object}  contained The DOM element or Query object that may be a descendant of the parent
-   * @return {Boolean}           True if the child element is a descendant of the parent, otherwise false
-   */
-  contains: function contains(container, contained) {
-    return !container || !contained ? false : !!((container = $(container)[0]) && (contained = $(contained)[0]) && container.contains(contained));
-  },
-
-  /**
-   * Get the children of each element in the set of matched elements, including text and comment nodes
-   * @return {DOM Element} The DOM element
-   * @return {Object}      The collection of matched elements
-   */
-  contents: function contents(element) {
-    var name = function name(o, n) {
-      return o.nodeName && o.nodeName.toUpperCase() === n.toUpperCase();
-    };
-
-    return name(element, 'iframe') ? $(element.contentDocument || element.contentWindow.document) : $(_arrays.slice.call(element.childNodes));
-  },
-
-  /**
-   * Determine whether or not a DOM element matches a given selector
-   * @param  {DOM Element} element  The DOM element to perform the test on
-   * @param  {String}      selector The selector to test
-   * @return {Boolean}              The value true or false
-   */
-  match: function match(element, selector) {
-    if (!element || element.nodeType !== 1) {
-      return;
-    }
-
-    var matches = function matches(element, selector) {
-      var nativeSelector = element[_core2.default.browser.nativeSelector];
-      return element && nativeSelector && nativeSelector.call(element, selector);
-    };
-
-    return matches(element, selector || '*');
-  },
-
-  /**
-   * Get the siblings of each element in the collection
-   * @param  {Object}      nodes   The collection of DOM nodes
-   * @param  {DOM Element} element The sibling to exclude from the collection (optional)
-   * @return {Array}       The collection of siblings
-   */
-  siblings: function siblings(nodes, element) {
-    var collection = [];
-
-    if (nodes == undefined) {
-      return collection;
-    }
-
-    for (; nodes; nodes = nodes.nextSibling) {
-      if (nodes.nodeType == 1 && nodes !== element) {
-        collection.push(nodes);
-      }
-    }
-
-    return collection;
-  }
-});
-
-/**
- * Map select methods from Eleven
- */
-(0, _helpers.each)(['ajax', 'ajaxSettings', 'appendQuery', 'browser', 'camelCase', 'dasherize', 'debounce', 'deparam', 'device', 'each', 'extend', 'format', 'get', 'getJSON', 'inArray', 'isArray', 'isArrayLike', 'isEmptyObject', 'isFunction', 'isNumber', 'isNumeric', 'isObject', 'isPlainObject', 'isString', 'isWindow', 'jsonP', 'map', 'merge', 'os', 'params', 'proxy', 'regexp', 'ready', 'serialize', 'supports', 'toArray', 'unique', 'uuid'], function (item) {
-  $[item] = _core2.default[item];
-});
-
-$.fn.init.prototype = $.fn;
-
-_core2.default.apply($.fn, {
-  concat: _arrays.concat,
-  forEach: _helpers.each,
-  indexOf: _helpers.indexOf,
-  reduce: _arrays.reduce,
-  splice: _arrays.splice,
-  each: $.each,
-  extend: $.extend,
-  /**
-   * Add additional items to an existing Query collection
-   * @param  {Mixed}  selector The Object or CSS selector
-   * @param  {Mixed}  context  The context of the selector
-   * @return {Object}          The modified Query Object
-   */
-  add: function add(selector, context) {
-    return this.chain($.unique($.merge(this, $(selector, context))));
-  },
-
-  /**
-   * Creates a reference to the original matched collection for chain breaking (e.g. using .end())
-   * @param  {Object} collection The collection to add the prev reference to
-   * @return {Object}            The modified collection
-   */
-  chain: function chain(collection) {
-    return !!collection && (collection.prevObject = this) && $(collection) || $();
-  },
-
-  /**
-   * Return the child elements of each element in the set of matched elements
-   * @param  {String} selector Filter by a selector (optional)
-   * @return {Object}          The collection of child elements
-   */
-  children: function children(selector) {
-    var collection = [];
-
-    if (this[0] === undefined) {
-      return undefined;
-    }
-
-    if (this.length === 1) {
-      collection = $.siblings(this[0].firstChild);
-    } else {
-      var i = 0,
-          k = this.length;
-
-      for (; i < k; i++) {
-        collection = [].concat(_toConsumableArray(collection), _toConsumableArray($.siblings(this[i].firstChild)));
-      }
-    }
-
-    return this.chain($(collection).filter(selector));
-  },
-
-  /**
-   * Create a copy, or deep copy (optional), of a node
-   * @param {Boolean} deep If true, the children of the node will also be cloned
-   */
-  clone: function clone(deep) {
-    var collection = this.map(function (item) {
-      return item.cloneNode(!!deep);
-    });
-    return $(collection);
-  },
-
-  /**
-   * Find the closest ancestor of the element that matches a given selector
-   * @param  {Mixed}  selector The selector we are looking for
-   * @param  {Mixed}  context  The context in which to perform the search
-   * @return {Object}          The matched element
-   */
-  closest: function closest(selector, context) {
-    if (!this.length) {
-      return undefined;
-    }
-
-    var element = this[0],
-        query = $(selector, context);
-
-    if (!query.length) {
-      return $();
-    }
-
-    while (element && query.indexOf(element) < 0) {
-      element = element !== context && element !== _document.document && element.parentNode;
-    }
-
-    return this.chain($(element || []));
-  },
-
-  /**
-   * Determines if a DOM element is a descendant of another DOM element
-   * @param  {Mixed} selector The CSS selector or DOM element
-   * @return {Boolean}        The true or false value
-   */
-  contains: function contains(selector) {
-    return $.contains(this, selector);
-  },
-
-  /**
-   * Get the children of each element in the set of matched elements, including text and comment nodes.
-   * @return {Object} The collection of matched elements
-   */
-  contents: function contents() {
-    return this[0] !== undefined && $.contents(this[0]);
-  },
-
-  /**
-   * Remove all child nodes from each parent element in the matched set
-   * @return {Object} Query object
-   */
-  empty: function empty() {
-
-    if (this[0] === undefined) {
-      return;
-    }
-
-    var i = 0,
-        k = this.length;
-
-    for (; i < k; i++) {
-      var element = this[i];
-
-      while (element.firstChild) {
-        if ('uid' in element.firstChild) {
-          $.data(element.firstChild, 'destroy');
-        }
-
-        element.removeChild(element.firstChild);
-      }
-
-      element = null;
-    }
-
-    return this;
-  },
-
-  /**
-   * Breaks the current chain and returns the set of matched elements defined in `prevObject` (i.e. previous state)
-   * @return {Object}  The matched elements from its previous state
-   */
-  end: function end() {
-    return this.prevObject || $();
-  },
-
-  /**
-   * Reduce the set of matched elements to the one at a specified index. If a negative integer is used
-   * it will do a reverse search of the set - eq(-1) will return the last item in the array.
-   * @param  {Integer} index Zero-based index of the element to match
-   * @return {Object}        The matched element in specified index of the collection
-   */
-  eq: function eq(index) {
-    return $(index < 0 ? this[index += this.length - 1] : this[index]);
-  },
-
-  /**
-   * Search descendants of an element and returns matches
-   * @param  {String} selector The element(s) to search for
-   * @return {Object}          The matched set of elements
-   */
-  find: function find(selector) {
-    var search;
-
-    if (!selector || typeof selector !== 'string') {
-      return [];
-    }
-
-    if (this.length === 1) {
-      search = $($.query(selector, this[0]));
-    } else {
-      search = $($.map(this, function (node) {
-        return $.query(selector, node);
-      }));
-    }
-
-    return this.chain(search);
-  },
-
-  /**
-   * Returns the first matched element in the collection
-   * @return {Object} The first matched element
-   */
-  first: function first() {
-    return $(this[0]);
-  },
-
-  /**
-   * Reduce the collection of matched elements to that of the passed selector
-   * @param  {String} selector A string containing a selector to match the current set of elements against
-   * @return {Object}          The matached elements object
-   */
-  filter: function filter(selector) {
-    if (!selector) {
-      return this;
-    }
-
-    return $(_arrays.filter.call(this, function (element) {
-      return $.match(element, selector);
-    }));
-  },
-
-  /**
-   * Retrieve the DOM element at the specified index the Query object collection
-   * @param  {Integer} index A zero-based index indicating which element to retrieve
-   * @return {Mixed}         A matched DOM element. If no index is specified all of the matched DOM elements are returned.
-   */
-  get: function get(index) {
-    return index !== undefined ? index < 0 ? this[this.length + index] : this[index] : _arrays.slice.call(this);
-  },
-
-  /**
-   * Hides each element in the matched set of elements
-   * @return {Object} Query object
-   */
-  hide: function hide() {
-    if (this[0] === undefined) {
-      return this;
-    }
-
-    var i = 0,
-        k = this.length;
-
-    for (; i < k; i++) {
-      var element = this[i],
-          display = (0, _helpers.getComputedStyle)(element, null)['display'];
-
-      if (element.nodeType === 1 && display !== 'none') {
-        element.displayRef = display;
-        element.style.display = 'none';
-      }
-
-      element = display = null;
-    }
-
-    return this;
-  },
-
-  /**
-   * Returns the HTML contents of the first element in a matched set or updates the contents of one or more elements
-   * @param  {String} html The HTML string to replace the contents with
-   * @return {Mixed}       The contents of an individual element, or sets the contents for each element in the matched set
-   */
-  html: function html(_html) {
-    var _this = this;
-
-    if (!this.length || this[0] === undefined) {
-      return undefined;
-    }
-
-    if (!_html) {
-      return this[0].innerHTML;
-    }
-
-    return this.empty().each(function () {
-      return $(_this).append(_html);
-    });
-  },
-
-  /**
-   * Returns the position of an element. If no element is provided, returns position of the current element among its siblings else -1 if not found.
-   * @param  {Mixed}  element The DOM element or CSS selector
-   * @return {Integer}        The index of the element
-   */
-  index: function index(selector) {
-    return this.length ? selector ? (0, _helpers.indexOf)(this, $(selector)[0]) : (0, _helpers.indexOf)(this[0].parentNode.children, this[0]) : undefined;
-  },
-
-  /**
-   * Returns the last element in a matched set
-   * @return {Object} The last element
-   */
-  last: function last() {
-    return $(this[this.length - 1]);
-  },
-
-  /**
-   * Returns a new $ collection of values by mapping each element
-   * in a collection through the iterative function
-   * @param {Function} fn The function to process each item against in the collection
-   */
-  map: function map(fn) {
-    return $($.map(this, function (element, index) {
-      return fn.call(element, index, element);
-    }));
-  },
-
-  /**
-   * Returns the offset object for the first matched element in a collection
-   * @return {Object} The offset object: height, left, top, width
-   */
-  offset: function offset(properties) {
-
-    if (!this.length || this[0] === undefined) {
-      return undefined;
-    }
-
-    var element = this[0].getBoundingClientRect();
-
-    return {
-      bottom: element.top + element.height + _window2.default.pageYOffset,
-      height: element.height,
-      left: element.left + _window2.default.pageXOffset,
-      right: element.left + element.width + _window2.default.pageXOffset,
-      top: element.top + _window2.default.pageYOffset,
-      width: element.width
-    };
-  },
-
-  /**
-   * Get the closest positioned parent element
-   * @return {Object} The parent DOM Element
-   */
-  offsetParent: function offsetParent() {
-    return this.map(function () {
-      var offsetParent = this.offsetParent || _document.document.body;
-
-      while (offsetParent && !$.regexp.root.test(offsetParent.nodeName) && $(offsetParent).css('position') === 'static') {
-        offsetParent = offsetParent.offsetParent;
-      }
-
-      return offsetParent;
-    });
-  },
-
-  /**
-   * Returns an HTML string of the element and its descendants
-   * @return {HTML String} The container element and its children
-   */
-  outerHTML: function outerHTML() {
-    return this[0] !== undefined && this[0].outerHTML || undefined;
-  },
-
-  /**
-   * Return the parent element of the first matched element
-   * @param  {String} selector The selector to filter by (optional)
-   * @return {Object}          The parent element object
-   */
-  parent: function parent(selector) {
-    var result;
-
-    if (!this[0].parentNode) {
-      return this;
-    }
-
-    if (selector) {
-      result = $(this[0].parentNode).filter(selector);
-    } else {
-      result = $(this[0].parentNode || []);
-    }
-
-    return this.chain(result);
-  },
-
-  /**
-   * Returns the current position of an element relative to its offset parent
-   * @return {Object} The position object containing the top and left coordinates
-   */
-  position: function position() {
-
-    if (!this.length) {
-      return undefined;
-    }
-
-    var element = $(this[0]),
-        offsetParent = $(this.offsetParent()),
-        offset = this.offset(),
-        first = offsetParent.eq(0),
-        parentOffset = $.regexp.root.test(offsetParent[0].nodeName) ? { top: 0, left: 0 } : offsetParent.offset();
-
-    offset.top -= parseFloat(element.css('marginTop')) || 0, offset.left -= parseFloat(element.css('marginLeft')) || 0, parentOffset.top += parseFloat(first.css('borderTopWidth')) || 0;
-    parentOffset.left += parseFloat(first.css('borderLeftWidth')) || 0;
-
-    return {
-      top: offset.top - parentOffset.top,
-      left: offset.left - parentOffset.left
-    };
-  },
-
-  /**
-   * Executes a function when the DOM is ready
-   * @param {Function} fn The function to execute
-   */
-  ready: function ready(fn) {
-    if ($.regexp.ready.test(_document.document.readyState)) {
-      fn.call();
-    } else {
-      _document.document.addEventListener('DOMContentLoaded', fn, false);
-    }
-
-    return this;
-  },
-
-  /**
-   * Shows each element in the matched set of elements
-   * @return {Object} Query object
-   */
-  show: function show() {
-    if (!this.length || this[0] === undefined) {
-      return this;
-    }
-
-    var i = 0,
-        k = this.length;
-
-    for (; i < k; i++) {
-      var element = this[i];
-
-      if (element.nodeType === 1 && (0, _helpers.getComputedStyle)(element, null)['display'] === 'none') {
-        element.style.display = element.displayRef || 'block';
-        try {
-          delete element.displayRef;
-        } catch (e) {
-          element.displayRef = null;
-        }
-      }
-
-      element = null;
-    }
-
-    return this;
-  },
-
-  /**
-   * Get the siblings of each element in the set of matched elements
-   * @param  {String} selector Selector to filter by (optional)
-   * @return {Object}          The siblings of the matched elements in the set
-   */
-  siblings: function siblings(selector) {
-    var collection = [];
-
-    if (!this.length) {
-      return undefined;
-    }
-
-    var i = 0,
-        k = this.length;
-
-    if (this.length === 1) {
-      if (this[0].nodeType == 1) {
-        this[0].parentNode && (collection = $.siblings(this[0].parentNode.firstChild, this[0]));
-      }
-    } else {
-      for (; i < k; i++) {
-        if (this[i].nodeType == 1) {
-          this[i].parentNode && (collection = [].concat(_toConsumableArray(collection), [$.siblings(this[i].parentNode.firstChild, this[i])]));
-        }
-      }
-    }
-
-    return this.chain($(collection).filter(selector));
-  },
-
-  /**
-   * Slice a matched collection
-   * @return {Object} The modified collection
-   */
-  slice: function slice() {
-    return $(_arrays.slice.apply(this, arguments));
-  },
-
-  /**
-   * Returns the text from the first element in the matched set, or sets the
-   * text value for one or more elements
-   * @param  {String} text The text content to set
-   * @return {Mixed}       Gets or sets the text content of the element(s)
-   */
-  text: function text(_text) {
-    if (!this[0] === undefined) {
-      return undefined;
-    }
-
-    if (!_text) {
-      return this[0].textContent;
-    }
-
-    var i = 0,
-        k = this.length;
-
-    for (; i < k; i++) {
-      var element = this[i];
-
-      if (element.nodeType) {
-        $(element).empty();
-
-        if (typeof _text === 'function') {
-          element.textContent = _text.call(element, i, element.textContent);
-        } else {
-          element.textContent = _text;
-        }
-      }
-
-      element = null;
-    }
-
-    return this;
-  },
-
-  /**
-   * Converts anything that can be iterated over into a real JavaScript Array
-   * @param  {Integer} start Zero-based index to start the array at (optional)
-   * @param  {Integer} end   Zero-based index to end the array at (optional)
-   * @return {Array}         The new array
-   */
-  toArray: function toArray(start, end) {
-    return $.toArray(this, start, end);
-  },
-
-  /**
-   * Gets the value for the first element in the matched set or sets the value for one or more elements
-   * @param  {Mixed} value The value to set
-   * @return {Mixed}       The property value
-   */
-  val: function val(value) {
-    if (this[0] === undefined) {
-      return;
-    }
-
-    if (value === undefined) {
-      return this[0].value;
-    }
-
-    for (var i = 0, k = this.length; i < k; i++) {
-      this[i].value = value;
-    }
-
-    return this;
-  },
-
-  /**
-   * Wrap an HTML fragment around each element in the matched set
-   * @param {Array} node The element(s) to wrap
-   */
-  wrap: function wrap(node) {
-    if (this[0] === undefined) {
-      return;
-    }
-
-    var node = $(node),
-        i = 0,
-        k = this.length,
-        element = null;
-
-    for (; i < k; i++) {
-      element = $(this[i]);
-      element.before(node) && node.append(element);
-    }
-
-    return this;
-  }
-});
-
-/**
- * Removes an element from the DOM
- * @return {Object}
- */
-(0, _helpers.each)(['detach', 'remove'], function (method, index) {
-  $.fn[method] = function (selector) {
-
-    if (!this.length || this[0] === undefined) {
-      return;
-    }
-
-    var i = 0,
-        k = this.length;
-
-    for (; i < k; i++) {
-      var element = this[i];
-
-      if (element.nodeType === 1) {
-        if (index === 1 && 'uid' in element) {
-          $.data(element, 'destroy');
-        }
-
-        element.parentNode && element.parentNode.removeChild(element);
-      }
-
-      element = null;
-    }
-
-    return this;
-  };
-});
-
-/**
- * .parents(), .next() and .prev() - get the next or previous sibling of
- * the first matched in a collection or get the ancestors of each element in
- * the set of matched elements
- * @param  {String} selector The selector to filter the elements against
- * @return {Object}          The matched element(s)
- */
-$.each({ parents: 'parentNode', next: 'nextElementSibling', prev: 'previousElementSibling' }, function (method, property) {
-  $.fn[method] = function (selector) {
-    if (!this.length) {
-      return undefined;
-    }
-
-    var collection = [],
-        elements = this;
-
-    while (elements.length > 0) {
-      elements = $.map(elements, function (element) {
-        element = element[property];
-
-        if (element && element.nodeType === 1 && (0, _helpers.indexOf)(collection, element) < 0) {
-          return collection.push(element) && element;
-        }
-      });
-    }
-
-    collection = selector ? $(collection).filter(selector) : $(collection);
-
-    return method !== 'parents' ? collection.first() : collection;
-  };
-});
-
-/**
- * Get all preceding or following siblings of the first matched element in a collection
- * @param  {String} selector Filter siblings by a selector (optional)
- * @return {Array}           The collection of child elements
- */
-(0, _helpers.each)(['nextAll', 'prevAll'], function (method) {
-  $.fn[method] = function (selector) {
-
-    if (!this.length || this[0] === undefined || !this[0].parentNode) {
-      return this;
-    }
-
-    var index = this.index(),
-        items = $(this[0].parentNode).children(selector),
-        collection = [];
-
-    (0, _helpers.each)(items, function (item, i) {
-      if (method === 'nextAll' ? i > index : i < index) {
-        collection.push(this);
-      }
-    });
-
-    return $(collection);
-  };
-});
-
-/**
- * .width() and .height() methods; Returns width or height of the
- * matched element or set the height and width of one or more elements
- *
- * .outerWidth and .outerHeight will return the elements
- *  width + padding + borders + margins (optional, pass true as param)
- * @param  {Mixed} value  If passed true, it will return the width/height including margins, otherwise, sets the value
- * @return {Mixed}        The property value, or the matched set
- */
-(0, _helpers.each)(['width', 'height', 'outerWidth', 'outerHeight'], function (method) {
-  $.fn[method] = function (value) {
-    var element = this[0],
-        dimension = method.replace('outer', '').toLowerCase(),
-        property = dimension.charAt(0).toUpperCase() + dimension.slice(1),
-        scrollOffset = 'scroll' + property,
-        clientOffset = 'client' + property,
-        offsetProperty = 'offset' + property,
-        padding = 0,
-        margin = 0,
-        extra = 0;
-
-    if (!element) {
-      return undefined;
-    }
-
-    if ($.isWindow(element)) {
-      return element['inner' + property];
-    }
-
-    if (element.nodeType === 9) {
-      var doc = _document.documentElement;
-
-      return Math.max(element.body[scrollOffset], element.body[offsetProperty], doc[scrollOffset], doc[offsetProperty], doc[clientOffset]);
-    }
-
-    if (value === undefined && method.indexOf('outer') < 0) {
-      return this.css(method);
-    }
-
-    if (method.indexOf('outer') !== -1) {
-      padding = dimension === 'width' ? this.css('paddingLeft') + this.css('paddingRight') : this.css('paddingTop') + this.css('paddingBottom');
-      margin = value === true ? dimension === 'width' ? this.css('marginLeft') + this.css('marginRight') : this.css('marginTop') + this.css('marginBottom') : dimension === 'width' ? this.css('borderLeftWidth') + this.css('borderRightWidth') : this.css('borderTopWidth') + this.css('borderBottomWidth');
-
-      return this.css(dimension) + padding + margin + extra;
-    }
-
-    return this.css(method, value);
-  };
-});
-
-/**
- * Sets or gets the scroll position for the first element - .scrollLeft() and .scrollTop()
- * @return {Mixed} The current X/Y scroll position or this
- */
-(0, _helpers.each)(['scrollLeft', 'scrollTop'], function (method, index) {
-  var top = index === 1,
-      property = top ? 'pageYOffset' : 'pageXOffset';
-
-  $.fn[method] = function (value) {
-
-    if (this[0] === undefined) {
-      return undefined;
-    }
-
-    var elem = this[0],
-        win = $.isWindow(elem) ? elem : elem.nodeType === 9 ? elem.defaultView || elem.parentWindow : false;
-
-    return value === undefined ? win ? property in win ? win[property] : _document.documentElement[method] : elem[method] : win ? win.scrollTo(!top ? value : $(win).scrollLeft(), top ? value : $(win).scrollTop()) : elem[method] = value;
-  };
-});
-
-_core2.default.query = $;
-
-exports.default = $;
-
-},{"../common/arrays":5,"../common/document":6,"../common/helpers":7,"../common/objects":9,"../common/strings":11,"../common/window":12,"../core/":13}],24:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-var _core = require('./core');
-
-var _core2 = _interopRequireDefault(_core);
-
-var _helpers = require('../common/helpers');
+var _helpers = require('../../common/helpers');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -3454,7 +2984,38 @@ _core2.default.events = {
 
 exports.default = _core2.default;
 
-},{"../common/helpers":7,"./core":23}],25:[function(require,module,exports){
+},{"../../common/helpers":7,"../core":22}],31:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+var _document = require('../../common/document');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * Executes a function when the DOM is ready
+ * @param {Function} fn The function to execute
+ */
+_core2.default.fn.ready = function (fn) {
+  if (_core2.default.regexp.ready.test(_document.document.readyState)) {
+    fn.call();
+  } else {
+    _document.document.addEventListener('DOMContentLoaded', fn, false);
+  }
+
+  return this;
+};
+
+exports.default = _core2.default;
+
+},{"../../common/document":6,"../core":22}],32:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3521,7 +3082,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../../common/document":6,"../../common/helpers":7,"../core":23}],26:[function(require,module,exports){
+},{"../../common/document":6,"../../common/helpers":7,"../core":22}],33:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3531,8 +3092,6 @@ Object.defineProperty(exports, "__esModule", {
 var _core = require('../core');
 
 var _core2 = _interopRequireDefault(_core);
-
-var _document = require('../../common/document');
 
 var _helpers = require('../../common/helpers');
 
@@ -3572,7 +3131,175 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _core2.default;
 
-},{"../../common/document":6,"../../common/helpers":7,"../core":23}],27:[function(require,module,exports){
+},{"../../common/helpers":7,"../core":22}],34:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * Create a copy, or deep copy (optional), of a node
+ * @param {Boolean} deep If true, the children of the node will also be cloned
+ */
+_core2.default.fn.clone = function (deep) {
+  var collection = this.map(function (item) {
+    return item.cloneNode(!!deep);
+  });
+
+  return (0, _core2.default)(collection);
+};
+
+exports.default = _core2.default;
+
+},{"../core":22}],35:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+var _helpers = require('../../common/helpers');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * Removes one or more elements from the DOM
+ * @return {Object}
+ */
+(0, _helpers.each)(['detach', 'remove'], function (method, index) {
+  _core2.default.fn[method] = function (selector) {
+
+    if (!this.length || this[0] === undefined) {
+      return;
+    }
+
+    var i = 0,
+        k = this.length;
+
+    for (; i < k; i++) {
+      var element = this[i];
+
+      if (element.nodeType === 1) {
+        if (index === 1 && 'uid' in element) {
+          _core2.default.data(element, 'destroy');
+        }
+
+        element.parentNode && element.parentNode.removeChild(element);
+      }
+
+      element = null;
+    }
+
+    return this;
+  };
+});
+
+exports.default = _core2.default;
+
+},{"../../common/helpers":7,"../core":22}],36:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * Remove all child nodes from each parent element in the matched set
+ * @return {Object} Query object
+ */
+_core2.default.fn.empty = function () {
+  if (this[0] === undefined) {
+    return;
+  }
+
+  var i = 0,
+      k = this.length;
+
+  for (; i < k; i++) {
+    var element = this[i];
+
+    while (element.firstChild) {
+      if ('uid' in element.firstChild) {
+        _core2.default.data(element.firstChild, 'destroy');
+      }
+
+      element.removeChild(element.firstChild);
+    }
+
+    element = null;
+  }
+
+  return this;
+};
+
+exports.default = _core2.default;
+
+},{"../core":22}],37:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+var _helpers = require('../../common/helpers');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_core2.default.fn.extend({
+  /**
+   * Returns the HTML contents of the first element in a matched set or updates the contents of one or more elements
+   * @param  {String} html The HTML string to replace the contents with
+   * @return {Mixed}       The contents of an individual element, or sets the contents for each element in the matched set
+   */
+  html: function html(_html) {
+    var _this = this;
+
+    if (!this.length || this[0] === undefined) {
+      return undefined;
+    }
+
+    if (!_html) {
+      return this[0].innerHTML;
+    }
+
+    return this.empty().each(function () {
+      return (0, _core2.default)(_this).append(_html);
+    });
+  },
+
+  /**
+   * Returns an HTML string of the element and its descendants
+   * @return {HTML String} The container element and its children
+   */
+  outerHTML: function outerHTML() {
+    return this[0] !== undefined && this[0].outerHTML || undefined;
+  }
+});
+
+exports.default = _core2.default;
+
+},{"../../common/helpers":7,"../core":22}],38:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3610,7 +3337,96 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _core2.default;
 
-},{"../../common/helpers":7,"../core":23}],28:[function(require,module,exports){
+},{"../../common/helpers":7,"../core":22}],39:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * Returns the text from the first element in the matched set, or sets the
+ * text value for one or more elements
+ * @param  {String} text The text content to set
+ * @return {Mixed}       Gets or sets the text content of the element(s)
+ */
+_core2.default.fn.text = function (text) {
+  if (!this[0] === undefined) {
+    return undefined;
+  }
+
+  if (!text) {
+    return this[0].textContent;
+  }
+
+  var i = 0,
+      k = this.length;
+
+  for (; i < k; i++) {
+    var element = this[i];
+
+    if (element.nodeType) {
+      (0, _core2.default)(element).empty();
+
+      if (typeof text === 'function') {
+        element.textContent = text.call(element, i, element.textContent);
+      } else {
+        element.textContent = text;
+      }
+    }
+
+    element = null;
+  }
+
+  return this;
+};
+
+exports.default = _core2.default;
+
+},{"../core":22}],40:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * Wrap an HTML fragment around each element in the matched set
+ * @param {Array} node The element(s) to wrap
+ */
+_core2.default.fn.wrap = function (node) {
+  if (this[0] === undefined) {
+    return;
+  }
+
+  var node = (0, _core2.default)(node),
+      i = 0,
+      k = this.length,
+      element = null;
+
+  for (; i < k; i++) {
+    element = (0, _core2.default)(this[i]);
+    element.before(node) && node.append(element);
+  }
+
+  return this;
+};
+
+exports.default = _core2.default;
+
+},{"../core":22}],41:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3623,23 +3439,587 @@ var _core2 = _interopRequireDefault(_core);
 
 require('./attributes/attr');
 
-require('./attributes/css');
+require('./attributes/val');
 
-require('./attributes/data');
+require('./css/classes');
 
-require('./events');
+require('./css/css');
+
+require('./css/dimensions');
+
+require('./css/position');
+
+require('./css/scroll');
+
+require('./css/showHide');
+
+require('./data/data');
+
+require('./events/events');
+
+require('./events/ready');
 
 require('./manipulation/append');
 
 require('./manipulation/beforeAfter');
 
+require('./manipulation/clone');
+
+require('./manipulation/detach');
+
+require('./manipulation/empty');
+
+require('./manipulation/html');
+
 require('./manipulation/prepend');
+
+require('./manipulation/text');
+
+require('./manipulation/wrap');
+
+require('./traversing/ancestors');
+
+require('./traversing/descendants');
+
+require('./traversing/position');
+
+require('./traversing/traversing');
+
+require('./utils/chain');
+
+require('./utils/utils');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = _core2.default;
 
-},{"./attributes/attr":20,"./attributes/css":21,"./attributes/data":22,"./core":23,"./events":24,"./manipulation/append":25,"./manipulation/beforeAfter":26,"./manipulation/prepend":27}],29:[function(require,module,exports){
+},{"./attributes/attr":20,"./attributes/val":21,"./core":22,"./css/classes":23,"./css/css":24,"./css/dimensions":25,"./css/position":26,"./css/scroll":27,"./css/showHide":28,"./data/data":29,"./events/events":30,"./events/ready":31,"./manipulation/append":32,"./manipulation/beforeAfter":33,"./manipulation/clone":34,"./manipulation/detach":35,"./manipulation/empty":36,"./manipulation/html":37,"./manipulation/prepend":38,"./manipulation/text":39,"./manipulation/wrap":40,"./traversing/ancestors":42,"./traversing/descendants":43,"./traversing/position":44,"./traversing/traversing":45,"./utils/chain":46,"./utils/utils":47}],42:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+var _helpers = require('../../common/helpers');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_core2.default.fn.extend({
+  /**
+   * Find the closest ancestor of the element that matches a given selector
+   * @param  {Mixed}  selector The selector we are looking for
+   * @param  {Mixed}  context  The context in which to perform the search
+   * @return {Object}          The matched element
+   */
+  closest: function closest(selector, context) {
+    if (!this.length) {
+      return undefined;
+    }
+
+    var element = this[0],
+        query = (0, _core2.default)(selector, context);
+
+    if (!query.length) {
+      return (0, _core2.default)();
+    }
+
+    while (element && query.indexOf(element) < 0) {
+      element = element !== context && element !== document && element.parentNode;
+    }
+
+    return this.chain((0, _core2.default)(element || []));
+  },
+
+  /**
+   * Get the closest positioned parent element
+   * @return {Object} The parent DOM Element
+   */
+  offsetParent: function offsetParent() {
+    return this.map(function () {
+      var offsetParent = this.offsetParent || document.body;
+
+      while (offsetParent && !_core2.default.regexp.root.test(offsetParent.nodeName) && (0, _core2.default)(offsetParent).css('position') === 'static') {
+        offsetParent = offsetParent.offsetParent;
+      }
+
+      return offsetParent;
+    });
+  },
+
+  /**
+   * Return the parent element of the first matched element
+   * @param  {String} selector The selector to filter by (optional)
+   * @return {Object}          The parent element object
+   */
+  parent: function parent(selector) {
+    var result;
+
+    if (!this[0].parentNode) {
+      return this;
+    }
+
+    if (selector) {
+      result = (0, _core2.default)(this[0].parentNode).filter(selector);
+    } else {
+      result = (0, _core2.default)(this[0].parentNode || []);
+    }
+
+    return this.chain(result);
+  },
+
+  /**
+   * Get the ancestors of each element in a set, optionally filtered by a CSS selector
+   * @param  {String} selector A string containing the CSS selector to filter elements by
+   * @return {Object}          Query object containing DOM elements of  elements of the selected element,
+   */
+  parents: function parents(selector) {
+    if (!this.length) {
+      return undefined;
+    }
+
+    var collection = [],
+        elements = this;
+
+    while (elements.length > 0) {
+      elements = _core2.default.map(elements, function (element) {
+        element = element[property];
+
+        if (element && element.nodeType === 1 && indexOf(collection, element) < 0) {
+          return collection.push(element) && element;
+        }
+      });
+    }
+
+    collection = selector ? (0, _core2.default)(collection).filter(selector) : (0, _core2.default)(collection);
+
+    return collection;
+  }
+});
+
+exports.default = _core2.default;
+
+},{"../../common/helpers":7,"../core":22}],43:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+var _helpers = require('../../common/helpers');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+/**
+ * Get the siblings of each element in the collection
+ * @param  {Object}      nodes   The collection of DOM nodes
+ * @param  {DOM Element} element The sibling to exclude from the collection (optional)
+ * @return {Array}       The collection of siblings
+ */
+_core2.default.siblings = function (nodes, element) {
+  var collection = [];
+
+  if (nodes == undefined) {
+    return collection;
+  }
+
+  for (; nodes; nodes = nodes.nextSibling) {
+    if (nodes.nodeType == 1 && nodes !== element) {
+      collection.push(nodes);
+    }
+  }
+
+  return collection;
+};
+
+_core2.default.fn.extend({
+  /**
+   * Return the child elements of each element in the set of matched elements
+   * @param  {String} selector Filter by a selector (optional)
+   * @return {Object}          The collection of child elements
+   */
+  children: function children(selector) {
+    var collection = [];
+
+    if (this[0] === undefined) {
+      return undefined;
+    }
+
+    if (this.length === 1) {
+      collection = _core2.default.siblings(this[0].firstChild);
+    } else {
+      var i = 0,
+          k = this.length;
+
+      for (; i < k; i++) {
+        collection = [].concat(_toConsumableArray(collection), _toConsumableArray(_core2.default.siblings(this[i].firstChild)));
+      }
+    }
+
+    return this.chain((0, _core2.default)(collection).filter(selector));
+  },
+
+  /**
+   * Get the siblings of each element in the set of matched elements
+   * @param  {String} selector Selector to filter by (optional)
+   * @return {Object}          The siblings of the matched elements in the set
+   */
+  siblings: function siblings(selector) {
+    var collection = [];
+
+    if (!this.length) {
+      return undefined;
+    }
+
+    var i = 0,
+        k = this.length;
+
+    if (this.length === 1) {
+      if (this[0].nodeType == 1) {
+        this[0].parentNode && (collection = _core2.default.siblings(this[0].parentNode.firstChild, this[0]));
+      }
+    } else {
+      for (; i < k; i++) {
+        if (this[i].nodeType == 1) {
+          this[i].parentNode && (collection = [].concat(_toConsumableArray(collection), [_core2.default.siblings(this[i].parentNode.firstChild, this[i])]));
+        }
+      }
+    }
+
+    return this.chain((0, _core2.default)(collection).filter(selector));
+  }
+});
+
+exports.default = _core2.default;
+
+},{"../../common/helpers":7,"../core":22}],44:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+var _helpers = require('../../common/helpers');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_core2.default.fn.extend({
+  /**
+   * Reduce the set of matched elements to the one at a specified index. If a negative integer is used
+   * it will do a reverse search of the set - eq(-1) will return the last item in the array.
+   * @param  {Integer} index Zero-based index of the element to match
+   * @return {Object}        The matched element in specified index of the collection
+   */
+  eq: function eq(index) {
+    return (0, _core2.default)(index < 0 ? this[index += this.length - 1] : this[index]);
+  },
+
+  /**
+   * Returns the first matched element in the collection
+   * @return {Object} The first matched element
+   */
+  first: function first() {
+    return (0, _core2.default)(this[0]);
+  },
+
+  /**
+   * Retrieve the DOM element at the specified index the Query object collection
+   * @param  {Integer} index A zero-based index indicating which element to retrieve
+   * @return {Mixed}         A matched DOM element. If no index is specified all of the matched DOM elements are returned.
+   */
+  get: function get(index) {
+    return index !== undefined ? index < 0 ? this[this.length + index] : this[index] : _helpers.slice.call(this);
+  },
+
+  /**
+   * Returns the last element in a matched set
+   * @return {Object} The last element
+   */
+  last: function last() {
+    return (0, _core2.default)(this[this.length - 1]);
+  }
+});
+
+exports.default = _core2.default;
+
+},{"../../common/helpers":7,"../core":22}],45:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+var _arrays = require('../../common/arrays');
+
+var _helpers = require('../../common/helpers');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_core2.default.extend({
+  /**
+   * Get the children of each element in the set of matched elements, including text and comment nodes
+   * @return {DOM Element} The DOM element
+   * @return {Object}      The collection of matched elements
+   */
+  contents: function contents(element) {
+    var name = function name(o, n) {
+      return o.nodeName && o.nodeName.toUpperCase() === n.toUpperCase();
+    };
+
+    return name(element, 'iframe') ? (0, _core2.default)(element.contentDocument || element.contentWindow.document) : (0, _core2.default)(_arrays.slice.call(element.childNodes));
+  },
+
+  /**
+   * Determine whether or not a DOM element matches a given selector
+   * @param  {DOM Element} element  The DOM element to perform the test on
+   * @param  {String}      selector The selector to test
+   * @return {Boolean}              The value true or false
+   */
+  match: function match(element, selector) {
+    if (!element || element.nodeType !== 1) {
+      return;
+    }
+
+    var matches = function matches(element, selector) {
+      var nativeSelector = element[_core2.default.browser.nativeSelector];
+      return element && nativeSelector && nativeSelector.call(element, selector);
+    };
+
+    return matches(element, selector || '*');
+  }
+});
+
+_core2.default.fn.extend({
+  /**
+   * Add additional items to an existing Query collection
+   * @param  {Mixed}  selector The Object or CSS selector
+   * @param  {Mixed}  context  The context of the selector
+   * @return {Object}          The modified Query Object
+   */
+  add: function add(selector, context) {
+    return this.chain(_core2.default.unique(_core2.default.merge(this, (0, _core2.default)(selector, context))));
+  },
+
+  /**
+   * Get the children of each element in the set of matched elements, including text and comment nodes.
+   * @return {Object} The collection of matched elements
+   */
+  contents: function contents() {
+    return this[0] !== undefined && _core2.default.contents(this[0]);
+  },
+
+  /**
+   * Reduce the collection of matched elements to that of the passed selector
+   * @param  {String} selector A string containing a selector to match the current set of elements against
+   * @return {Object}          The matached elements object
+   */
+  filter: function filter(selector) {
+    return !selector ? this : (0, _core2.default)(_arrays.filter.call(this, function (element) {
+      return _core2.default.match(element, selector);
+    }));
+  },
+
+  /**
+   * Search descendants of an element and returns matches
+   * @param  {String} selector The element(s) to search for
+   * @return {Object}          The matched set of elements
+   */
+  find: function find(selector) {
+    var search;
+
+    if (!selector || typeof selector !== 'string') {
+      return [];
+    }
+
+    if (this.length === 1) {
+      search = (0, _core2.default)(_core2.default.query(selector, this[0]));
+    } else {
+      search = (0, _core2.default)(_core2.default.map(this, function (node) {
+        return _core2.default.query(selector, node);
+      }));
+    }
+
+    return this.chain(search);
+  }
+});
+
+/**
+ * .next() and .prev() - get the next or previous sibling of
+ * the first matched in a collection or get the ancestors of each element in
+ * the set of matched elements
+ * @param  {String} selector The selector to filter the elements against
+ * @return {Object}          The matched element(s)
+ */
+_core2.default.each({ next: 'nextElementSibling', prev: 'previousElementSibling' }, function (method, property) {
+  _core2.default.fn[method] = function (selector) {
+    if (!this.length) {
+      return undefined;
+    }
+
+    var collection = [],
+        elements = this;
+
+    while (elements.length > 0) {
+      elements = _core2.default.map(elements, function (element) {
+        element = element[property];
+
+        if (element && element.nodeType === 1 && indexOf(collection, element) < 0) {
+          return collection.push(element) && element;
+        }
+      });
+    }
+
+    collection = selector ? (0, _core2.default)(collection).filter(selector) : (0, _core2.default)(collection);
+
+    return method !== 'parents' ? collection.first() : collection;
+  };
+});
+
+/**
+ * Get all preceding or following siblings of the first matched element in a collection
+ * @param  {String} selector Filter siblings by a selector (optional)
+ * @return {Array}           The collection of child elements
+ */
+(0, _helpers.each)(['nextAll', 'prevAll'], function (method) {
+  _core2.default.fn[method] = function (selector) {
+
+    if (!this.length || this[0] === undefined || !this[0].parentNode) {
+      return this;
+    }
+
+    var index = this.index();
+    var items = (0, _core2.default)(this[0].parentNode).children(selector);
+    var collection = [];
+
+    (0, _helpers.each)(items, function (item, i) {
+      if (method === 'nextAll' ? i > index : i < index) {
+        collection.push(this);
+      }
+    });
+
+    return (0, _core2.default)(collection);
+  };
+});
+
+exports.default = _core2.default;
+
+},{"../../common/arrays":5,"../../common/helpers":7,"../core":22}],46:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_core2.default.fn.extend({
+  /**
+   * Creates a reference to the original matched collection for chain breaking (e.g. using .end())
+   * @param  {Object} collection The collection to add the prev reference to
+   * @return {Object}            The modified collection
+   */
+  chain: function chain(collection) {
+    return !!collection && (collection.prevObject = this) && (0, _core2.default)(collection) || (0, _core2.default)();
+  },
+
+  /**
+   * Breaks the current chain and returns the set of matched elements defined in `prevObject` (i.e. previous state)
+   * @return {Object}  The matched elements from its previous state
+   */
+  end: function end() {
+    return this.prevObject || (0, _core2.default)();
+  }
+});
+
+exports.default = _core2.default;
+
+},{"../core":22}],47:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_core2.default.fn.extend({
+  /**
+   * Determines if a DOM element is a descendant of another DOM element
+   * @param  {Mixed} selector The CSS selector or DOM element
+   * @return {Boolean}        The true or false value
+   */
+  contains: function contains(selector) {
+    return _core2.default.contains(this, selector);
+  },
+
+  /**
+   * Returns a new $ collection of values by mapping each element
+   * in a collection through the iterative function
+   * @param {Function} fn The function to process each item against in the collection
+   */
+  map: function map(fn) {
+    return (0, _core2.default)(_core2.default.map(this, function (element, index) {
+      return fn.call(element, index, element);
+    }));
+  },
+
+  /**
+   * Slice a matched collection
+   * @return {Object} The modified collection
+   */
+  slice: function (_slice) {
+    function slice() {
+      return _slice.apply(this, arguments);
+    }
+
+    slice.toString = function () {
+      return _slice.toString();
+    };
+
+    return slice;
+  }(function () {
+    return (0, _core2.default)(slice.apply(this, arguments));
+  }),
+
+  /**
+   * Converts anything that can be iterated over into a real JavaScript Array
+   * @param  {Integer} start Zero-based index to start the array at (optional)
+   * @param  {Integer} end   Zero-based index to end the array at (optional)
+   * @return {Array}         The new array
+   */
+  toArray: function toArray(start, end) {
+    return _core2.default.toArray(this, start, end);
+  }
+});
+
+exports.default = _core2.default;
+
+},{"../core":22}],48:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3733,7 +4113,7 @@ _core2.default.speak = function (text) {
 
 exports.default = _core2.default;
 
-},{"../core":13,"./speechSynthesis":32}],30:[function(require,module,exports){
+},{"../core":13,"./speechSynthesis":51}],49:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3875,7 +4255,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../core":13}],31:[function(require,module,exports){
+},{"../core":13}],50:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3890,7 +4270,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _window2.default.SpeechRecognition || _window2.default.webkitSpeechRecognition || _window2.default.mozSpeechRecognition || _window2.default.msSpeechRecognition || _window2.default.oSpeechRecognition;
 
-},{"../common/window":12}],32:[function(require,module,exports){
+},{"../common/window":12}],51:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3905,7 +4285,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _window2.default.speechSynthesis;
 
-},{"../common/window":12}],33:[function(require,module,exports){
+},{"../common/window":12}],52:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3982,7 +4362,7 @@ var configs = {
 
 exports.default = configs;
 
-},{}],34:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -4038,7 +4418,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../core":13,"./speechSynthesis":32,"./speechSynthesisOverrides":33}],35:[function(require,module,exports){
+},{"../core":13,"./speechSynthesis":51,"./speechSynthesisOverrides":52}],54:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
