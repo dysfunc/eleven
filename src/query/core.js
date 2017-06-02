@@ -1,4 +1,4 @@
-import Eleven from '../core/';
+import Eleven from '../core';
 import window from '../common/window';
 import { document } from '../common/document';
 import { toString } from '../common/objects';

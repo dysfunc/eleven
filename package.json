@@ -28,5 +28,21 @@
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.7.0"
+  },
+  "devDependencies": {
+    "babel-istanbul": "^0.6.0",
+    "babel-istanbul-loader": "0.0.1",
+    "babel-loader": "^6.2.1",
+    "babel-plugin-add-module-exports": "^0.1.2",
+    "jasmine-core": "^2.4.1",
+    "karma": "^0.13.19",
+    "karma-chrome-launcher": "^0.2.2",
+    "karma-coverage": "^0.5.3",
+    "karma-jasmine": "^0.3.6",
+    "karma-sourcemap-loader": "^0.3.7",
+    "karma-webpack": "^1.7.0",
+    "loader-utils": "^0.2.12",
+    "rimraf": "^2.5.0",
+    "webpack": "^1.12.11"
   }
 }
