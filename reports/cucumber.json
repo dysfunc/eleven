@@ -1,0 +1,108 @@
+[
+  {
+    "keyword": "Feature",
+    "line": 1,
+    "name": "Google Search",
+    "tags": [],
+    "uri": "/Library/WebServer/Documents/eleven/test/e2e/features/google-search.feature",
+    "elements": [
+      {
+        "keyword": "Scenario",
+        "line": 3,
+        "name": "Searching Google",
+        "tags": [],
+        "id": "google-search;searching-google",
+        "steps": [
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "name": "I open Google`s search page",
+            "result": {
+              "status": "passed",
+              "duration": 10248
+            },
+            "line": 5,
+            "match": {
+              "location": "/Library/WebServer/Documents/eleven/test/e2e/features/step_definitions/steps.js:5"
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Then ",
+            "name": "the title is \"Google\"",
+            "result": {
+              "status": "passed",
+              "duration": 19
+            },
+            "line": 6,
+            "match": {
+              "location": "/Library/WebServer/Documents/eleven/test/e2e/features/step_definitions/steps.js:10"
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "name": "the Google search form exists",
+            "result": {
+              "status": "passed",
+              "duration": 43
+            },
+            "line": 7,
+            "match": {
+              "location": "/Library/WebServer/Documents/eleven/test/e2e/features/step_definitions/steps.js:14"
+            }
+          }
+        ]
+      },
+      {
+        "keyword": "Scenario",
+        "line": 9,
+        "name": "Searching Google again",
+        "tags": [],
+        "id": "google-search;searching-google-again",
+        "steps": [
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "name": "I open Google`s search page",
+            "result": {
+              "status": "passed",
+              "duration": 262
+            },
+            "line": 11,
+            "match": {
+              "location": "/Library/WebServer/Documents/eleven/test/e2e/features/step_definitions/steps.js:5"
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Then ",
+            "name": "the title is \"Google\"",
+            "result": {
+              "status": "passed",
+              "duration": 15
+            },
+            "line": 12,
+            "match": {
+              "location": "/Library/WebServer/Documents/eleven/test/e2e/features/step_definitions/steps.js:10"
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "name": "the Google search form exists",
+            "result": {
+              "status": "passed",
+              "duration": 35
+            },
+            "line": 13,
+            "match": {
+              "location": "/Library/WebServer/Documents/eleven/test/e2e/features/step_definitions/steps.js:14"
+            }
+          }
+        ]
+      }
+    ],
+    "id": "google-search"
+  }
+]
