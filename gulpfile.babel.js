@@ -9,6 +9,7 @@ import github from 'gulp-gh-pages';
 import gulp from 'gulp';
 import ifElse from 'gulp-if-else';
 import { Server } from 'karma';
+import nightwatch from 'gulp-nightwatch';
 import sass from 'gulp-sass';
 import scsslint from 'gulp-scss-lint';
 import source from 'vinyl-source-stream';
@@ -116,13 +117,24 @@ gulp.task('lint-style', function(done){
  return scsslintRunner({ failOnError: false });
 });
 
-gulp.task('karma', [], function(done){
+gulp.task('karma', [], (done) => {
   var server = new Server({
-    configFile: __dirname + '/test/unit/karma.config.js',
+    configFile: __dirname + '/test/unit/karma.conf.js',
     singleRun: true
   }, done);
 
   server.start();
+});
+
+
+gulp.task('nightwatch', () => {
+  return gulp.src('')
+    .pipe(nightwatch({
+      configFile:  __dirname + '/test/functional/nightwatch.json',
+      cliArgs: {
+        env: 'chrome'
+      }
+    }));
 });
 
 gulp.task('test', ['karma']);
