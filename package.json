@@ -34,6 +34,7 @@
     "babel-istanbul-loader": "0.0.1",
     "babel-loader": "^6.2.1",
     "babel-plugin-add-module-exports": "^0.1.2",
+    "gulp-nightwatch": "^0.3.2",
     "jasmine-core": "^2.4.1",
     "karma": "^0.13.19",
     "karma-chrome-launcher": "^0.2.2",
@@ -42,7 +43,9 @@
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^1.7.0",
     "loader-utils": "^0.2.12",
+    "nightwatch": "^0.9.15",
     "rimraf": "^2.5.0",
+    "selenium-standalone": "^6.4.1",
     "webpack": "^1.12.11"
   }
 }
