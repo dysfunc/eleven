@@ -24,7 +24,7 @@ $.fn.extend({
    */
   outerHTML(){
     return this[0] !== undefined && this[0].outerHTML || undefined;
-  }  
+  }
 });
 
 export default $;
