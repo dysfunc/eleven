@@ -15,6 +15,7 @@ build
 
 # testing
 test/unit/coverage
+test/functional/reports
 
 # demo
 app/js/eleven.js
