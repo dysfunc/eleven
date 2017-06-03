@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for src/speech/speak.js</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../prettify.css" />
+    <link rel="stylesheet" href="../../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../../index.html">all files</a> / <a href="index.html">src/speech/</a> speak.js
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">24.39% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>10/41</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">13.33% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>4/30</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">16.67% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>1/6</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">11.76% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>4/34</span>
+      </div>
+      <div class='fl pad1y'>
+        <span class="strong">1 statement, 1 branch</span>
+        <span class="quiet">Ignored</span>  &nbsp;&nbsp;&nbsp;&nbsp;
+      </div>
+    </div>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79</td><td class="line-coverage quiet"><span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import Eleven from '../core';
+import SpeechSynthesis from './speechSynthesis';
+&nbsp;
+Eleven.speak = <span class="fstat-no" title="function not covered" >function(text, <span class="cstat-no" title="statement not covered" >config = {}){</span></span>
+  var <span class="cstat-no" title="statement not covered" >cancelled = false;</span>
+  // get instance
+  const <span class="cstat-no" title="statement not covered" >eleven = Eleven();</span>
+  // clean up text
+  text = <span class="cstat-no" title="statement not covered" >text.replace(/[\"\`]/gm, '\'');</span>
+  // split text into 140 character chunks
+  const <span class="cstat-no" title="statement not covered" >chunks = text.match(Eleven.regexp.textChunks);</span>
+  // find voice profile
+  const <span class="cstat-no" title="statement not covered" >agent = Eleven.speechAgent;</span>
+&nbsp;
+  if(<span class="cstat-no" title="statement not covered" >!SpeechSynthesis){</span>
+    throw <span class="cstat-no" title="statement not covered" >'[Eleven] Speech Synthesis is not supported on this device.';</span>
+  }
+&nbsp;
+  if(<span class="cstat-no" title="statement not covered" >speechSynthesis.speaking){</span>
+    cancelled = <span class="cstat-no" title="statement not covered" >true;</span>
+    speechSynthesis.<span class="cstat-no" title="statement not covered" >cancel();</span>
+  }
+&nbsp;
+  chunks.<span class="cstat-no" title="statement not covered" >forEach(<span class="fstat-no" title="function not covered" >(text, index) =&gt; {</span></span>
+    // create new utterance
+    const <span class="cstat-no" title="statement not covered" >speechUtterance = new SpeechSynthesisUtterance();</span>
+&nbsp;
+    Eleven.<span class="cstat-no" title="statement not covered" >extend(speechUtterance, {</span>
+      voice: agent.suppportedVoice,
+      voiceURI: agent.voiceURI,
+      volume: agent.volume || 1,
+      rate: agent.rate || 1,
+      pitch: agent.pitch || 1,
+      text: text,
+      lang: agent.lang,
+      rvIndex: index,
+      rvTotal: chunks.length
+    });
+&nbsp;
+    if(<span class="cstat-no" title="statement not covered" >index == 0){</span>
+      speechUtterance.<span class="cstat-no" title="statement not covered" >onstart = <span class="fstat-no" title="function not covered" >() =&gt; {</span></span>
+        eleven.<span class="cstat-no" title="statement not covered" >getVisualizer('container').classList.add('ready');</span>
+        eleven.<span class="cstat-no" title="statement not covered" >getVisualizer().start();</span>
+&nbsp;
+        if(<span class="cstat-no" title="statement not covered" >Eleven.isFunction(config.onStart)){</span>
+          config.<span class="cstat-no" title="statement not covered" >onStart();</span>
+        }
+      };
+    }
+&nbsp;
+    if(<span class="cstat-no" title="statement not covered" >index == chunks.length - 1){</span>
+      speechUtterance.<span class="cstat-no" title="statement not covered" >onend = <span class="fstat-no" title="function not covered" >() =&gt; {</span></span>
+        // prevent this from being triggered when invoking speechSynthesis.cancel
+        if(<span class="cstat-no" title="statement not covered" >cancelled === true){</span>
+          cancelled = <span class="cstat-no" title="statement not covered" >false;</span>
+          return;
+        }
+&nbsp;
+        eleven.<span class="cstat-no" title="statement not covered" >getVisualizer().stop();</span>
+&nbsp;
+        if(<span class="cstat-no" title="statement not covered" >Eleven.isFunction(config.onEnd)){</span>
+          config.<span class="cstat-no" title="statement not covered" >onEnd();</span>
+        }
+      };
+    }
+&nbsp;
+    speechUtterance.<span class="cstat-no" title="statement not covered" >onerror = <span class="fstat-no" title="function not covered" >(error) =&gt; {</span></span>
+      if(<span class="cstat-no" title="statement not covered" >Eleven.debug){</span>
+        console.<span class="cstat-no" title="statement not covered" >error(`[Eleven] Unknow Error: ${error}`);</span>
+      }
+    };
+&nbsp;
+    speechSynthesis.<span class="cstat-no" title="statement not covered" >speak(speechUtterance);</span>
+  });
+};
+&nbsp;
+export default Eleven;
+&nbsp;
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Sat Jun 03 2017 09:27:58 GMT-0700 (PDT)
+</div>
+</div>
+<script src="../../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../../sorter.js"></script>
+</body>
+</html>

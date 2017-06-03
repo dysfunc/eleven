@@ -12,6 +12,9 @@
 node_modules
 build
 .publish
+phantomjsdriver.log
+scss-lint-report.xml
+selenium-debug.log
 
 # testing
 test/unit/coverage

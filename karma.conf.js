@@ -1,6 +1,6 @@
-var path = require('path');
+const path = require('path');
 
-module.exports = function (config) {
+module.exports = (config) => {
   config.set({
     browsers: ['Chrome'],
     coverageReporter: {
@@ -11,13 +11,13 @@ module.exports = function (config) {
       ]
     },
     files: [
-      'tests.webpack.js'
+      'test/unit/tests.webpack.js'
     ],
     frameworks: [
       'jasmine'
     ],
     preprocessors: {
-      'tests.webpack.js': ['webpack', 'sourcemap']
+      'test/unit/tests.webpack.js': ['webpack', 'sourcemap']
     },
     reporters: ['progress', 'coverage'],
     webpack: {
@@ -45,7 +45,7 @@ module.exports = function (config) {
         loaders: [
           {
             test: /\.js$/,
-            include: path.resolve(__dirname, '../../src'),
+            include: path.resolve(__dirname, '/src'),
             loader: 'babel',
             query: {
               cacheDirectory: true

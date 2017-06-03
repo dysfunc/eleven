@@ -10,6 +10,7 @@ import gulp from 'gulp';
 import ifElse from 'gulp-if-else';
 import { Server } from 'karma';
 import nightwatch from 'gulp-nightwatch';
+import run from 'run-sequence';
 import sass from 'gulp-sass';
 import scsslint from 'gulp-scss-lint';
 import source from 'vinyl-source-stream';
@@ -17,6 +18,8 @@ import uglify from 'gulp-uglify';
 import watchify from 'watchify';
 
 watchify.args.debug = true;
+
+run.use(gulp);
 
 const sync = browserSync.create();
 
@@ -117,24 +120,22 @@ gulp.task('lint-style', function(done){
  return scsslintRunner({ failOnError: false });
 });
 
-gulp.task('karma', [], (done) => {
+gulp.task('karma', (done) => {
   var server = new Server({
-    configFile: __dirname + '/test/unit/karma.conf.js',
+    configFile: __dirname + '/karma.conf.js',
     singleRun: true
   }, done);
 
   server.start();
 });
 
-
 gulp.task('nightwatch', () => {
   return gulp.src('')
     .pipe(nightwatch({
-      configFile:  __dirname + '/test/functional/nightwatch.json',
-      cliArgs: {
-        env: 'chrome'
-      }
+      configFile:  __dirname + '/nightwatch.conf.js'
     }));
 });
 
-gulp.task('test', ['karma']);
+gulp.task('unit', ['karma']);
+gulp.task('e2e', ['nightwatch']);
+gulp.task('test', () => run('unit', 'e2e'));
