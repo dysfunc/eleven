@@ -22,22 +22,32 @@ This uses experimental APIs which means you will need to use the latest version 
 * **Speech APIs** Powered by [SpeechRecognition](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition) and [SpeechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis) interface of the Web Speech APIs.
 * **Query Language** A light-weight jQuery-like solution but with a smaller footprint, faster performance, and designed for modern browsers. Provides a larger jQuery-compatible API which supports the majority of existing plugins out-of-the-box. If you know how to use jQuery then you already know how to use this query library.
 
-## TODO
-- [ ] Configure Karma, Mocha, Chai and Sinon
-- [ ] Tests
-- [ ] Documentation
+## Technical
 
-## Installing
+We current use the following:
+
+* Babel
+* ESLint
+* Gulp
+* Jasmine
+* Karma
+* Nightwatch
+* NPM
+* SASS + SCSS Lint
+* Webpack
+* Yarn
+
+## Development
 
 Read the [Contribution Guide](CONTRIBUTING.md) for detailed instructions on how to setup your Eleven development environment.
-
-## Contributing
-
-Contributions are always welcome (and needed), no matter how big or small the contribution. Before contributing, please read the [code of conduct](COC.md).
 
 ## API Documentation
 
 Use our [API documentation](API.md) to understand how to write plugins or extend Eleven's core functionality.
+
+## Contributing
+
+Contributions are always welcome (and needed), no matter how big or small the contribution. Before contributing, please read the [code of conduct](COC.md).
 
 ## Acknowledgements
 
