@@ -1,5 +1,5 @@
 import $ from '../core';
-import { slice } from '../../common/helpers';
+import { slice } from '../../common/arrays';
 
 $.fn.extend({
   /**
