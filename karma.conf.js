@@ -5,8 +5,8 @@ module.exports = (config) => {
     browsers: ['Chrome'],
     coverageReporter: {
       reporters: [
-        { type: 'html', subdir: 'html' },
-        { type: 'lcovonly', subdir: '.' },
+        { type: 'html',     dir: 'test/unit/coverage', subdir: 'html' },
+        { type: 'lcovonly', dir: 'test/unit/coverage', subdir: '.' },
         { type: 'text' }
       ]
     },
