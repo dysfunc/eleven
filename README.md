@@ -1,13 +1,16 @@
-[![Build Status](https://travis-ci.com/dysfunc/eleven.svg?token=4SK3g33gtmzfiqqsvG76&branch=master)](https://travis-ci.com/dysfunc/eleven)
-
 <p align="center">
   <a href="https://dysfunc.github.io/eleven/">
-    <img alt="Eleven" src="https://github.com/dysfunc/eleven/blob/master/app/img/logo.png?raw=true" width="400">
+    <img alt="Eleven" src="https://github.com/dysfunc/eleven/blob/master/app/img/logo.png?raw=true" width="400" />
   </a>
 </p>
 
 <p align="center">
   A web experiment of AI voice agents and visual interactions.
+</p>
+
+<p align="center">
+  <img src="https://travis-ci.com/dysfunc/eleven.svg?token=4SK3g33gtmzfiqqsvG76&branch=master" />
+  <img src="https://coveralls.io/repos/github/dysfunc/eleven/badge.svg?branch=master&t=pgIC2r" />
 </p>
 
 ---
