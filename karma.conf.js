@@ -1,7 +1,7 @@
 const path = require('path');
 
-module.exports = (config) => {
-  config.set({
+module.exports = (karma) => {
+  const config = {
     browsers: ['Chrome'],
     coverageReporter: {
       reporters: [
@@ -20,6 +20,12 @@ module.exports = (config) => {
       'test/unit/tests.webpack.js': ['webpack', 'sourcemap']
     },
     reporters: ['progress', 'coverage'],
+    customLaunchers: {
+      Chrome_travis_ci: {
+        base: 'Chrome',
+        flags: ['--no-sandbox']
+      }
+    },
     webpack: {
       cache: true,
       devtool: 'inline-source-map',
@@ -54,5 +60,11 @@ module.exports = (config) => {
         ]
       }
     }
-  });
+  };
+
+  if(process.env.TRAVIS) {
+    config.browsers = ['Chrome_travis_ci'];
+  }
+
+  karma.set(config);
 };
