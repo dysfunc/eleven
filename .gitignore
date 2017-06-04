@@ -2,6 +2,7 @@
 
 # configs
 !.babelrc
+!.coveralls.yml
 !.editorconfig
 !.eslintignore
 !.eslintrc
