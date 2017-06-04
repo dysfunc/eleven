@@ -41,7 +41,6 @@ Eleven.speak = function(text, config = {}){
       speechUtterance.onstart = () => {
         eleven.getVisualizer('container').classList.add('ready');
         eleven.getVisualizer().start();
-        eleven.listening = false;
 
         if(Eleven.isFunction(config.onStart)){
           config.onStart();
@@ -58,7 +57,6 @@ Eleven.speak = function(text, config = {}){
         }
 
         eleven.getVisualizer().stop();
-        eleven.listening = true;
 
         if(Eleven.isFunction(config.onEnd)){
           config.onEnd();
