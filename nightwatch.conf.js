@@ -15,7 +15,7 @@ require('nightwatch-cucumber')({
 });
 
 module.exports = {
-  output_folder: 'reports',
+  output_folder: 'test/e2e/reports',
   custom_assertions_path: '',
   live_output: false,
   disable_colors: false,
