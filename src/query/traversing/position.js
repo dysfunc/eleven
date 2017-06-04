@@ -1,5 +1,6 @@
 import $ from '../core';
 import { slice } from '../../common/arrays';
+import { indexOf } from '../../common/helpers';
 
 $.fn.extend({
   /**
@@ -25,6 +26,14 @@ $.fn.extend({
    */
   get(index){
     return index !== undefined ? (index < 0 ? this[this.length + index] : this[index]) : slice.call(this);
+  },
+  /**
+   * Returns the position of an element. If no element is provided, returns position of the current element among its siblings else -1 if not found.
+   * @param  {Mixed}  element The DOM element or CSS selector
+   * @return {Integer}        The index of the element
+   */
+  index: function(selector){
+    return this.length ? (selector ? indexOf(this, $(selector)[0]) : indexOf(this[0].parentNode.children, this[0])) : undefined;
   },
   /**
    * Returns the last element in a matched set

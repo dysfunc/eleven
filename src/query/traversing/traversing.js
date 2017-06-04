@@ -1,6 +1,6 @@
 import $ from '../core';
 import { filter, slice } from '../../common/arrays';
-import { each } from '../../common/helpers';
+import { each, indexOf } from '../../common/helpers';
 
 $.extend({
   /**
@@ -81,34 +81,27 @@ $.fn.extend({
 });
 
 /**
- * .next() and .prev() - get the next or previous sibling of
- * the first matched in a collection or get the ancestors of each element in
- * the set of matched elements
+ * .next() and .prev() - Get the next or previous sibling of the first matched element in a set
  * @param  {String} selector The selector to filter the elements against
  * @return {Object}          The matched element(s)
  */
 $.each({ next: 'nextElementSibling', prev: 'previousElementSibling' }, (method, property) => {
   $.fn[method] = function(selector){
-    if(!this.length){
+    if(!this.length || this[0] === undefined){
       return undefined;
     }
 
-    var collection = [],
-        elements = this;
+    var collection = [];
 
-    while(elements.length > 0){
-      elements = $.map(elements, function(element){
-        element = element[property];
-
-        if(element && element.nodeType === 1 && indexOf(collection, element) < 0){
-          return collection.push(element) && element;
-        }
-      });
-    }
+    this.each(function(element){
+      if(element[property] && !collection.includes(element)){
+        collection.push(element[property]);
+      }
+    });
 
     collection = selector ? $(collection).filter(selector) : $(collection);
 
-    return method !== 'parents' ? collection.first() : collection;
+    return collection;
   }
 });
 
