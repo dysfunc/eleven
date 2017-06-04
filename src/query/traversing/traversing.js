@@ -91,7 +91,7 @@ $.each({ next: 'nextElementSibling', prev: 'previousElementSibling' }, (method, 
       return undefined;
     }
 
-    var collection = [];
+    const collection = [];
 
     this.each(function(element){
       if(element[property] && !collection.includes(element)){
@@ -99,9 +99,7 @@ $.each({ next: 'nextElementSibling', prev: 'previousElementSibling' }, (method, 
       }
     });
 
-    collection = selector ? $(collection).filter(selector) : $(collection);
-
-    return collection;
+    return selector ? $(collection).filter(selector) : $(collection);
   }
 });
 
