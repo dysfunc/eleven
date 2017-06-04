@@ -39,6 +39,7 @@
     "karma": "^0.13.19",
     "karma-chrome-launcher": "^0.2.2",
     "karma-coverage": "^0.5.3",
+    "karma-coveralls": "^1.1.2",
     "karma-jasmine": "^0.3.6",
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^1.7.0",
@@ -52,8 +53,8 @@
     "semantic-release": "^6.3.6",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
-    "webpack": "^1.12.11",
-    "watchify": "^3.7.0"
+    "watchify": "^3.7.0",
+    "webpack": "^1.12.11"
   },
   "scripts": {
     "test": "gulp unit"

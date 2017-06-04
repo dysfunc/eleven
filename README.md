@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/dysfunc/eleven.svg?token=4SK3g33gtmzfiqqsvG76&branch=master)](https://travis-ci.com/dysfunc/eleven)
+
 <p align="center">
   <a href="https://dysfunc.github.io/eleven/">
     <img alt="Eleven" src="https://github.com/dysfunc/eleven/blob/master/app/img/logo.png?raw=true" width="400">

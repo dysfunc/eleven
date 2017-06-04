@@ -64,6 +64,7 @@ module.exports = (karma) => {
 
   if(process.env.TRAVIS) {
     config.browsers = ['Chrome_travis_ci'];
+    config.reporters.push('coveralls');
   }
 
   karma.set(config);
