@@ -7,6 +7,7 @@
 !.eslintrc
 !.gitignore
 !.scss-lint.yml
+!.travis.yml
 
 # generated
 node_modules
