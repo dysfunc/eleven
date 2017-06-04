@@ -54,5 +54,8 @@
     "vinyl-source-stream": "^1.1.0",
     "webpack": "^1.12.11",
     "watchify": "^3.7.0"
+  },
+  "scripts": {
+    "test": "gulp unit"
   }
 }
