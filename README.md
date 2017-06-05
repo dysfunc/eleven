@@ -31,7 +31,12 @@ This uses experimental APIs which means you will need to use the latest version 
 * **Speech APIs** Powered by [SpeechRecognition](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition) and [SpeechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis) interface of the Web Speech APIs.
 * **Query Language** A light-weight jQuery-like solution but with a smaller footprint, faster performance, and designed for modern browsers. Provides a larger jQuery-compatible API which supports the majority of existing plugins out-of-the-box. If you know how to use jQuery then you already know how to use this query library.
 
-## Technical
+## TODO
+
+- [ ] Write a ton of tests
+- [ ] Write a ton of useful documentation and provide examples
+
+## Development Tools
 
 We current use the following:
 

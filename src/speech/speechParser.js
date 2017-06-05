@@ -1,4 +1,5 @@
 import Eleven from '../core';
+import { indexOf } from '../common/helpers';
 
 Eleven.fn.extend({
   parser(results){
@@ -88,11 +89,11 @@ Eleven.fn.extend({
     const result = event.results[event.resultIndex];
     const results = [];
 
-    if(this.options.wakeCommands.indexOf(result[0].transcript.trim()) !== -1){
+    if(indexOf(this.options.wakeCommands, result[0].transcript.trim()) > -1){
       if(!this.activated){
         this.activated = true;
         this.container.classList.add('ready');
-        this.wakeSound.play();
+        // this.wakeSound.play();
 
         this.commandTimer = setTimeout(() => {
           this.activated = false;

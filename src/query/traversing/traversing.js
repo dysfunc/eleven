@@ -113,13 +113,14 @@ $.each({ next: 'nextElementSibling', prev: 'previousElementSibling' }, (method, 
  */
 each(['nextAll', 'prevAll'], (method) => {
   $.fn[method] = function(selector){
+    const parentNode = this[0].parentNode;
 
-    if(!this.length || this[0] === undefined || !this[0].parentNode){
+    if(this[0] === undefined || !parentNode){
       return this;
     }
 
     const index = this.index();
-    const items = $(this[0].parentNode).children(selector);
+    const items = $(parentNode).children(selector);
     const collection = [];
 
     each(items, function(item, i){
