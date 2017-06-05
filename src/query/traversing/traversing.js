@@ -97,7 +97,7 @@ $.each({ next: 'nextElementSibling', prev: 'previousElementSibling' }, (method, 
     for(; i < k; i++){
       const element = this[i];
 
-      if(element[property] && !collection.includes(element[property])){
+      if(element[property] && indexOf(collection, element[property]) < 0){
         collection.push(element[property]);
       }
     };

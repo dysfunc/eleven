@@ -1,5 +1,5 @@
 import $ from '../core';
-import { each } from '../../common/helpers';
+import { each, indexOf } from '../../common/helpers';
 
 $.fn.extend({
   /**
@@ -20,7 +20,7 @@ $.fn.extend({
       return $();
     }
 
-    while(element && query.includes(element)){
+    while(element && indexOf(query, element) < 0){
       element = element !== context && element !== document && element.parentNode;
     }
 
@@ -80,7 +80,7 @@ $.fn.extend({
       var parentNode = element.parentNode;
 
       while(parentNode){
-        if(parentNode !== document && !collection.includes(parentNode)){
+        if(parentNode !== document && indexOf(collection, parentNode) < 0){
           collection.push(parentNode);
         }
 
