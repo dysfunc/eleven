@@ -87,17 +87,20 @@ $.fn.extend({
  */
 $.each({ next: 'nextElementSibling', prev: 'previousElementSibling' }, (method, property) => {
   $.fn[method] = function(selector){
-    if(!this.length || this[0] === undefined){
+    if(this[0] === undefined){
       return undefined;
     }
 
     const collection = [];
+    var i = 0, k = this.length;
 
-    this.each(function(element){
-      if(element[property] && !collection.includes(element)){
+    for(; i < k; i++){
+      const element = this[i];
+
+      if(element[property] && !collection.includes(element[property])){
         collection.push(element[property]);
       }
-    });
+    };
 
     return selector ? $(collection).filter(selector) : $(collection);
   }

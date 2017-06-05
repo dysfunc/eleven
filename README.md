@@ -9,8 +9,12 @@
 </p>
 
 <p align="center">
-  <img src="https://travis-ci.com/dysfunc/eleven.svg?token=4SK3g33gtmzfiqqsvG76&branch=master" />
-  <img src="https://coveralls.io/repos/github/dysfunc/eleven/badge.svg?branch=master&t=pgIC2r" />
+  <a href='https://travis-ci.com/dysfunc/eleven/jobs/77966365'>
+    <img src="https://travis-ci.com/dysfunc/eleven.svg?token=4SK3g33gtmzfiqqsvG76&branch=master" />
+  </a>
+  <a href='https://coveralls.io/github/dysfunc/eleven?branch=master'>
+    <img src='https://coveralls.io/repos/github/dysfunc/eleven/badge.svg?branch=master&t=pgIC2r' alt='Coverage Status' />
+  </a>
 </p>
 
 ---

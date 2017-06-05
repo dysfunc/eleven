@@ -20,7 +20,7 @@ $.fn.extend({
       return $();
     }
 
-    while(element && query.indexOf(element) < 0){
+    while(element && query.includes(element)){
       element = element !== context && element !== document && element.parentNode;
     }
 
@@ -68,20 +68,24 @@ $.fn.extend({
    */
   parents(selector){
     if(!this.length){
-      return undefined;
+      return this;
     }
 
     var collection = [],
-        elements = this;
+        i = 0,
+        k = this.length;
 
-    while(elements.length > 0){
-      elements = $.map(elements, (element) => {
-        element = element[property];
+    for(; i < k; i++){
+      const element = this[i];
+      var parentNode = element.parentNode;
 
-        if(element && element.nodeType === 1 && indexOf(collection, element) < 0){
-          return collection.push(element) && element;
+      while(parentNode){
+        if(parentNode !== document && !collection.includes(parentNode)){
+          collection.push(parentNode);
         }
-      });
+
+        parentNode = parentNode.parentNode;
+      }
     }
 
     collection = selector ? $(collection).filter(selector) : $(collection);
