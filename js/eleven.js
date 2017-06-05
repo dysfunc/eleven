@@ -5,15 +5,17 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _core = require('./core');
+var _core = require('../core');
 
 var _core2 = _interopRequireDefault(_core);
 
-var _speechRecognition = require('./speech/speechRecognition');
+var _speechRecognition = require('../speech/speechRecognition');
 
 var _speechRecognition2 = _interopRequireDefault(_speechRecognition);
 
-var _document = require('./common/document');
+var _document = require('../common/document');
+
+var _helpers = require('../common/helpers');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -166,9 +168,656 @@ _core2.default.fn.extend({
   }
 });
 
+_core2.default.extend(_core2.default, {
+  /**
+   * Removes all rendered elements from the viewport and executes a callback
+   * @param  {Function} fn Function to execute once the view has been cleared
+   */
+  resetView: function resetView() {
+    var selector = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '.results';
+    var fn = arguments[1];
+
+    if (_core2.default.isFunction(selector)) {
+      fn = selector;
+      selector = '.results';
+    }
+
+    var results = _document.document.querySelectorAll(selector);
+
+    if (results && results.length) {
+      results.forEach(function (element) {
+        return element.parentNode && element.parentNode.removeChild(element);
+      });
+    }
+
+    if (_core2.default.isFunction(fn)) {
+      fn();
+    }
+
+    return this;
+  }
+});
+
 exports.default = _core2.default;
 
-},{"./common/document":6,"./core":13,"./speech/speechRecognition":50}],2:[function(require,module,exports){
+},{"../common/document":5,"../common/helpers":6,"../core":10,"../speech/speechRecognition":51}],2:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+var _commandsParser = require('./commandsParser');
+
+var _commandsParser2 = _interopRequireDefault(_commandsParser);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_core2.default.fn.extend({
+  /**
+   * Add one or more commands to Eleven's registry
+   *
+   * Example:
+   *
+   * var agent = Eleven();
+   *
+   * // add multiple commands
+   * agent.addCommands({
+   *   'hello :name': fn,
+   *   'hey (there)': fn,
+   *   'hi': fn
+   * });
+   *
+   * Add plugin scoped commands when registering them after initializing Eleven
+   *
+   * agent.plugin('news', {
+   *   commands: {
+   *     'show me the (top) stories': function(){
+   *       // do something when matched
+   *     }
+   *   }
+   * });
+   *
+   * @param  {Object} context  String containing the commands execution context
+   * @param  {Object} commands Object containing commands and their callbacks
+   * @return {Object}          Eleven instance
+   */
+  addCommands: function addCommands(context, commands) {
+    var command = {};
+
+    if (typeof context !== 'string') {
+      commands = context;
+      context = 'eleven';
+    }
+
+    for (var phrase in commands) {
+      command[context] = commands[phrase];
+
+      if (command[context]) {
+        if (_core2.default.isFunction(command[context])) {
+          this.registerCommands(context, phrase, (0, _commandsParser2.default)(phrase), command[context]);
+        } else if (_core2.default.isObject(command[context]) && _core2.default.isRegExp(command[context].regexp)) {
+          this.registerCommands(context, phrase, new RegExp(command[context].regexp.source, 'i'), command[context].callback);
+        } else {
+          if (this.options.debug) {
+            console.debug('[Eleven] Command registration failed: ' + phrase);
+          }
+        }
+      }
+    }
+
+    return this;
+  },
+
+  /**
+   * Adds the passed command to the command list
+   * @param {String}   context   String containing the commands plugin namespace
+   * @param {String}   phrase    String continaing the command to listen for
+   * @param {String}   command   String representing the RegExp for the command
+   * @param {Function} callback  Function to execute when command has been invoked
+   */
+  registerCommands: function registerCommands(context, phrase, command, callback) {
+    if (!this.commands[context]) {
+      this.commands[context] = {};
+    }
+
+    this.commands[context][phrase] = { callback: callback, phrase: phrase, regexp: command };
+
+    if (this.options.debug) {
+      console.debug('[Eleven] Command registered: ' + phrase);
+    }
+  },
+
+  /**
+   * Removes one or more commands from the command registry
+   *
+   * // remove a single command from Eleven
+   * agent.removeCommands('hi');
+   *
+   * // remove a single command from a plugin
+   * agent.removeCommands('news', 'hi');
+   *
+   * // remove multiple commands from Eleven
+   * agent.removeCommands(['hello :name', 'hi']);
+   *
+   * // remove multiple commands from a plugin
+   * agent.removeCommands('news', ['get news', 'todays headlines']);
+   *
+   * //remove all commands
+   * agent.removeCommands();
+   *
+   * @param  {String} context  String containing the plugin namespace to remove commands from
+   * @param  {Mixed}  commands String or Array containing commands to remove from the command list
+   * @return {Object}         Eleven instance
+   */
+  removeCommands: function removeCommands(context, commands) {
+    if (context === undefined && commands === undefined) {
+      return (this.commands = []) && this;
+    }
+
+    if (arguments.length === 1) {
+      commands = context;
+      context = 'eleven';
+    }
+
+    var currentCommmands = this.commands[context];
+
+    if (typeof commands === 'string') {
+      commands = [commands];
+    }
+
+    _core2.default.each(commands, function (command) {
+      if (currentCommmands[command]) {
+        delete currentCommmands[command];
+      }
+    });
+
+    return this;
+  }
+});
+
+exports.default = _core2.default;
+
+},{"../core":10,"./commandsParser":3}],3:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var parser = function parser(command) {
+  command = command.replace(_core2.default.regexp.escapeRegExp, '\\$&').replace(_core2.default.regexp.optionalParam, '(?:$1)?').replace(_core2.default.regexp.namedParam, function (match, optional) {
+    return optional ? match : '([^\\s]+)';
+  }).replace(_core2.default.regexp.splatParam, '(.*?)').replace(_core2.default.regexp.optionalRegex, '\\s*$1?\\s*');
+
+  return new RegExp('^' + command + '$', 'i');
+};
+
+exports.default = parser;
+
+},{"../core":10}],4:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var _ref = [],
+    concat = _ref.concat,
+    each = _ref.each,
+    filter = _ref.filter,
+    forEach = _ref.forEach,
+    includes = _ref.includes,
+    indexOf = _ref.indexOf,
+    pop = _ref.pop,
+    push = _ref.push,
+    reduce = _ref.reduce,
+    slice = _ref.slice,
+    splice = _ref.splice,
+    reverse = _ref.reverse,
+    shift = _ref.shift,
+    unshift = _ref.unshift;
+exports.concat = concat;
+exports.each = each;
+exports.filter = filter;
+exports.forEach = forEach;
+exports.includes = includes;
+exports.indexOf = indexOf;
+exports.pop = pop;
+exports.push = push;
+exports.reduce = reduce;
+exports.slice = slice;
+exports.splice = splice;
+exports.reverse = reverse;
+exports.shift = shift;
+exports.unshift = unshift;
+
+},{}],5:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.defaultView = exports.documentElement = exports.document = undefined;
+
+var _window = require('./window');
+
+var _window2 = _interopRequireDefault(_window);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var document = _window2.default.document;
+var documentElement = document.documentElement;
+var defaultView = document.defaultView;
+
+exports.document = document;
+exports.documentElement = documentElement;
+exports.defaultView = defaultView;
+
+},{"./window":9}],6:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.noop = exports.indexOf = exports.getComputedStyle = exports.each = exports.documentFragments = exports.addScript = undefined;
+
+var _window = require('../common/window');
+
+var _window2 = _interopRequireDefault(_window);
+
+var _document = require('../common/document');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var indexOf = function indexOf(collection, item) {
+  var k = collection.length;
+  var i = 0;
+
+  for (; i < k; i++) {
+    if (collection[i] === item) {
+      return i;
+    }
+  }
+
+  return -1;
+};
+
+var each = function each(collection, fn) {
+  var k = collection.length;
+  var i = 0;
+
+  for (; i < k; i++) {
+    var result = fn.call(collection[i], collection[i], i);
+
+    if (result === false) {
+      break;
+    }
+  }
+};
+
+var noop = function noop() {};
+
+var getComputedStyle = _window2.default.getComputedStyle || _document.defaultView && _document.defaultView.getComputedStyle;
+
+var addScript = function addScript(node) {
+  var src = node.src && node.src.length > 0;
+
+  try {
+    if (!src) {
+      (1, eval)(node.innerHTML);
+      return node;
+    }
+
+    var script = document.createElement('script');
+
+    script.type = 'text/javascript';
+    script.src = node.src;
+
+    return script;
+  } catch (error) {
+    console.log('There was an error with the script:' + error);
+  }
+};
+
+/**
+ * Use document fragments for faster DOM manipulation
+ * @param {Array}   elements  The elements to append to the fragement
+ * @param {Object}  container The container element to append the fragment to
+ * @param {Boolean} insert    A flag to determine insertion
+ */
+var documentFragments = function documentFragments(elements, container, insert) {
+  var fragment = document.createDocumentFragment(),
+      l = elements.length,
+      i = l - 1,
+      k = 0;
+
+  if (insert) {
+    for (; i >= 0; i--) {
+      var element = elements[i];
+
+      if (element.nodeName.toLowerCase() === 'script') {
+        element = addScript(element);
+      }
+
+      fragment.insertBefore(element, fragment.firstChild);
+    }
+
+    container.insertBefore(fragment, container.firstChild);
+  } else {
+    for (; k < l; k++) {
+      var element = elements[k];
+
+      if (element.nodeName.toLowerCase() === 'script') {
+        element = addScript(element);
+      }
+
+      fragment.appendChild(element);
+    }
+
+    container.appendChild(fragment);
+  }
+
+  fragment = null;
+};
+
+exports.addScript = addScript;
+exports.documentFragments = documentFragments;
+exports.each = each;
+exports.getComputedStyle = getComputedStyle;
+exports.indexOf = indexOf;
+exports.noop = noop;
+
+},{"../common/document":5,"../common/window":9}],7:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.vendor = exports.userAgent = exports.navigator = exports.language = undefined;
+
+var _window = require('./window');
+
+var _window2 = _interopRequireDefault(_window);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var navigator = _window2.default.navigator;
+
+var language = navigator.language,
+    userAgent = navigator.userAgent,
+    vendor = navigator.vendor;
+exports.language = language;
+exports.navigator = navigator;
+exports.userAgent = userAgent;
+exports.vendor = vendor;
+
+},{"./window":9}],8:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var _ref = {},
+    hasOwnProperty = _ref.hasOwnProperty,
+    toString = _ref.toString;
+exports.hasOwnProperty = hasOwnProperty;
+exports.toString = toString;
+
+},{}],9:[function(require,module,exports){
+(function (global){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = global;
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+
+},{}],10:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _window = require('./common/window');
+
+var _window2 = _interopRequireDefault(_window);
+
+var _document = require('./common/document');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var initialized = null;
+
+/**
+ * Eleven
+ * @constructor
+ * @param  {Object} options Object containing Eleven's configuration
+ * @return {Object}         Eleven instance
+ */
+var Eleven = function Eleven(selector, options) {
+  return initialized || new Eleven.fn.init(selector, options);
+};
+
+Eleven.fn = Eleven.prototype = {
+  constructor: Eleven,
+  version: '1.0.0',
+  init: function init(selector, options) {
+    var defaultConfig = {
+      debug: false,
+      language: 'en-US',
+      commands: [],
+      continuous: true,
+      interimResults: true,
+      maxAlternatives: 1,
+      requiresWakeWord: true,
+      speechAgent: 'Google UK English Female',
+      useEngine: false,
+      wakeCommands: ['eleven', '11'],
+      wakeSound: 'https://s3-us-west-1.amazonaws.com/voicelabs/static/chime.mp3',
+      wakeCommandWait: 10000,
+      template: '\n         <div class="eleven-container">\n          <div class="eleven-container-inner">\n            <div class="eleven-off">\n              <span>ELEVEN</span>\n            </div>\n            <div class="eleven-on">\n              <div class="bg"></div>\n              <div class="waves"></div>\n            </div>\n          </div>\n        </div>\n      '
+    };
+    // create a ref to the container element
+    this.container = _document.document.querySelector(selector);
+    // store options
+    this.options = Eleven.extend({}, defaultConfig, options || {});
+    // create markup
+    this.container.innerHTML = this.options.template;
+    // reference to all of our commands
+    this.commands = {};
+    // reference hash for installed plugins
+    this.plugins = {};
+    // create audio sound
+    this.wakeSound = new Audio(this.options.wakeSound);
+    // create interactive audio wave orb (aka Eleven)
+    this.visualize();
+    // prevent initialize until called
+    if (!this.options.delayStart) {
+      // enable all the things!
+      this.enable();
+    }
+    // print the instance config
+    if (this.options.debug) {
+      Eleven.debug = true;
+      console.debug(this);
+    }
+    // configure speechSynthesis voices
+    this.voices();
+    // allow single instance (Speech API does not support multiple instances yet)
+    initialized = this;
+    // always return this for chaining
+    return this;
+  }
+};
+
+Eleven.fn.init.prototype = Eleven.fn;
+
+exports.default = Eleven;
+
+},{"./common/document":5,"./common/window":9}],11:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('./core');
+
+var _core2 = _interopRequireDefault(_core);
+
+require('./query/query');
+
+require('./extend');
+
+require('./agent/agent');
+
+require('./commands/commands');
+
+require('./plugins/plugins');
+
+require('./speech/speak');
+
+require('./speech/speechParser');
+
+require('./speech/speechVoices');
+
+require('./visualizer/visualizer');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = _core2.default;
+
+},{"./agent/agent":1,"./commands/commands":2,"./core":10,"./extend":12,"./plugins/plugins":14,"./query/query":40,"./speech/speak":49,"./speech/speechParser":50,"./speech/speechVoices":54,"./visualizer/visualizer":55}],12:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('./core');
+
+var _core2 = _interopRequireDefault(_core);
+
+var _helpers = require('./common/helpers');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// expose query library utility methods to Eleven
+(0, _helpers.each)(['ajax', 'ajaxSettings', 'appendQuery', 'apply', 'browser', 'camelCase', 'dasherize', 'debounce', 'deparam', 'device', 'each', 'extend', 'format', 'get', 'getJSON', 'inArray', 'isArray', 'isArrayLike', 'isEmptyObject', 'isFunction', 'isNumber', 'isNumeric', 'isObject', 'isPlainObject', 'isString', 'isWindow', 'jsonP', 'map', 'merge', 'os', 'params', 'parseJSON', 'proxy', 'regexp', 'ready', 'serialize', 'stringify', 'supports', 'toArray', 'unique', 'uuid'], function (item) {
+  _core2.default[item] = _core2.default.query[item];
+});
+
+_core2.default.fn.extend = _core2.default.query.extend;
+
+exports.default = _core2.default;
+
+},{"./common/helpers":6,"./core":10}],13:[function(require,module,exports){
+'use strict';
+
+var _eleven = require('./eleven');
+
+var _eleven2 = _interopRequireDefault(_eleven);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+(function (root) {
+  return (root.Eleven = _eleven2.default) && ('$' in window ? window.Q = _eleven2.default.query : window.$ = _eleven2.default.query);
+})(window);
+
+},{"./eleven":11}],14:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// plugin registry cache
+var plugins = {};
+
+/**
+ * Adds plugin to the plugin registry for any Eleven instance to bind to
+ * @param {String}  name String containing the plugins unique name
+ * @param {Functio} fn   Constructor function of plugin
+ */
+_core2.default.plugin = function (name, fn) {
+  if (!plugins[name]) {
+    if (!_core2.default.isFunction(fn)) {
+      throw '"' + name + '" does not have a constructor.';
+    } else {
+      plugins[name] = fn;
+    }
+  }
+
+  return undefined;
+};
+
+_core2.default.fn.extend({
+  /**
+   * Plugin cache
+   * @type {Object}
+   */
+  plugins: {},
+  /**
+   * Returns the specified plugin
+   * @param  {String} name String containing the plugins unique name
+   * @return {Object}      The plugin instance
+   */
+  getPlugin: function getPlugin(name) {
+    if (!this.plugins[name]) {
+      throw '"' + name + '" plugin does not exist!';
+    }
+
+    return this.plugins[name];
+  },
+
+  /**
+   * Registers a plugin with a given Eleven instance
+   * @param {String} name    String containing the plugins unique name
+   * @param {Object} options Object containing the options for that plugin
+   * @type {Object}          Eleven
+   */
+  plugin: function plugin(name) {
+    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+    if (!this.plugins[name] && plugins[name]) {
+
+      if (options.commands) {
+        this.addCommands(name, options.commands);
+      }
+
+      this.plugins[name] = new plugins[name](options);
+    } else if (this.plugins[name] && plugins[name]) {
+      console.warn('"' + name + '" plugin has already been loaded!');
+    } else {
+      throw '"' + name + '" plugin does not exist!';
+    }
+
+    return this;
+  }
+});
+
+exports.default = _core2.default;
+
+},{"../core":10}],15:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -181,11 +830,11 @@ var _core = require('../core');
 
 var _core2 = _interopRequireDefault(_core);
 
-var _window = require('../common/window');
+var _window = require('../../common/window');
 
 var _window2 = _interopRequireDefault(_window);
 
-var _document = require('../common/document');
+var _document = require('../../common/document');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -499,71 +1148,65 @@ _core2.default.extend({
 
 exports.default = _core2.default;
 
-},{"../common/document":6,"../common/window":12,"../core":13}],3:[function(require,module,exports){
+},{"../../common/document":5,"../../common/window":9,"../core":18}],16:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var _core = require('../core');
 
 var _core2 = _interopRequireDefault(_core);
-
-var _commandsParser = require('./commandsParser');
-
-var _commandsParser2 = _interopRequireDefault(_commandsParser);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 _core2.default.fn.extend({
   /**
-   * Add one or more commands to Eleven's registry
-   *
-   * Example:
-   *
-   * var agent = Eleven();
-   *
-   * // add multiple commands
-   * agent.addCommands({
-   *   'hello :name': fn,
-   *   'hey (there)': fn,
-   *   'hi': fn
-   * });
-   *
-   * Add plugin scoped commands when registering them after initializing Eleven
-   *
-   * agent.plugin('news', {
-   *   commands: {
-   *     'show me the (top) stories': function(){
-   *       // do something when matched
-   *     }
-   *   }
-   * });
-   *
-   * @param  {Object} context  String containing the commands execution context
-   * @param  {Object} commands Object containing commands and their callbacks
-   * @return {Object}          Eleven instance
+   * Get the value of an attribute for the first element in the set of matched
+   * elements or set one or more attributes for every matched element
+   * @param  {Mixed} name  The name of the attribute to get or a hash of key/value pairs to set
+   * @param  {Mixed} value The value to set for one or more elements (optional)
+   * @return {Mixed}       The attribute value or the matched set
    */
-  addCommands: function addCommands(context, commands) {
-    var command = {};
+  attr: function attr(name, value) {
+    var element = this[0];
 
-    if (typeof context !== 'string') {
-      commands = context;
-      context = 'eleven';
+    if (!element || element && element.nodeType !== 1) {
+      return undefined;
     }
 
-    for (var phrase in commands) {
-      command[context] = commands[phrase];
-
-      if (command[context]) {
-        if (_core2.default.isFunction(command[context])) {
-          this.registerCommands(context, phrase, (0, _commandsParser2.default)(phrase), command[context]);
-        } else if (_core2.default.isObject(command[context]) && _core2.default.isRegExp(command[context].regexp)) {
-          this.registerCommands(context, phrase, new RegExp(command[context].regexp.source, 'i'), command[context].callback);
+    if (typeof name === 'string' && value === undefined && value != 'null') {
+      if (typeof name === 'string') {
+        return element.getAttribute(name);
+      }
+    } else {
+      var i = 0,
+          k = this.length,
+          process = function process(element, key, value) {
+        if (value == null) {
+          element.removeAttribute(key);
         } else {
-          if (this.options.debug) {
-            console.debug('[Eleven] Command registration failed: ' + phrase);
+          element.setAttribute(key, value);
+        }
+      };
+
+      for (; i < k; i++) {
+        element = this[i];
+
+        if (!element || element && element.nodeType !== 1) {
+          return undefined;
+        }
+
+        if (typeof name === 'string') {
+          process(element, name, value);
+        }
+
+        if ((typeof name === 'undefined' ? 'undefined' : _typeof(name)) === 'object') {
+          for (var key in name) {
+            process(element, key, name[key]);
           }
         }
       }
@@ -573,67 +1216,38 @@ _core2.default.fn.extend({
   },
 
   /**
-   * Adds the passed command to the command list
-   * @param {String}   context   String containing the commands plugin namespace
-   * @param {String}   phrase    String continaing the command to listen for
-   * @param {String}   command   String representing the RegExp for the command
-   * @param {Function} callback  Function to execute when command has been invoked
+   * Removes one or more attributes from a set of matched elements in a collection
+   * @param {Mixed} name The string or array of properties names to remove
    */
-  registerCommands: function registerCommands(context, phrase, command, callback) {
-    if (!this.commands[context]) {
-      this.commands[context] = {};
+  removeAttr: function removeAttr(name) {
+    if (this[0] === undefined) {
+      return;
     }
 
-    this.commands[context][phrase] = { callback: callback, phrase: phrase, regexp: command };
+    var i = 0,
+        k = this.length;
 
-    if (this.options.debug) {
-      console.debug('[Eleven] Command registered: ' + phrase);
-    }
-  },
+    for (; i < k; i++) {
+      var element = this[i];
 
-  /**
-   * Removes one or more commands from the command registry
-   *
-   * // remove a single command from Eleven
-   * agent.removeCommands('hi');
-   *
-   * // remove a single command from a plugin
-   * agent.removeCommands('news', 'hi');
-   *
-   * // remove multiple commands from Eleven
-   * agent.removeCommands(['hello :name', 'hi']);
-   *
-   * // remove multiple commands from a plugin
-   * agent.removeCommands('news', ['get news', 'todays headlines']);
-   *
-   * //remove all commands
-   * agent.removeCommands();
-   *
-   * @param  {String} context  String containing the plugin namespace to remove commands from
-   * @param  {Mixed}  commands String or Array containing commands to remove from the command list
-   * @return {Object}         Eleven instance
-   */
-  removeCommands: function removeCommands(context, commands) {
-    if (context === undefined && commands === undefined) {
-      return (this.commands = []) && this;
-    }
-
-    if (arguments.length === 1) {
-      commands = context;
-      context = 'eleven';
-    }
-
-    var currentCommmands = this.commands[context];
-
-    if (typeof commands === 'string') {
-      commands = [commands];
-    }
-
-    _core2.default.each(commands, function (command) {
-      if (currentCommmands[command]) {
-        delete currentCommmands[command];
+      if (element.nodeType !== 1) {
+        continue;
       }
-    });
+
+      if (typeof name === 'string') {
+        element.removeAttribute(name);
+      } else if (typeof name === 'array') {
+        var j = 0,
+            l = name.length;
+
+        for (; j < l; j++) {
+          var property = name[j];
+          element[property] && element.removeAttribute(property);
+        }
+      }
+
+      element = null;
+    }
 
     return this;
   }
@@ -641,7 +1255,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../core":13,"./commandsParser":4}],4:[function(require,module,exports){
+},{"../core":18}],17:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -653,307 +1267,32 @@ var _core = require('../core');
 var _core2 = _interopRequireDefault(_core);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var parser = function parser(command) {
-  command = command.replace(_core2.default.regexp.escapeRegExp, '\\$&').replace(_core2.default.regexp.optionalParam, '(?:$1)?').replace(_core2.default.regexp.namedParam, function (match, optional) {
-    return optional ? match : '([^\\s]+)';
-  }).replace(_core2.default.regexp.splatParam, '(.*?)').replace(_core2.default.regexp.optionalRegex, '\\s*$1?\\s*');
-
-  return new RegExp('^' + command + '$', 'i');
-};
-
-exports.default = parser;
-
-},{"../core":13}],5:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var _ref = [],
-    concat = _ref.concat,
-    each = _ref.each,
-    filter = _ref.filter,
-    forEach = _ref.forEach,
-    includes = _ref.includes,
-    indexOf = _ref.indexOf,
-    pop = _ref.pop,
-    push = _ref.push,
-    reduce = _ref.reduce,
-    slice = _ref.slice,
-    splice = _ref.splice,
-    reverse = _ref.reverse,
-    shift = _ref.shift,
-    unshift = _ref.unshift;
-exports.concat = concat;
-exports.each = each;
-exports.filter = filter;
-exports.forEach = forEach;
-exports.includes = includes;
-exports.indexOf = indexOf;
-exports.pop = pop;
-exports.push = push;
-exports.reduce = reduce;
-exports.slice = slice;
-exports.splice = splice;
-exports.reverse = reverse;
-exports.shift = shift;
-exports.unshift = unshift;
-
-},{}],6:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.defaultView = exports.documentElement = exports.document = undefined;
-
-var _window = require('./window');
-
-var _window2 = _interopRequireDefault(_window);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var document = _window2.default.document;
-var documentElement = document.documentElement;
-var defaultView = document.defaultView;
-
-exports.document = document;
-exports.documentElement = documentElement;
-exports.defaultView = defaultView;
-
-},{"./window":12}],7:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.noop = exports.indexOf = exports.getComputedStyle = exports.each = exports.documentFragments = exports.addScript = undefined;
-
-var _window = require('../common/window');
-
-var _window2 = _interopRequireDefault(_window);
-
-var _document = require('../common/document');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var indexOf = function indexOf(collection, item) {
-  var k = collection.length;
-  var i = 0;
-
-  for (; i < k; i++) {
-    if (collection[i] === item) {
-      return i;
-    }
-  }
-
-  return -1;
-};
-
-var each = function each(collection, fn) {
-  var k = collection.length;
-  var i = 0;
-
-  for (; i < k; i++) {
-    var result = fn.call(collection[i], collection[i], i);
-
-    if (result === false) {
-      break;
-    }
-  }
-};
-
-var noop = function noop() {};
-
-var getComputedStyle = _window2.default.getComputedStyle || _document.defaultView && _document.defaultView.getComputedStyle;
-
-var addScript = function addScript(node) {
-  var src = node.src && node.src.length > 0;
-
-  try {
-    if (!src) {
-      (1, eval)(node.innerHTML);
-      return node;
-    }
-
-    var script = document.createElement('script');
-
-    script.type = 'text/javascript';
-    script.src = node.src;
-
-    return script;
-  } catch (error) {
-    console.log('There was an error with the script:' + error);
-  }
-};
 
 /**
- * Use document fragments for faster DOM manipulation
- * @param {Array}   elements  The elements to append to the fragement
- * @param {Object}  container The container element to append the fragment to
- * @param {Boolean} insert    A flag to determine insertion
+ * Returns the value for the first element in a matched
+ * set or sets the value for one or more elements
+ * @param  {Mixed} value The value to set
+ * @return {Mixed}       The property value
  */
-var documentFragments = function documentFragments(elements, container, insert) {
-  var fragment = document.createDocumentFragment(),
-      l = elements.length,
-      i = l - 1,
-      k = 0;
-
-  if (insert) {
-    for (; i >= 0; i--) {
-      var element = elements[i];
-
-      if (element.nodeName.toLowerCase() === 'script') {
-        element = addScript(element);
-      }
-
-      fragment.insertBefore(element, fragment.firstChild);
-    }
-
-    container.insertBefore(fragment, container.firstChild);
-  } else {
-    for (; k < l; k++) {
-      var element = elements[k];
-
-      if (element.nodeName.toLowerCase() === 'script') {
-        element = addScript(element);
-      }
-
-      fragment.appendChild(element);
-    }
-
-    container.appendChild(fragment);
+_core2.default.fn.val = function (value) {
+  if (this[0] === undefined) {
+    return;
   }
 
-  fragment = null;
-};
+  if (value === undefined) {
+    return this[0].value;
+  }
 
-exports.addScript = addScript;
-exports.documentFragments = documentFragments;
-exports.each = each;
-exports.getComputedStyle = getComputedStyle;
-exports.indexOf = indexOf;
-exports.noop = noop;
+  for (var i = 0, k = this.length; i < k; i++) {
+    this[i].value = value;
+  }
 
-},{"../common/document":6,"../common/window":12}],8:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.vendor = exports.userAgent = exports.navigator = exports.language = undefined;
-
-var _window = require('./window');
-
-var _window2 = _interopRequireDefault(_window);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var navigator = _window2.default.navigator;
-
-var language = navigator.language,
-    userAgent = navigator.userAgent,
-    vendor = navigator.vendor;
-exports.language = language;
-exports.navigator = navigator;
-exports.userAgent = userAgent;
-exports.vendor = vendor;
-
-},{"./window":12}],9:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var _ref = {},
-    hasOwnProperty = _ref.hasOwnProperty,
-    toString = _ref.toString;
-exports.hasOwnProperty = hasOwnProperty;
-exports.toString = toString;
-
-},{}],10:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _core = require('../core');
-
-var _core2 = _interopRequireDefault(_core);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-_core2.default.regexp = {
-  alpha: /[A-Za-z]/,
-  browser: /(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*([\d\.]+)/i,
-  callback: /\?(.+)=\?/,
-  camel: /-([\da-z])/gi,
-  cssNumbers: /^((margin|padding|border)(top|right|bottom|left)(width|height)?|height|width|zindex?)$/i,
-  device: /((ip)(hone|ad|od)|playbook|hp-tablet)/i,
-  escape: /('|\\)/g,
-  fragments: /^\s*<(\w+|!)[^>]*>/,
-  jsonCallback: /\?(.+)=\?/,
-  jsonString: /^(\{|\[)/i,
-  manipulation: /insert|to/i,
-  mixed: /^(?:\s*<[\w!]+>|body|head|#\w(?:[\w-]*)|\.\w(?:[\w-]*))$/,
-  mobile: /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i,
-  ms: /^-ms-/,
-  nodes: /^(?:1|3|8|9|11)$/,
-  numbers: /^(0|[1-9][0-9]*)$/i,
-  os: /(android|blackberry|bb10|macintosh|webos|windows)/i,
-  protocol: /^((http|ftp|file)(s?)\:)?/,
-  queries: /[&?]{1,2}/,
-  quotes: /^["']|["']$/g,
-  ready: /^(?:complete|loaded|interactive)$/i,
-  relative: /^([-+=])/,
-  responseOK: /^(20[0-6]|304)$/g,
-  root: /^(?:body|html)$/i,
-  space: /\s+/g,
-  tags: /^[\w-]+$/,
-  templates: {
-    keys: /\{(\w+)\}/g,
-    indexed: /\{(\d+)\}/g
-  },
-  trim: /^\s+|\s+$/g,
-  whitespaces: /^\s*$/g,
-
-  // commands regexp
-  escapeRegExp: /[\-{}\[\]+?.,\\\^$|#]/g,
-  optionalParam: /\s*\((.*?)\)\s*/g,
-  optionalRegex: /(\(\?:[^)]+\))\?/g,
-  namedParam: /(\(\?)?:\w+/g,
-  readyState: /^(?:complete|loaded|interactive)$/i,
-  splatParam: /\*\w+/g,
-
-  // speech splitting
-  textChunks: /.{1,140}(?:\s+|\w+)/g
+  return this;
 };
 
 exports.default = _core2.default;
 
-},{"../core":13}],11:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var trim = String.prototype.trim;
-exports.trim = trim;
-
-},{}],12:[function(require,module,exports){
-(function (global){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = global;
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-
-},{}],13:[function(require,module,exports){
+},{"../core":18}],18:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -963,87 +1302,161 @@ Object.defineProperty(exports, "__esModule", {
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _window = require('./common/window');
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+var _window = require('../common/window');
 
 var _window2 = _interopRequireDefault(_window);
 
-var _document = require('./common/document');
+var _document = require('../common/document');
 
-var _helpers = require('./common/helpers');
+var _objects = require('../common/objects');
 
-var _objects = require('./common/objects');
+var _arrays = require('../common/arrays');
 
-var _strings = require('./common/strings');
-
-var _arrays = require('./common/arrays');
+var _helpers = require('../common/helpers');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-var initialized = null;
+var fragmentContainer = {};
 
 /**
- * Eleven
- * @constructor
- * @param  {Object} options Object containing Eleven's configuration
- * @return {Object}         Eleven instance
+ * Define a local copy of $
+ * @param {Mixed} selector String containing CSS selector(s), HTML tags to create, or DOM Element
+ * @param {Mixed} context  Context in which to perform the search (can be a CSS Selector or DOM Element)
  */
-var $ = function $(selector, options) {
-  return initialized || new $.fn.init(selector, options);
+var $ = function $(selector, context) {
+  return new $.fn.init(selector, context);
 };
 
 $.fn = $.prototype = {
   constructor: $,
   version: '1.0.0',
-  init: function init(selector, options) {
-    var defaultConfig = {
-      debug: false,
-      language: 'en-US',
-      commands: [],
-      continuous: true,
-      interimResults: true,
-      maxAlternatives: 1,
-      requiresWakeWord: true,
-      speechAgent: 'Google UK English Female',
-      useEngine: false,
-      wakeCommands: ['eleven', '11'],
-      wakeSound: 'https://s3-us-west-1.amazonaws.com/voicelabs/static/chime.mp3',
-      wakeCommandWait: 10000,
-      template: '\n         <div class="eleven-container">\n          <div class="eleven-container-inner">\n            <div class="eleven-off">\n              <span>ELEVEN</span>\n            </div>\n            <div class="eleven-on">\n              <div class="bg"></div>\n              <div class="waves"></div>\n            </div>\n          </div>\n        </div>\n      '
-    };
-    // create a ref to the container element
-    this.container = _document.document.querySelector(selector);
-    // store options
-    this.options = $.extend({}, defaultConfig, options || {});
-    // create markup
-    this.container.innerHTML = this.options.template;
-    // reference to all of our commands
-    this.commands = {};
-    // reference hash for installed plugins
-    this.plugins = {};
-    // create audio sound
-    this.wakeSound = new Audio(this.options.wakeSound);
-    // create interactive audio wave orb (aka Eleven)
-    this.visualize();
-    // prevent initialize until called
-    if (!this.options.delayStart) {
-      // enable all the things!
-      this.enable();
+  init: function init(selector, context) {
+    this.length = 0;
+
+    if (!selector) {
+      return this;
     }
-    // print the instance config
-    if (this.options.debug) {
-      $.debug = true;
-      console.debug(this);
+
+    if (selector.constructor === $) {
+      return selector;
     }
-    // configure speechSynthesis voices
-    this.voices();
-    // allow single instance (Speech API does not support multiple instances yet)
-    initialized = this;
-    // always return this for chaining
-    return this;
+
+    var type = typeof selector === 'undefined' ? 'undefined' : _typeof(selector);
+
+    if (type === 'function') {
+      return $(_document.document).ready(selector);
+    }
+
+    this.selector = selector;
+    this.context = context;
+
+    if (selector === 'body' || selector === _document.document.body) {
+      this[this.length++] = this.context = _document.document.body;
+      return this;
+    }
+
+    if (selector === _window2.default || selector.nodeType || selector === 'body') {
+      this[this.length++] = this.context = selector;
+      return this;
+    }
+
+    if (type === 'string') {
+      selector = selector.trim();
+
+      if (selector[0] === '<' && selector[selector.length - 1] === '>' && $.regexp.fragments.test(selector)) {
+        selector = $.fragment(_document.document.createElement(fragmentContainer[RegExp.$1] || 'div'), selector);
+        this.selector = selector;
+      }
+    }
+
+    if (selector.length !== undefined && _objects.toString.call(selector) === '[object Array]') {
+      var i = 0,
+          k = selector.length;
+
+      for (; i < k; i++) {
+        this[this.length++] = selector[i] instanceof $ ? selector[i][0] : selector[i];
+      }
+
+      return this;
+    }
+
+    if (this.context === undefined) {
+      this.context = _document.document;
+    } else {
+      this.context = $(this.context)[0];
+    }
+
+    return $.merge(this, $.query(this.selector, this.context));
   }
 };
+
+/**
+ * Creates a dictionary of fragment containers for
+ * proper DOM node creation when using $.fragment
+ */
+(0, _helpers.each)(['tbody', 'thead', 'tfoot', 'tr', 'th', 'td'], function (item) {
+  fragmentContainer[item] = item === 'th' || item === 'td' ? 'tr' : 'table';
+});
+
+/**
+ * Returns the created DOM node(s) from a passed HTML string
+ * @param  {String} html The string containing arbitrary HTML
+ * @return {Array}       The DOM node(s)
+ */
+$.fragment = function (container, html) {
+  container.innerHTML = '' + html;
+
+  var items = _arrays.slice.call(container.childNodes);
+
+  (0, _helpers.each)(items, function (element) {
+    return container.removeChild(element);
+  });
+
+  return items;
+};
+
+/**
+ * Traverses the DOM and returns matched elements
+ * @param  {Mixed} selector String containing CSS selector(s), HTML tags to create, or DOM Element
+ * @param  {Mixed} context  Context in which to perform the search (can be a CSS Selector or DOM Element)
+ * @return {Array}          NodeList of matched selectors
+ */
+$.query = function (selector, context) {
+  var query = [];
+  var noSpace = selector.length && selector.indexOf(' ') < 0;
+
+  if (selector[0] === '#' && context === _document.document && noSpace) {
+    var element = context.getElementById(selector.slice(1));
+
+    if (element) {
+      query = [element];
+    }
+  } else {
+    if (context.nodeType === 1 || context.nodeType === 9) {
+      if (selector[0] === '.' && noSpace) {
+        query = context.getElementsByClassName(selector.slice(1));
+      } else if ($.regexp.tags.test(selector)) {
+        query = context.getElementsByTagName(selector);
+      } else {
+        query = context.querySelectorAll(selector);
+      }
+    }
+  }
+
+  return _arrays.slice.call(query);
+};
+
+/**
+ * class2type cache
+ * @type {Object}
+ */
+var class2type = {};
 
 /**
  * Shallow copies all properties from the config object to the target object
@@ -1063,9 +1476,6 @@ $.apply = function (target, config, defaults) {
 
   return target;
 };
-
-// type check cache
-var class2type = {};
 
 $.apply($, {
   /**
@@ -1441,34 +1851,6 @@ $.apply($, {
   },
 
   /**
-   * Removes all rendered elements from the viewport and executes a callback
-   * @param  {Function} fn Function to execute once the view has been cleared
-   */
-  resetView: function resetView() {
-    var selector = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '.results';
-    var fn = arguments[1];
-
-    if ($.isFunction(selector)) {
-      fn = selector;
-      selector = '.results';
-    }
-
-    var results = _document.document.querySelectorAll(selector);
-
-    if (results && results.length) {
-      results.forEach(function (element) {
-        return element.parentNode && element.parentNode.removeChild(element);
-      });
-    }
-
-    if ($.isFunction(fn)) {
-      fn();
-    }
-
-    return this;
-  },
-
-  /**
    * Converts a value to JSON, optionally replacing values if a replacer function is specified
    * @param  {Mixed}  value    Value to convert to a JSON string
    * @param  {Mixed}  replacer Transforms values and properties encountered while stringifying (optional)
@@ -1560,614 +1942,6 @@ $.apply($, {
 
 $.fn.init.prototype = $.fn;
 
-$.fn.extend = $.extend;
-
-exports.default = $;
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-
-},{"./common/arrays":5,"./common/document":6,"./common/helpers":7,"./common/objects":9,"./common/strings":11,"./common/window":12}],14:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _core = require('../core');
-
-var _core2 = _interopRequireDefault(_core);
-
-var _window = require('../common/window');
-
-var _window2 = _interopRequireDefault(_window);
-
-var _navigator = require('../common/navigator');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-_core2.default.browser = function () {
-  var match = _navigator.userAgent.match(_core2.default.regexp.browser);
-  var browser = RegExp.$1.toLowerCase();
-  var types = {
-    'chrome': 'webkit',
-    'firefox': 'moz',
-    'msie': 'ms',
-    'opera': 'o',
-    'safari': 'webkit',
-    'trident': 'ms'
-  };
-  var prefix = types[browser] || '';
-  var nativeSelector = prefix + 'MatchesSelector';
-  var language = language;
-
-  return {
-    chrome: browser === 'chrome' && !('doNotTrack' in _window2.default),
-    cssPrefix: '-' + prefix + '-',
-    firefox: browser === 'firefox',
-    language: language && language.toLowerCase(),
-    msie: browser === 'msie' || browser === 'trident',
-    nativeSelector: prefix.length > 0 ? nativeSelector : nativeSelector[0].toLowerCase(),
-    opera: browser === 'opera',
-    prefix: prefix,
-    safari: browser === 'safari' && 'doNotTrack' in _window2.default,
-    version: _navigator.userAgent.match(/version\/([\.\d]+)/i) !== null ? RegExp.$1 : match[2],
-    webkit: prefix === 'webkit'
-  };
-}();
-
-exports.default = _core2.default;
-
-},{"../common/navigator":8,"../common/window":12,"../core":13}],15:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _core = require('../core');
-
-var _core2 = _interopRequireDefault(_core);
-
-var _window = require('../common/window');
-
-var _window2 = _interopRequireDefault(_window);
-
-var _navigator = require('../common/navigator');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-_core2.default.device = function () {
-  var match = _navigator.userAgent.match(_core2.default.regexp.device);
-  var device = RegExp.$1.toLowerCase();
-  var detectMobile = function () {
-    return _core2.default.regexp.mobile.test(_navigator.userAgent || _navigator.vendor || _window2.default.opera);
-  }();
-
-  return {
-    idevice: /((ip)(hone|ad|od))/i.test(device),
-    ipad: device === 'ipad',
-    iphone: device === 'iphone',
-    ipod: device === 'ipod',
-    isDesktop: !detectMobile,
-    isMobile: detectMobile,
-    orientation: function orientation() {
-      return _window2.default.innerHeight > _window2.default.innerWidth ? 'portrait' : 'landscape';
-    },
-    playbook: device === 'playbook',
-    touchpad: device === 'hp-tablet'
-  };
-}();
-
-exports.default = _core2.default;
-
-},{"../common/navigator":8,"../common/window":12,"../core":13}],16:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-var _core = require('../core');
-
-var _core2 = _interopRequireDefault(_core);
-
-var _window = require('../common/window');
-
-var _window2 = _interopRequireDefault(_window);
-
-var _navigator = require('../common/navigator');
-
-var _document = require('../common/document');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var supports = function supports(name) {
-  return _core2.default.camelCase(_core2.default.browser.prefix.replace(_core2.default.regexp.ms, 'ms-')) + name;
-};
-
-_core2.default.supports = {
-  cssAnimationEvents: supports('AnimationName') in _document.documentElement.style,
-  cssTransform: supports('Transform') in _document.documentElement.style,
-  cssTransitionEnd: supports('TransitionEnd') in _document.documentElement.style,
-  cssTransition: supports('Transition') in _document.documentElement.style,
-  cssTransform3d: 'WebKitCSSMatrix' in _window2.default && 'm11' in new WebKitCSSMatrix(),
-  homescreen: 'standalone' in _navigator.navigator,
-  localStorage: _typeof(_window2.default.localStorage) !== undefined,
-  pushState: 'pushState' in _window2.default.history && 'replaceState' in _window2.default.history,
-  retina: 'devicePixelRatio' in _window2.default && _window2.default.devicePixelRatio > 1,
-  touch: 'ontouchstart' in _window2.default
-};
-
-exports.default = _core2.default;
-
-},{"../common/document":6,"../common/navigator":8,"../common/window":12,"../core":13}],17:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _core = require('../core');
-
-var _core2 = _interopRequireDefault(_core);
-
-var _navigator = require('../common/navigator');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-_core2.default.os = function () {
-  var match = _navigator.userAgent.match(_core2.default.regexp.os);
-  var mobile = /mobile/i.test(_navigator.userAgent);
-  var os = RegExp.$1.toLowerCase();
-
-  if (_core2.default.device.idevice) {
-    return 'ios';
-  }
-
-  if (os === 'blackberry' && mobile) {
-    return 'bbmobile';
-  }
-
-  if (os === 'macintosh') {
-    return 'osx';
-  }
-
-  return os;
-}();
-
-exports.default = _core2.default;
-
-},{"../common/navigator":8,"../core":13}],18:[function(require,module,exports){
-'use strict';
-
-var _core = require('./core');
-
-var _core2 = _interopRequireDefault(_core);
-
-require('./agent');
-
-require('./ajax/ajax');
-
-require('./commands/commands');
-
-require('./common/regexp');
-
-require('./detection/browser');
-
-require('./detection/device');
-
-require('./detection/feature');
-
-require('./detection/os');
-
-require('./query/query');
-
-require('./plugins');
-
-require('./speech/speak');
-
-require('./speech/speechParser');
-
-require('./speech/speechVoices');
-
-require('./visualizer');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-(function (root) {
-  return (root.Eleven = _core2.default) && ('$' in window ? window.Q = _core2.default.query : window.$ = _core2.default.query);
-})(window);
-
-},{"./agent":1,"./ajax/ajax":2,"./commands/commands":3,"./common/regexp":10,"./core":13,"./detection/browser":14,"./detection/device":15,"./detection/feature":16,"./detection/os":17,"./plugins":19,"./query/query":41,"./speech/speak":48,"./speech/speechParser":49,"./speech/speechVoices":53,"./visualizer":54}],19:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _core = require('./core');
-
-var _core2 = _interopRequireDefault(_core);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// plugin registry cache
-var plugins = {};
-
-/**
- * Adds plugin to the plugin registry for any Eleven instance to bind to
- * @param {String}  name String containing the plugins unique name
- * @param {Functio} fn   Constructor function of plugin
- */
-_core2.default.plugin = function (name, fn) {
-  if (!plugins[name]) {
-    if (!_core2.default.isFunction(fn)) {
-      throw '"' + name + '" does not have a constructor.';
-    } else {
-      plugins[name] = fn;
-    }
-  }
-
-  return undefined;
-};
-
-_core2.default.fn.extend({
-  /**
-   * Plugin cache
-   * @type {Object}
-   */
-  plugins: {},
-  /**
-   * Returns the specified plugin
-   * @param  {String} name String containing the plugins unique name
-   * @return {Object}      The plugin instance
-   */
-  getPlugin: function getPlugin(name) {
-    if (!this.plugins[name]) {
-      throw '"' + name + '" plugin does not exist!';
-    }
-
-    return this.plugins[name];
-  },
-
-  /**
-   * Registers a plugin with a given Eleven instance
-   * @param {String} name    String containing the plugins unique name
-   * @param {Object} options Object containing the options for that plugin
-   * @type {Object}          Eleven
-   */
-  plugin: function plugin(name) {
-    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-    if (!this.plugins[name] && plugins[name]) {
-
-      if (options.commands) {
-        this.addCommands(name, options.commands);
-      }
-
-      this.plugins[name] = new plugins[name](options);
-    } else if (this.plugins[name] && plugins[name]) {
-      console.warn('"' + name + '" plugin has already been loaded!');
-    } else {
-      throw '"' + name + '" plugin does not exist!';
-    }
-
-    return this;
-  }
-});
-
-exports.default = _core2.default;
-
-},{"./core":13}],20:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-var _core = require('../core');
-
-var _core2 = _interopRequireDefault(_core);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-_core2.default.fn.extend({
-  /**
-   * Get the value of an attribute for the first element in the set of matched
-   * elements or set one or more attributes for every matched element
-   * @param  {Mixed} name  The name of the attribute to get or a hash of key/value pairs to set
-   * @param  {Mixed} value The value to set for one or more elements (optional)
-   * @return {Mixed}       The attribute value or the matched set
-   */
-  attr: function attr(name, value) {
-    var element = this[0];
-
-    if (!element || element && element.nodeType !== 1) {
-      return undefined;
-    }
-
-    if (typeof name === 'string' && value === undefined && value != 'null') {
-      if (typeof name === 'string') {
-        return element.getAttribute(name);
-      }
-    } else {
-      var i = 0,
-          k = this.length,
-          process = function process(element, key, value) {
-        if (value == null) {
-          element.removeAttribute(key);
-        } else {
-          element.setAttribute(key, value);
-        }
-      };
-
-      for (; i < k; i++) {
-        element = this[i];
-
-        if (!element || element && element.nodeType !== 1) {
-          return undefined;
-        }
-
-        if (typeof name === 'string') {
-          process(element, name, value);
-        }
-
-        if ((typeof name === 'undefined' ? 'undefined' : _typeof(name)) === 'object') {
-          for (var key in name) {
-            process(element, key, name[key]);
-          }
-        }
-      }
-    }
-
-    return this;
-  },
-
-  /**
-   * Removes one or more attributes from a set of matched elements in a collection
-   * @param {Mixed} name The string or array of properties names to remove
-   */
-  removeAttr: function removeAttr(name) {
-    if (this[0] === undefined) {
-      return;
-    }
-
-    var i = 0,
-        k = this.length;
-
-    for (; i < k; i++) {
-      var element = this[i];
-
-      if (element.nodeType !== 1) {
-        continue;
-      }
-
-      if (typeof name === 'string') {
-        element.removeAttribute(name);
-      } else if (typeof name === 'array') {
-        var j = 0,
-            l = name.length;
-
-        for (; j < l; j++) {
-          var property = name[j];
-          element[property] && element.removeAttribute(property);
-        }
-      }
-
-      element = null;
-    }
-
-    return this;
-  }
-});
-
-exports.default = _core2.default;
-
-},{"../core":22}],21:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _core = require('../core');
-
-var _core2 = _interopRequireDefault(_core);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * Returns the value for the first element in a matched
- * set or sets the value for one or more elements
- * @param  {Mixed} value The value to set
- * @return {Mixed}       The property value
- */
-_core2.default.fn.val = function (value) {
-  if (this[0] === undefined) {
-    return;
-  }
-
-  if (value === undefined) {
-    return this[0].value;
-  }
-
-  for (var i = 0, k = this.length; i < k; i++) {
-    this[i].value = value;
-  }
-
-  return this;
-};
-
-exports.default = _core2.default;
-
-},{"../core":22}],22:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-var _core = require('../core/');
-
-var _core2 = _interopRequireDefault(_core);
-
-var _window = require('../common/window');
-
-var _window2 = _interopRequireDefault(_window);
-
-var _document = require('../common/document');
-
-var _objects = require('../common/objects');
-
-var _arrays = require('../common/arrays');
-
-var _helpers = require('../common/helpers');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var fragmentContainer = {};
-
-/**
- * Define a local copy of $
- * @param {Mixed} selector String containing CSS selector(s), HTML tags to create, or DOM Element
- * @param {Mixed} context  Context in which to perform the search (can be a CSS Selector or DOM Element)
- */
-var $ = function $(selector, context) {
-  return new $.fn.init(selector, context);
-};
-
-$.fn = $.prototype = {
-  constructor: $,
-  version: '1.0.0',
-  init: function init(selector, context) {
-    this.length = 0;
-
-    if (!selector) {
-      return this;
-    }
-
-    if (selector.constructor === $) {
-      return selector;
-    }
-
-    var type = typeof selector === 'undefined' ? 'undefined' : _typeof(selector);
-
-    if (type === 'function') {
-      return $(_document.document).ready(selector);
-    }
-
-    this.selector = selector;
-    this.context = context;
-
-    if (selector === 'body' || selector === _document.document.body) {
-      this[this.length++] = this.context = _document.document.body;
-      return this;
-    }
-
-    if (selector === _window2.default || selector.nodeType || selector === 'body') {
-      this[this.length++] = this.context = selector;
-      return this;
-    }
-
-    if (type === 'string') {
-      selector = selector.trim();
-
-      if (selector[0] === '<' && selector[selector.length - 1] === '>' && $.regexp.fragments.test(selector)) {
-        selector = $.fragment(_document.document.createElement(fragmentContainer[RegExp.$1] || 'div'), selector);
-        this.selector = selector;
-      }
-    }
-
-    if (selector.length !== undefined && _objects.toString.call(selector) === '[object Array]') {
-      var i = 0,
-          k = selector.length;
-
-      for (; i < k; i++) {
-        this[this.length++] = selector[i] instanceof $ ? selector[i][0] : selector[i];
-      }
-
-      return this;
-    }
-
-    if (this.context === undefined) {
-      this.context = _document.document;
-    } else {
-      this.context = $(this.context)[0];
-    }
-
-    return $.merge(this, $.query(this.selector, this.context));
-  }
-};
-
-/**
- * Creates a dictionary of fragment containers for
- * proper DOM node creation when using $.fragment
- */
-(0, _helpers.each)(['tbody', 'thead', 'tfoot', 'tr', 'th', 'td'], function (item) {
-  fragmentContainer[item] = item === 'th' || item === 'td' ? 'tr' : 'table';
-});
-
-/**
- * Returns the created DOM node(s) from a passed HTML string
- * @param  {String} html The string containing arbitrary HTML
- * @return {Array}       The DOM node(s)
- */
-$.fragment = function (container, html) {
-  container.innerHTML = '' + html;
-
-  var items = _arrays.slice.call(container.childNodes);
-
-  (0, _helpers.each)(items, function (element) {
-    return container.removeChild(element);
-  });
-
-  return items;
-};
-
-/**
- * Traverses the DOM and returns matched elements
- * @param  {Mixed} selector String containing CSS selector(s), HTML tags to create, or DOM Element
- * @param  {Mixed} context  Context in which to perform the search (can be a CSS Selector or DOM Element)
- * @return {Array}          NodeList of matched selectors
- */
-$.query = function (selector, context) {
-  var query = [];
-  var noSpace = selector.length && selector.indexOf(' ') < 0;
-
-  if (selector[0] === '#' && context === _document.document && noSpace) {
-    var element = context.getElementById(selector.slice(1));
-
-    if (element) {
-      query = [element];
-    }
-  } else {
-    if (context.nodeType === 1 || context.nodeType === 9) {
-      if (selector[0] === '.' && noSpace) {
-        query = context.getElementsByClassName(selector.slice(1));
-      } else if ($.regexp.tags.test(selector)) {
-        query = context.getElementsByTagName(selector);
-      } else {
-        query = context.querySelectorAll(selector);
-      }
-    }
-  }
-
-  return _arrays.slice.call(query);
-};
-
-// extend $ with existing Eleven methods
-(0, _helpers.each)(['ajax', 'ajaxSettings', 'appendQuery', 'browser', 'camelCase', 'dasherize', 'debounce', 'deparam', 'device', 'each', 'extend', 'format', 'get', 'getJSON', 'inArray', 'isArray', 'isArrayLike', 'isEmptyObject', 'isFunction', 'isNumber', 'isNumeric', 'isObject', 'isPlainObject', 'isString', 'isWindow', 'jsonP', 'map', 'merge', 'os', 'params', 'proxy', 'regexp', 'ready', 'serialize', 'supports', 'toArray', 'unique', 'uuid'], function (item) {
-  $[item] = _core2.default[item];
-});
-
-$.fn.init.prototype = $.fn;
-
 $.extend($.fn, {
   concat: _arrays.concat,
   indexOf: _helpers.indexOf,
@@ -2181,7 +1955,169 @@ _core2.default.query = $;
 
 exports.default = $;
 
-},{"../common/arrays":5,"../common/document":6,"../common/helpers":7,"../common/objects":9,"../common/window":12,"../core/":13}],23:[function(require,module,exports){
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+
+},{"../common/arrays":4,"../common/document":5,"../common/helpers":6,"../common/objects":8,"../common/window":9,"../core":10}],19:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_core2.default.fn.extend({
+  /**
+   * Creates a reference to the original matched collection for chain breaking (e.g. using .end())
+   * @param  {Object} collection The collection to add the prev reference to
+   * @return {Object}            The modified collection
+   */
+  chain: function chain(collection) {
+    return !!collection && (collection.prevObject = this) && (0, _core2.default)(collection) || (0, _core2.default)();
+  },
+
+  /**
+   * Breaks the current chain and returns the set of matched elements defined in `prevObject` (i.e. previous state)
+   * @return {Object}  The matched elements from its previous state
+   */
+  end: function end() {
+    return this.prevObject || (0, _core2.default)();
+  }
+});
+
+exports.default = _core2.default;
+
+},{"../core":18}],20:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_core2.default.regexp = {
+  alpha: /[A-Za-z]/,
+  browser: /(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*([\d\.]+)/i,
+  callback: /\?(.+)=\?/,
+  camel: /-([\da-z])/gi,
+  cssNumbers: /^((margin|padding|border)(top|right|bottom|left)(width|height)?|height|width|zindex?)$/i,
+  device: /((ip)(hone|ad|od)|playbook|hp-tablet)/i,
+  escape: /('|\\)/g,
+  fragments: /^\s*<(\w+|!)[^>]*>/,
+  jsonCallback: /\?(.+)=\?/,
+  jsonString: /^(\{|\[)/i,
+  manipulation: /insert|to/i,
+  mixed: /^(?:\s*<[\w!]+>|body|head|#\w(?:[\w-]*)|\.\w(?:[\w-]*))$/,
+  mobile: /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i,
+  ms: /^-ms-/,
+  nodes: /^(?:1|3|8|9|11)$/,
+  numbers: /^(0|[1-9][0-9]*)$/i,
+  os: /(android|blackberry|bb10|macintosh|webos|windows)/i,
+  protocol: /^((http|ftp|file)(s?)\:)?/,
+  queries: /[&?]{1,2}/,
+  quotes: /^["']|["']$/g,
+  ready: /^(?:complete|loaded|interactive)$/i,
+  relative: /^([-+=])/,
+  responseOK: /^(20[0-6]|304)$/g,
+  root: /^(?:body|html)$/i,
+  space: /\s+/g,
+  tags: /^[\w-]+$/,
+  templates: {
+    keys: /\{(\w+)\}/g,
+    indexed: /\{(\d+)\}/g
+  },
+  trim: /^\s+|\s+$/g,
+  whitespaces: /^\s*$/g,
+
+  // commands regexp
+  escapeRegExp: /[\-{}\[\]+?.,\\\^$|#]/g,
+  optionalParam: /\s*\((.*?)\)\s*/g,
+  optionalRegex: /(\(\?:[^)]+\))\?/g,
+  namedParam: /(\(\?)?:\w+/g,
+  readyState: /^(?:complete|loaded|interactive)$/i,
+  splatParam: /\*\w+/g,
+
+  // speech splitting
+  textChunks: /.{1,140}(?:\s+|\w+)/g
+};
+
+exports.default = _core2.default;
+
+},{"../core":18}],21:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_core2.default.fn.extend({
+  /**
+   * Determines if a DOM element is a descendant of another DOM element
+   * @param  {Mixed} selector The CSS selector or DOM element
+   * @return {Boolean}        The true or false value
+   */
+  contains: function contains(selector) {
+    return _core2.default.contains(this, selector);
+  },
+
+  /**
+   * Returns a new $ collection of values by mapping each element
+   * in a collection through the iterative function
+   * @param {Function} fn The function to process each item against in the collection
+   */
+  map: function map(fn) {
+    return (0, _core2.default)(_core2.default.map(this, function (element, index) {
+      return fn.call(element, index, element);
+    }));
+  },
+
+  /**
+   * Slice a matched collection
+   * @return {Object} The modified collection
+   */
+  slice: function (_slice) {
+    function slice() {
+      return _slice.apply(this, arguments);
+    }
+
+    slice.toString = function () {
+      return _slice.toString();
+    };
+
+    return slice;
+  }(function () {
+    return (0, _core2.default)(slice.apply(this, arguments));
+  }),
+
+  /**
+   * Converts anything that can be iterated over into a real JavaScript Array
+   * @param  {Integer} start Zero-based index to start the array at (optional)
+   * @param  {Integer} end   Zero-based index to end the array at (optional)
+   * @return {Array}         The new array
+   */
+  toArray: function toArray(start, end) {
+    return _core2.default.toArray(this, start, end);
+  }
+});
+
+exports.default = _core2.default;
+
+},{"../core":18}],22:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2273,7 +2209,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../../common/helpers":7,"../core":22}],24:[function(require,module,exports){
+},{"../../common/helpers":6,"../core":18}],23:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2370,7 +2306,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../../common/helpers":7,"../core":22}],25:[function(require,module,exports){
+},{"../../common/helpers":6,"../core":18}],24:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2439,7 +2375,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _core2.default;
 
-},{"../../common/document":6,"../../common/helpers":7,"../core":22}],26:[function(require,module,exports){
+},{"../../common/document":5,"../../common/helpers":6,"../core":18}],25:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2502,7 +2438,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../core":22}],27:[function(require,module,exports){
+},{"../core":18}],26:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2542,7 +2478,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _core2.default;
 
-},{"../../common/document":6,"../../common/helpers":7,"../core":22}],28:[function(require,module,exports){
+},{"../../common/document":5,"../../common/helpers":6,"../core":18}],27:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2618,7 +2554,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../../common/helpers":7,"../core":22}],29:[function(require,module,exports){
+},{"../../common/helpers":6,"../core":18}],28:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2722,7 +2658,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../core":22}],30:[function(require,module,exports){
+},{"../core":18}],29:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2984,7 +2920,7 @@ _core2.default.events = {
 
 exports.default = _core2.default;
 
-},{"../../common/helpers":7,"../core":22}],31:[function(require,module,exports){
+},{"../../common/helpers":6,"../core":18}],30:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3015,7 +2951,7 @@ _core2.default.fn.ready = function (fn) {
 
 exports.default = _core2.default;
 
-},{"../../common/document":6,"../core":22}],32:[function(require,module,exports){
+},{"../../common/document":5,"../core":18}],31:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3082,7 +3018,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../../common/document":6,"../../common/helpers":7,"../core":22}],33:[function(require,module,exports){
+},{"../../common/document":5,"../../common/helpers":6,"../core":18}],32:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3131,7 +3067,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _core2.default;
 
-},{"../../common/helpers":7,"../core":22}],34:[function(require,module,exports){
+},{"../../common/helpers":6,"../core":18}],33:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3158,7 +3094,7 @@ _core2.default.fn.clone = function (deep) {
 
 exports.default = _core2.default;
 
-},{"../core":22}],35:[function(require,module,exports){
+},{"../core":18}],34:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3207,7 +3143,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _core2.default;
 
-},{"../../common/helpers":7,"../core":22}],36:[function(require,module,exports){
+},{"../../common/helpers":6,"../core":18}],35:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3251,7 +3187,7 @@ _core2.default.fn.empty = function () {
 
 exports.default = _core2.default;
 
-},{"../core":22}],37:[function(require,module,exports){
+},{"../core":18}],36:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3299,7 +3235,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../../common/helpers":7,"../core":22}],38:[function(require,module,exports){
+},{"../../common/helpers":6,"../core":18}],37:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3337,7 +3273,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _core2.default;
 
-},{"../../common/helpers":7,"../core":22}],39:[function(require,module,exports){
+},{"../../common/helpers":6,"../core":18}],38:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3389,7 +3325,7 @@ _core2.default.fn.text = function (text) {
 
 exports.default = _core2.default;
 
-},{"../core":22}],40:[function(require,module,exports){
+},{"../core":18}],39:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3426,7 +3362,7 @@ _core2.default.fn.wrap = function (node) {
 
 exports.default = _core2.default;
 
-},{"../core":22}],41:[function(require,module,exports){
+},{"../core":18}],40:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3437,9 +3373,17 @@ var _core = require('./core');
 
 var _core2 = _interopRequireDefault(_core);
 
+require('./ajax/ajax');
+
 require('./attributes/attr');
 
 require('./attributes/val');
+
+require('./core/chain');
+
+require('./core/regexp');
+
+require('./core/utils');
 
 require('./css/classes');
 
@@ -3477,6 +3421,14 @@ require('./manipulation/text');
 
 require('./manipulation/wrap');
 
+require('./support/browser');
+
+require('./support/device');
+
+require('./support/feature');
+
+require('./support/os');
+
 require('./traversing/ancestors');
 
 require('./traversing/descendants');
@@ -3485,15 +3437,184 @@ require('./traversing/position');
 
 require('./traversing/traversing');
 
-require('./utils/chain');
-
-require('./utils/utils');
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = _core2.default;
 
-},{"./attributes/attr":20,"./attributes/val":21,"./core":22,"./css/classes":23,"./css/css":24,"./css/dimensions":25,"./css/position":26,"./css/scroll":27,"./css/showHide":28,"./data/data":29,"./events/events":30,"./events/ready":31,"./manipulation/append":32,"./manipulation/beforeAfter":33,"./manipulation/clone":34,"./manipulation/detach":35,"./manipulation/empty":36,"./manipulation/html":37,"./manipulation/prepend":38,"./manipulation/text":39,"./manipulation/wrap":40,"./traversing/ancestors":42,"./traversing/descendants":43,"./traversing/position":44,"./traversing/traversing":45,"./utils/chain":46,"./utils/utils":47}],42:[function(require,module,exports){
+},{"./ajax/ajax":15,"./attributes/attr":16,"./attributes/val":17,"./core":18,"./core/chain":19,"./core/regexp":20,"./core/utils":21,"./css/classes":22,"./css/css":23,"./css/dimensions":24,"./css/position":25,"./css/scroll":26,"./css/showHide":27,"./data/data":28,"./events/events":29,"./events/ready":30,"./manipulation/append":31,"./manipulation/beforeAfter":32,"./manipulation/clone":33,"./manipulation/detach":34,"./manipulation/empty":35,"./manipulation/html":36,"./manipulation/prepend":37,"./manipulation/text":38,"./manipulation/wrap":39,"./support/browser":41,"./support/device":42,"./support/feature":43,"./support/os":44,"./traversing/ancestors":45,"./traversing/descendants":46,"./traversing/position":47,"./traversing/traversing":48}],41:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+var _window = require('../../common/window');
+
+var _window2 = _interopRequireDefault(_window);
+
+var _navigator = require('../../common/navigator');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_core2.default.browser = function () {
+  var match = _navigator.userAgent.match(_core2.default.regexp.browser);
+  var browser = RegExp.$1.toLowerCase();
+  var types = {
+    'chrome': 'webkit',
+    'firefox': 'moz',
+    'msie': 'ms',
+    'opera': 'o',
+    'safari': 'webkit',
+    'trident': 'ms'
+  };
+  var prefix = types[browser] || '';
+  var nativeSelector = prefix + 'MatchesSelector';
+  var language = language;
+
+  return {
+    chrome: browser === 'chrome' && !('doNotTrack' in _window2.default),
+    cssPrefix: '-' + prefix + '-',
+    firefox: browser === 'firefox',
+    language: language && language.toLowerCase(),
+    msie: browser === 'msie' || browser === 'trident',
+    nativeSelector: prefix.length > 0 ? nativeSelector : nativeSelector[0].toLowerCase(),
+    opera: browser === 'opera',
+    prefix: prefix,
+    safari: browser === 'safari' && 'doNotTrack' in _window2.default,
+    version: _navigator.userAgent.match(/version\/([\.\d]+)/i) !== null ? RegExp.$1 : match[2],
+    webkit: prefix === 'webkit'
+  };
+}();
+
+exports.default = _core2.default;
+
+},{"../../common/navigator":7,"../../common/window":9,"../core":18}],42:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+var _window = require('../../common/window');
+
+var _window2 = _interopRequireDefault(_window);
+
+var _navigator = require('../../common/navigator');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_core2.default.device = function () {
+  var match = _navigator.userAgent.match(_core2.default.regexp.device);
+  var device = RegExp.$1.toLowerCase();
+  var detectMobile = function () {
+    return _core2.default.regexp.mobile.test(_navigator.userAgent || _navigator.vendor || _window2.default.opera);
+  }();
+
+  return {
+    idevice: /((ip)(hone|ad|od))/i.test(device),
+    ipad: device === 'ipad',
+    iphone: device === 'iphone',
+    ipod: device === 'ipod',
+    isDesktop: !detectMobile,
+    isMobile: detectMobile,
+    orientation: function orientation() {
+      return _window2.default.innerHeight > _window2.default.innerWidth ? 'portrait' : 'landscape';
+    },
+    playbook: device === 'playbook',
+    touchpad: device === 'hp-tablet'
+  };
+}();
+
+exports.default = _core2.default;
+
+},{"../../common/navigator":7,"../../common/window":9,"../core":18}],43:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+var _window = require('../../common/window');
+
+var _window2 = _interopRequireDefault(_window);
+
+var _navigator = require('../../common/navigator');
+
+var _document = require('../../common/document');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var supports = function supports(name) {
+  return _core2.default.camelCase(_core2.default.browser.prefix.replace(_core2.default.regexp.ms, 'ms-')) + name;
+};
+
+_core2.default.supports = {
+  cssAnimationEvents: supports('AnimationName') in _document.documentElement.style,
+  cssTransform: supports('Transform') in _document.documentElement.style,
+  cssTransitionEnd: supports('TransitionEnd') in _document.documentElement.style,
+  cssTransition: supports('Transition') in _document.documentElement.style,
+  cssTransform3d: 'WebKitCSSMatrix' in _window2.default && 'm11' in new WebKitCSSMatrix(),
+  homescreen: 'standalone' in _navigator.navigator,
+  localStorage: _typeof(_window2.default.localStorage) !== undefined,
+  pushState: 'pushState' in _window2.default.history && 'replaceState' in _window2.default.history,
+  retina: 'devicePixelRatio' in _window2.default && _window2.default.devicePixelRatio > 1,
+  touch: 'ontouchstart' in _window2.default
+};
+
+exports.default = _core2.default;
+
+},{"../../common/document":5,"../../common/navigator":7,"../../common/window":9,"../core":18}],44:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = require('../core');
+
+var _core2 = _interopRequireDefault(_core);
+
+var _navigator = require('../../common/navigator');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_core2.default.os = function () {
+  var match = _navigator.userAgent.match(_core2.default.regexp.os);
+  var mobile = /mobile/i.test(_navigator.userAgent);
+  var os = RegExp.$1.toLowerCase();
+
+  if (_core2.default.device.idevice) {
+    return 'ios';
+  }
+
+  if (os === 'blackberry' && mobile) {
+    return 'bbmobile';
+  }
+
+  if (os === 'macintosh') {
+    return 'osx';
+  }
+
+  return os;
+}();
+
+exports.default = _core2.default;
+
+},{"../../common/navigator":7,"../core":18}],45:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3527,7 +3648,7 @@ _core2.default.fn.extend({
       return (0, _core2.default)();
     }
 
-    while (element && query.indexOf(element) < 0) {
+    while (element && (0, _helpers.indexOf)(query, element) < 0) {
       element = element !== context && element !== document && element.parentNode;
     }
 
@@ -3578,20 +3699,24 @@ _core2.default.fn.extend({
    */
   parents: function parents(selector) {
     if (!this.length) {
-      return undefined;
+      return this;
     }
 
     var collection = [],
-        elements = this;
+        i = 0,
+        k = this.length;
 
-    while (elements.length > 0) {
-      elements = _core2.default.map(elements, function (element) {
-        element = element[property];
+    for (; i < k; i++) {
+      var element = this[i];
+      var parentNode = element.parentNode;
 
-        if (element && element.nodeType === 1 && indexOf(collection, element) < 0) {
-          return collection.push(element) && element;
+      while (parentNode) {
+        if (parentNode !== document && (0, _helpers.indexOf)(collection, parentNode) < 0) {
+          collection.push(parentNode);
         }
-      });
+
+        parentNode = parentNode.parentNode;
+      }
     }
 
     collection = selector ? (0, _core2.default)(collection).filter(selector) : (0, _core2.default)(collection);
@@ -3602,7 +3727,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../../common/helpers":7,"../core":22}],43:[function(require,module,exports){
+},{"../../common/helpers":6,"../core":18}],46:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3701,7 +3826,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../../common/helpers":7,"../core":22}],44:[function(require,module,exports){
+},{"../../common/helpers":6,"../core":18}],47:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3711,6 +3836,8 @@ Object.defineProperty(exports, "__esModule", {
 var _core = require('../core');
 
 var _core2 = _interopRequireDefault(_core);
+
+var _arrays = require('../../common/arrays');
 
 var _helpers = require('../../common/helpers');
 
@@ -3741,9 +3868,17 @@ _core2.default.fn.extend({
    * @return {Mixed}         A matched DOM element. If no index is specified all of the matched DOM elements are returned.
    */
   get: function get(index) {
-    return index !== undefined ? index < 0 ? this[this.length + index] : this[index] : _helpers.slice.call(this);
+    return index !== undefined ? index < 0 ? this[this.length + index] : this[index] : _arrays.slice.call(this);
   },
 
+  /**
+   * Returns the position of an element. If no element is provided, returns position of the current element among its siblings else -1 if not found.
+   * @param  {Mixed}  element The DOM element or CSS selector
+   * @return {Integer}        The index of the element
+   */
+  index: function index(selector) {
+    return this.length ? selector ? (0, _helpers.indexOf)(this, (0, _core2.default)(selector)[0]) : (0, _helpers.indexOf)(this[0].parentNode.children, this[0]) : undefined;
+  },
   /**
    * Returns the last element in a matched set
    * @return {Object} The last element
@@ -3755,7 +3890,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../../common/helpers":7,"../core":22}],45:[function(require,module,exports){
+},{"../../common/arrays":4,"../../common/helpers":6,"../core":18}],48:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3861,34 +3996,29 @@ _core2.default.fn.extend({
 });
 
 /**
- * .next() and .prev() - get the next or previous sibling of
- * the first matched in a collection or get the ancestors of each element in
- * the set of matched elements
+ * .next() and .prev() - Get the next or previous sibling of the first matched element in a set
  * @param  {String} selector The selector to filter the elements against
  * @return {Object}          The matched element(s)
  */
 _core2.default.each({ next: 'nextElementSibling', prev: 'previousElementSibling' }, function (method, property) {
   _core2.default.fn[method] = function (selector) {
-    if (!this.length) {
+    if (this[0] === undefined) {
       return undefined;
     }
 
-    var collection = [],
-        elements = this;
+    var collection = [];
+    var i = 0,
+        k = this.length;
 
-    while (elements.length > 0) {
-      elements = _core2.default.map(elements, function (element) {
-        element = element[property];
+    for (; i < k; i++) {
+      var element = this[i];
 
-        if (element && element.nodeType === 1 && indexOf(collection, element) < 0) {
-          return collection.push(element) && element;
-        }
-      });
-    }
+      if (element[property] && (0, _helpers.indexOf)(collection, element[property]) < 0) {
+        collection.push(element[property]);
+      }
+    };
 
-    collection = selector ? (0, _core2.default)(collection).filter(selector) : (0, _core2.default)(collection);
-
-    return method !== 'parents' ? collection.first() : collection;
+    return selector ? (0, _core2.default)(collection).filter(selector) : (0, _core2.default)(collection);
   };
 });
 
@@ -3899,13 +4029,14 @@ _core2.default.each({ next: 'nextElementSibling', prev: 'previousElementSibling'
  */
 (0, _helpers.each)(['nextAll', 'prevAll'], function (method) {
   _core2.default.fn[method] = function (selector) {
+    var parentNode = this[0].parentNode;
 
-    if (!this.length || this[0] === undefined || !this[0].parentNode) {
+    if (this[0] === undefined || !parentNode) {
       return this;
     }
 
     var index = this.index();
-    var items = (0, _core2.default)(this[0].parentNode).children(selector);
+    var items = (0, _core2.default)(parentNode).children(selector);
     var collection = [];
 
     (0, _helpers.each)(items, function (item, i) {
@@ -3920,106 +4051,7 @@ _core2.default.each({ next: 'nextElementSibling', prev: 'previousElementSibling'
 
 exports.default = _core2.default;
 
-},{"../../common/arrays":5,"../../common/helpers":7,"../core":22}],46:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _core = require('../core');
-
-var _core2 = _interopRequireDefault(_core);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-_core2.default.fn.extend({
-  /**
-   * Creates a reference to the original matched collection for chain breaking (e.g. using .end())
-   * @param  {Object} collection The collection to add the prev reference to
-   * @return {Object}            The modified collection
-   */
-  chain: function chain(collection) {
-    return !!collection && (collection.prevObject = this) && (0, _core2.default)(collection) || (0, _core2.default)();
-  },
-
-  /**
-   * Breaks the current chain and returns the set of matched elements defined in `prevObject` (i.e. previous state)
-   * @return {Object}  The matched elements from its previous state
-   */
-  end: function end() {
-    return this.prevObject || (0, _core2.default)();
-  }
-});
-
-exports.default = _core2.default;
-
-},{"../core":22}],47:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _core = require('../core');
-
-var _core2 = _interopRequireDefault(_core);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-_core2.default.fn.extend({
-  /**
-   * Determines if a DOM element is a descendant of another DOM element
-   * @param  {Mixed} selector The CSS selector or DOM element
-   * @return {Boolean}        The true or false value
-   */
-  contains: function contains(selector) {
-    return _core2.default.contains(this, selector);
-  },
-
-  /**
-   * Returns a new $ collection of values by mapping each element
-   * in a collection through the iterative function
-   * @param {Function} fn The function to process each item against in the collection
-   */
-  map: function map(fn) {
-    return (0, _core2.default)(_core2.default.map(this, function (element, index) {
-      return fn.call(element, index, element);
-    }));
-  },
-
-  /**
-   * Slice a matched collection
-   * @return {Object} The modified collection
-   */
-  slice: function (_slice) {
-    function slice() {
-      return _slice.apply(this, arguments);
-    }
-
-    slice.toString = function () {
-      return _slice.toString();
-    };
-
-    return slice;
-  }(function () {
-    return (0, _core2.default)(slice.apply(this, arguments));
-  }),
-
-  /**
-   * Converts anything that can be iterated over into a real JavaScript Array
-   * @param  {Integer} start Zero-based index to start the array at (optional)
-   * @param  {Integer} end   Zero-based index to end the array at (optional)
-   * @return {Array}         The new array
-   */
-  toArray: function toArray(start, end) {
-    return _core2.default.toArray(this, start, end);
-  }
-});
-
-exports.default = _core2.default;
-
-},{"../core":22}],48:[function(require,module,exports){
+},{"../../common/arrays":4,"../../common/helpers":6,"../core":18}],49:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -4041,7 +4073,7 @@ _core2.default.speak = function (text) {
 
   var cancelled = false;
   // get instance
-  var eleven = Eleven();
+  var eleven = (0, _core2.default)();
   // clean up text
   text = text.replace(/[\"\`]/gm, '\'');
   // split text into 140 character chunks
@@ -4076,6 +4108,7 @@ _core2.default.speak = function (text) {
 
     if (index == 0) {
       speechUtterance.onstart = function () {
+        eleven.listening = false;
         eleven.getVisualizer('container').classList.add('ready');
         eleven.getVisualizer().start();
 
@@ -4093,7 +4126,7 @@ _core2.default.speak = function (text) {
           return;
         }
 
-        eleven.getVisualizer().stop();
+        eleven.stop();
 
         if (_core2.default.isFunction(config.onEnd)) {
           config.onEnd();
@@ -4107,13 +4140,15 @@ _core2.default.speak = function (text) {
       }
     };
 
+    console.log(speechUtterance, text);
+
     speechSynthesis.speak(speechUtterance);
   });
 };
 
 exports.default = _core2.default;
 
-},{"../core":13,"./speechSynthesis":51}],49:[function(require,module,exports){
+},{"../core":10,"./speechSynthesis":52}],50:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -4123,6 +4158,8 @@ Object.defineProperty(exports, "__esModule", {
 var _core = require('../core');
 
 var _core2 = _interopRequireDefault(_core);
+
+var _helpers = require('../common/helpers');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -4218,11 +4255,11 @@ _core2.default.fn.extend({
     var result = event.results[event.resultIndex];
     var results = [];
 
-    if (this.options.wakeCommands.indexOf(result[0].transcript.trim()) !== -1) {
+    if ((0, _helpers.indexOf)(this.options.wakeCommands, result[0].transcript.trim()) > -1) {
       if (!this.activated) {
         this.activated = true;
         this.container.classList.add('ready');
-        this.wakeSound.play();
+        // this.wakeSound.play();
 
         this.commandTimer = setTimeout(function () {
           _this2.activated = false;
@@ -4255,7 +4292,7 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../core":13}],50:[function(require,module,exports){
+},{"../common/helpers":6,"../core":10}],51:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -4270,7 +4307,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _window2.default.SpeechRecognition || _window2.default.webkitSpeechRecognition || _window2.default.mozSpeechRecognition || _window2.default.msSpeechRecognition || _window2.default.oSpeechRecognition;
 
-},{"../common/window":12}],51:[function(require,module,exports){
+},{"../common/window":9}],52:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -4285,7 +4322,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = _window2.default.speechSynthesis;
 
-},{"../common/window":12}],52:[function(require,module,exports){
+},{"../common/window":9}],53:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -4362,7 +4399,7 @@ var configs = {
 
 exports.default = configs;
 
-},{}],53:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -4418,14 +4455,14 @@ _core2.default.fn.extend({
 
 exports.default = _core2.default;
 
-},{"../core":13,"./speechSynthesis":51,"./speechSynthesisOverrides":52}],54:[function(require,module,exports){
+},{"../core":10,"./speechSynthesis":52,"./speechSynthesisOverrides":53}],55:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _core = require('./core');
+var _core = require('../core');
 
 var _core2 = _interopRequireDefault(_core);
 
@@ -4654,5 +4691,5 @@ _core2.default.apply(Visualizer.prototype, {
 
 exports.default = _core2.default;
 
-},{"./core":13}]},{},[18])
+},{"../core":10}]},{},[13])
 //# sourceMappingURL=eleven.js.map
