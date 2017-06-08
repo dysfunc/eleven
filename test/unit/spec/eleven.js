@@ -6,6 +6,7 @@ describe('Eleven())', () => {
     var container = $('<div id="eleven"></div>').appendTo(document.body);
     const e = Eleven('#eleven', {});
     expect(e.options).toEqual({
+      autoRestart: true,
       debug: false,
       language: 'en-US',
       commands: [],
