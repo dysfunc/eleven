@@ -16,6 +16,7 @@ Eleven.fn = Eleven.prototype = {
   version: '1.0.0',
   init(selector, options){
     const defaultConfig = {
+      autoRestart: true,
       debug: false,
       language: 'en-US',
       commands: [],

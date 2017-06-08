@@ -86,6 +86,8 @@ Eleven.fn.extend({
   },
 
   result(event){
+    this.recognition.onend = null;
+
     const result = event.results[event.resultIndex];
     const results = [];
 
@@ -93,7 +95,7 @@ Eleven.fn.extend({
       if(!this.activated){
         this.activated = true;
         this.container.classList.add('ready');
-        // this.wakeSound.play();
+        this.wakeSound.play();
 
         this.commandTimer = setTimeout(() => {
           this.activated = false;

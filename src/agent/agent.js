@@ -3,6 +3,9 @@ import SpeechRecognition from '../speech/speechRecognition';
 import { document } from '../common/document';
 import { each } from '../common/helpers';
 
+// buffer restarts
+var lastStartTime = 0, restartCount = 0;
+
 Eleven.fn.extend({
   /**
    * Iterates over a collection of objects
@@ -12,12 +15,16 @@ Eleven.fn.extend({
   error(event){
     const { error } = event;
 
-    if(error === 'no-speech' || error === 'aborted'){
-      this.start();
-    }else{
-      if(this.options.debug){
-        console.warn(`[Eleven] SpeechRecognition event error: ${error}`);
-      }
+    if(typeof(this.options.onError) === 'function'){
+      this.options.onError(error, event);
+    }
+
+    if(error === 'network' || error === 'not allowed' || error === 'service-not-allowed'){
+      this.options.autoRestart = false;
+    }
+
+    if(this.options.debug){
+      console.warn(`[Eleven] SpeechRecognition event error: ${error} \n ${JSON.stringify(event, null, 2)}`);
     }
   },
   /**
@@ -40,24 +47,18 @@ Eleven.fn.extend({
     this.recognition.interimResults = options.interimResults;
     // if true, this will pass all speech back to the onCommand callback
     if(options.useEngine){
-      this.addCommands({
+      this.addCommands('eleven', {
         '*msg': options.onCommand
       });
     }
     // add commands
     this.addCommands('eleven', {
       'stop': () => {
-        if(this.listening){
-          this.stop();
+        this.stop();
 
-          setTimeout(() => {
-            Eleven.resetView(() => {
-              document.body.classList.remove('interactive');
-            });
-          }, 500);
-        }
+        setTimeout(() => Eleven.resetView(() => document.body.classList.remove('interactive')), 500);
 
-        if(Eleven.isFunction(options.onStop)){
+        if(typeof(options.onStop) === 'function'){
           this.context = null;
           options.onStop.call(this);
         }
@@ -72,11 +73,74 @@ Eleven.fn.extend({
       Eleven.regexp.wakeCommands = new RegExp(`^(${options.wakeCommands.join('|')})\\s+`, 'i');
     }
     // setup all SpeechRecognition event listeners
-    this.listen();
+    this.listeners();
     // fire activation event
-    if(Eleven.isFunction(options.onActivate)){
+    if(typeof(options.onActivate) === 'function'){
       options.onActivate.call(this);
     }
+
+    this.start();
+
+    return this;
+  },
+  /**
+   * Binds callback functions to SpeechRecognition API
+   * events `onstart`, `onerror`, `onresult`, etc...
+   */
+  listeners(){
+    this.recognition.onend = () => this.stop(true);
+    this.recognition.onerror = (error) => this.error(error);
+    this.recognition.onresult = (result) => this.result(result);
+    this.recognition.onstart = () => this.start();
+    this.recognition.onaudioend = () => this.stop();
+    this.recognition.onaudiostart = () => {
+      if(typeof(this.options.onStart) === 'function'){
+        this.options.onStart.call(this);
+      }
+    };
+
+    document.addEventListener('visibilitychange', () => {
+      if(document.hidden){
+        if(this.recognition && this.recognition.abort){
+          if(this.debug){
+            console.debug('[Eleven] User switched to another tab - disabling listeners.');
+          }
+
+          this.stop();
+          this.recognition.abort();
+        }
+      }else{
+        if(this.options.autoRestart){
+          this.restart();
+        }
+      }
+    });
+  },
+
+  restart(){
+    const timeSinceLastStart = new Date().getTime() - lastStartTime;
+
+    restartCount += 1;
+
+    if(restartCount % 10 === 0){
+      if(this.options.debug){
+        console.debug('[Eleven] Speech Recognition is repeatedly stopping and starting.');
+      }
+    }
+
+    if(timeSinceLastStart < 1000){
+      setTimeout(() => {
+        this.start();
+      }, 1000 - timeSinceLastStart);
+    }else{
+      this.start();
+    }
+  },
+
+  start(){
+    this.listening = true;
+
+    lastStartTime = new Date().getTime();
 
     try {
       this.recognition.start();
@@ -86,68 +150,27 @@ Eleven.fn.extend({
       }
     }
 
-    this.start();
-
-    return this;
-  },
-  /**
-   * Binds callback functions to `onstart`, `onerror`, `onresult`,
-   * `onend` and `onaudioend` of SpeechRecognition API.
-   */
-  listen(){
-    this.recognition.onend = Eleven.proxy(this.stop, this);
-    this.recognition.onerror = Eleven.proxy(this.error, this);
-    this.recognition.onresult = Eleven.proxy(this.result, this);
-    this.recognition.onstart = Eleven.proxy(this.start, this);
-    this.recognition.onaudioend = Eleven.proxy(this.stop, this);
-    this.recognition.onaudiostart = () => {
-      if(Eleven.isFunction(this.options.onStart)){
-        this.options.onStart.call(this);
-      }
-    };
-
-    document.addEventListener('visibilitychange', () => {
-      if(document.hidden){
-        if(this.recognition && this.recognition.abort && this.listening){
-          if(this.debug){
-            console.debug('[Eleven] User switched to another tab. Disabling listeners.');
-          }
-
-          this.stop();
-          this.recognition.abort();
-        }
-      }else{
-        this.recognition.start();
-        this.stop();
-        this.start();
-      }
-    });
-
-  },
-
-  start(){
-    if(!this.listening){
-      this.listening = true;
-    }
-
     return this;
   },
 
-  stop(){
+  stop(restart){
     if(this.visualizer){
       this.running = false;
       this.visualizer.stop();
       this.container.classList.remove('ready');
     }
 
-    if(Eleven.isFunction(this.options.onEnd)){
+    if(typeof(this.options.onEnd) === 'function'){
       this.options.onEnd.call(this);
+    }
+
+    if(restart && this.options.autoRestart){
+      this.restart();
     }
 
     return this;
   }
 });
-
 
 Eleven.extend(Eleven, {
   /**
@@ -155,7 +178,7 @@ Eleven.extend(Eleven, {
    * @param  {Function} fn Function to execute once the view has been cleared
    */
   resetView(selector = '.results', fn){
-    if(Eleven.isFunction(selector)){
+    if(typeof(selector) === 'function'){
       fn = selector;
       selector = '.results';
     }
@@ -166,7 +189,7 @@ Eleven.extend(Eleven, {
       results.forEach((element) => element.parentNode && element.parentNode.removeChild(element));
     }
 
-    if(Eleven.isFunction(fn)){
+    if(typeof(fn) === 'function'){
       fn();
     }
 

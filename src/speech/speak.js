@@ -39,7 +39,6 @@ Eleven.speak = function(text, config = {}){
 
     if(index == 0){
       speechUtterance.onstart = () => {
-        eleven.listening = false;
         eleven.getVisualizer('container').classList.add('ready');
         eleven.getVisualizer().start();
 
@@ -70,8 +69,6 @@ Eleven.speak = function(text, config = {}){
         console.error(`[Eleven] Unknow Error: ${error}`);
       }
     };
-
-    console.log(speechUtterance, text);
 
     speechSynthesis.speak(speechUtterance);
   });
