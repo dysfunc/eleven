@@ -33,7 +33,7 @@ Eleven.fn.extend({
   addCommands(context, commands){
     const command = {};
 
-    if(typeof(context) !== 'string'){
+    if(!Eleven.isString(context)){
       commands = context;
       context = 'eleven';
     }
@@ -99,7 +99,7 @@ Eleven.fn.extend({
    * @return {Object}         Eleven instance
    */
   removeCommands(context, commands){
-    if(context === undefined && commands === undefined){
+    if(!arguments.length){
       return (this.commands = []) && this;
     }
 
@@ -110,7 +110,7 @@ Eleven.fn.extend({
 
     const currentCommmands = this.commands[context];
 
-    if(typeof(commands) === 'string'){
+    if(Eleven.isString(commands)){
       commands = [commands];
     }
 

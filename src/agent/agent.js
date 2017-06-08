@@ -15,7 +15,7 @@ Eleven.fn.extend({
   error(event){
     const { error } = event;
 
-    if(typeof(this.options.onError) === 'function'){
+    if(Eleven.isFunction(this.options.onError)){
       this.options.onError(error, event);
     }
 
@@ -58,7 +58,7 @@ Eleven.fn.extend({
 
         setTimeout(() => Eleven.resetView(() => document.body.classList.remove('interactive')), 500);
 
-        if(typeof(options.onStop) === 'function'){
+        if(Eleven.isFunction(options.onStop)){
           this.context = null;
           options.onStop.call(this);
         }
@@ -75,7 +75,7 @@ Eleven.fn.extend({
     // setup all SpeechRecognition event listeners
     this.listeners();
     // fire activation event
-    if(typeof(options.onActivate) === 'function'){
+    if(Eleven.isFunction(options.onActivate)){
       options.onActivate.call(this);
     }
 
@@ -94,7 +94,7 @@ Eleven.fn.extend({
     this.recognition.onstart = () => this.start();
     this.recognition.onaudioend = () => this.stop();
     this.recognition.onaudiostart = () => {
-      if(typeof(this.options.onStart) === 'function'){
+      if(Eleven.isFunction(this.options.onStart)){
         this.options.onStart.call(this);
       }
     };
@@ -160,7 +160,7 @@ Eleven.fn.extend({
       this.container.classList.remove('ready');
     }
 
-    if(typeof(this.options.onEnd) === 'function'){
+    if(Eleven.isFunction(this.options.onEnd)){
       this.options.onEnd.call(this);
     }
 
@@ -178,7 +178,7 @@ Eleven.extend(Eleven, {
    * @param  {Function} fn Function to execute once the view has been cleared
    */
   resetView(selector = '.results', fn){
-    if(typeof(selector) === 'function'){
+    if(Eleven.isFunction(selector)){
       fn = selector;
       selector = '.results';
     }
@@ -189,7 +189,7 @@ Eleven.extend(Eleven, {
       results.forEach((element) => element.parentNode && element.parentNode.removeChild(element));
     }
 
-    if(typeof(fn) === 'function'){
+    if(Eleven.isFunction(fn)){
       fn();
     }
 
