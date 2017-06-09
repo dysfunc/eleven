@@ -19,11 +19,43 @@ var _helpers = require('../common/helpers');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// buffer restarts
-var lastStartTime = 0,
-    restartCount = 0;
-
 _core2.default.fn.extend({
+  agent: function agent() {
+    var _this = this;
+
+    // reference to SpeechRecognition instance
+    this.recognition = new _speechRecognition2.default();
+    // set language
+    this.recognition.lang = this.options.language;
+    // set max alternative results
+    this.recognition.maxAlternatives = this.options.maxAlternatives;
+    // set continuous listening
+    this.recognition.continuous = this.options.continuous;
+    // return results immediately so we can emulate audio waves
+    this.recognition.interimResults = this.options.interimResults;
+
+    this.recognition.onend = function () {
+      return _this.stop(true);
+    };
+    this.recognition.onerror = function (error) {
+      return _this.error(error);
+    };
+    this.recognition.onresult = function (result) {
+      return _this.result(result);
+    };
+    // this.recognition.onstart = () => this.start();
+    // this.recognition.onaudioend = () => this.stop();
+    this.recognition.onaudiostart = function () {
+      if (_core2.default.isFunction(_this.options.onStart)) {
+        _this.options.onStart.call(_this);
+      }
+    };
+
+    this.recognition.start();
+
+    return this;
+  },
+
   /**
    * Iterates over a collection of objects
    * @param {Mixed}    collection Collection to iterate over
@@ -53,19 +85,9 @@ _core2.default.fn.extend({
    * @return {Object} Eleven instance
    */
   enable: function enable() {
-    var _this = this;
+    var _this2 = this;
 
     var options = this.options;
-    // reference to SpeechRecognition instance
-    this.recognition = new _speechRecognition2.default();
-    // set language
-    this.recognition.lang = options.language;
-    // set max alternative results
-    this.recognition.maxAlternatives = options.maxAlternatives;
-    // set continuous listening
-    this.recognition.continuous = options.continuous;
-    // return results immediately so we can emulate audio waves
-    this.recognition.interimResults = options.interimResults;
     // if true, this will pass all speech back to the onCommand callback
     if (options.useEngine) {
       this.addCommands('eleven', {
@@ -75,7 +97,7 @@ _core2.default.fn.extend({
     // add commands
     this.addCommands('eleven', {
       'stop': function stop() {
-        _this.stop();
+        _this2.stop();
 
         setTimeout(function () {
           return _core2.default.resetView(function () {
@@ -84,8 +106,8 @@ _core2.default.fn.extend({
         }, 500);
 
         if (_core2.default.isFunction(options.onStop)) {
-          _this.context = null;
-          options.onStop.call(_this);
+          _this2.context = null;
+          options.onStop.call(_this2);
         }
       }
     });
@@ -97,100 +119,42 @@ _core2.default.fn.extend({
     if (options.wakeCommands.length) {
       _core2.default.regexp.wakeCommands = new RegExp('^(' + options.wakeCommands.join('|') + ')\\s+', 'i');
     }
-    // setup all SpeechRecognition event listeners
-    this.listeners();
     // fire activation event
     if (_core2.default.isFunction(options.onActivate)) {
       options.onActivate.call(this);
     }
-
-    this.start();
-
-    return this;
-  },
-
-  /**
-   * Binds callback functions to SpeechRecognition API
-   * events `onstart`, `onerror`, `onresult`, etc...
-   */
-  listeners: function listeners() {
-    var _this2 = this;
-
-    this.recognition.onend = function () {
-      return _this2.stop(true);
-    };
-    this.recognition.onerror = function (error) {
-      return _this2.error(error);
-    };
-    this.recognition.onresult = function (result) {
-      return _this2.result(result);
-    };
-    this.recognition.onstart = function () {
-      return _this2.start();
-    };
-    this.recognition.onaudioend = function () {
-      return _this2.stop();
-    };
-    this.recognition.onaudiostart = function () {
-      if (_core2.default.isFunction(_this2.options.onStart)) {
-        _this2.options.onStart.call(_this2);
-      }
-    };
-
+    // prevent multi-tab issues running SpeechRecognition/SpeechSynthesis
     _document.document.addEventListener('visibilitychange', function () {
       if (_document.document.hidden) {
         if (_this2.recognition && _this2.recognition.abort) {
           if (_this2.debug) {
             console.debug('[Eleven] User switched to another tab - disabling listeners.');
           }
-
-          _this2.stop();
+          console.log('stopping!');
           _this2.recognition.abort();
+          _this2.stop();
+          _this2.recognition = null;
         }
       } else {
         if (_this2.options.autoRestart) {
-          _this2.restart();
+          console.log('starting!');
+          _this2.agent();
         }
       }
     });
-  },
-  restart: function restart() {
-    var _this3 = this;
 
-    var timeSinceLastStart = new Date().getTime() - lastStartTime;
+    this.start();
 
-    restartCount += 1;
-
-    if (restartCount % 10 === 0) {
-      if (this.options.debug) {
-        console.debug('[Eleven] Speech Recognition is repeatedly stopping and starting.');
-      }
-    }
-
-    if (timeSinceLastStart < 1000) {
-      setTimeout(function () {
-        _this3.start();
-      }, 1000 - timeSinceLastStart);
-    } else {
-      this.start();
-    }
+    return this;
   },
   start: function start() {
     this.listening = true;
 
-    lastStartTime = new Date().getTime();
-
-    try {
-      this.recognition.start();
-    } catch (e) {
-      if (this.options.debug) {
-        console.warn('[Eleven] Error trying to start SpeechRecognition: ' + e.message);
-      }
-    }
+    this.agent();
 
     return this;
   },
-  stop: function stop(restart) {
+  stop: function stop() {
     if (this.visualizer) {
       this.running = false;
       this.visualizer.stop();
@@ -199,10 +163,6 @@ _core2.default.fn.extend({
 
     if (_core2.default.isFunction(this.options.onEnd)) {
       this.options.onEnd.call(this);
-    }
-
-    if (restart && this.options.autoRestart) {
-      this.restart();
     }
 
     return this;
@@ -696,8 +656,11 @@ Eleven.fn = Eleven.prototype = {
       Eleven.debug = true;
       console.debug(this);
     }
-    // configure speechSynthesis voices
-    this.voices();
+
+    if (Eleven.device.isDesktop) {
+      // configure speechSynthesis voices
+      this.voices();
+    }
     // allow single instance (Speech API does not support multiple instances yet)
     initialized = this;
     // always return this for chaining
@@ -4303,6 +4266,8 @@ _core2.default.fn.extend({
 
         if (_core2.default.device.isDesktop) {
           this.wakeSound.play();
+        } else {
+          this.start();
         }
 
         this.commandTimer = setTimeout(function () {
@@ -4311,6 +4276,8 @@ _core2.default.fn.extend({
         }, this.options.wakeCommandWait);
       }
     } else {
+      console.log('did not get here!');
+
       if (this.activated) {
         if (!this.running && this.visualizer) {
           this.running = true;
