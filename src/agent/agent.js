@@ -23,7 +23,7 @@ Eleven.fn.extend({
    */
   error(event){
     const { error } = event;
-    
+
     if(Eleven.isFunction(this.options.onError)){
       this.options.onError(error, event);
     }
@@ -113,7 +113,7 @@ Eleven.fn.extend({
     // set continuous listening
     this.recognition.continuous = this.options.continuous;
     // return results immediately so we can emulate audio waves
-    this.recognition.interimResults = this.options.interimResults;
+    this.recognition.interimResults = Eleven.device.isDesktop ? this.options.interimResults : false;
     /**
      * runs when the voice recognition ends. this should be set to null in recognition.onresult
      * to prevent it running if you have a successful result. if recognition.onend runs, you know
@@ -134,7 +134,7 @@ Eleven.fn.extend({
      */
     this.recognition.onresult = (event) => this.result(event);
     // this.recognition.onstart = () => this.start();
-    // this.recognition.onaudioend = () => this.stop();
+    // this.recognition.onaudioend = () => this.start();
     this.recognition.onaudiostart = () => {
       if(Eleven.isFunction(this.options.onStart)){
         this.options.onStart.call(this);

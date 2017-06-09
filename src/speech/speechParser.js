@@ -47,6 +47,10 @@ Eleven.fn.extend({
       }
     }
 
+    if(Eleven.device.isMobile){
+      this.start();
+    }
+
     return this;
   },
 
@@ -95,9 +99,14 @@ Eleven.fn.extend({
     this.recognition.onend = null;
 
     const result = event.results[event.resultIndex];
+    const first = result[0].transcript.trim();
     const results = [];
 
-    if(indexOf(this.options.wakeCommands, result[0].transcript.trim()) > -1){
+    if(first.toLowerCase() === 'stop'){
+      this.parser(results['stop']);
+    }
+
+    if(indexOf(this.options.wakeCommands, first) > -1){
       if(!this.activated){
         this.activated = true;
         this.container.classList.add('ready');
