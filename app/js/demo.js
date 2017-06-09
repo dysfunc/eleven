@@ -22,15 +22,16 @@
 
           $.ajax({
             url: 'https://api.api.ai/api/query?v=20150910&lang=en',
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            headers: {
+              Authorization: 'Bearer 7e11b6f7694f4444b0df75b77cc0a457'
+            },
             data: {
               sessionId: sessionId,
               query: speech,
               access_token: 'a0a87a32cec4454aa6bbd3909ecbca14'
             },
-            headers: {
-              Authorization: 'Bearer 7e11b6f7694f4444b0df75b77cc0a457'
-            },
-            dataType: 'json',
             success: function(response){
               var news = Eleven().getPlugin('news'),
                   weather = Eleven().getPlugin('weather'),
