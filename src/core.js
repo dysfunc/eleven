@@ -67,8 +67,11 @@ Eleven.fn = Eleven.prototype = {
       Eleven.debug = true;
       console.debug(this);
     }
-    // configure speechSynthesis voices
-    this.voices();
+    
+    if(Eleven.device.isDesktop){
+      // configure speechSynthesis voices
+      this.voices();
+    }
     // allow single instance (Speech API does not support multiple instances yet)
     initialized = this;
     // always return this for chaining

@@ -1,5 +1,5 @@
 import Eleven from '../core';
-import { indexOf } from '../common/helpers';
+import { each, indexOf } from '../common/helpers';
 
 Eleven.fn.extend({
   parser(results){
@@ -19,7 +19,7 @@ Eleven.fn.extend({
       this.activated = false;
     }, 750);
 
-    Eleven.each(results, (result) => {
+    each(results, (result) => {
       const speech = result.replace(Eleven.regexp.wakeCommands, '').trim();
 
       if(this.options.debug){
@@ -33,12 +33,18 @@ Eleven.fn.extend({
       if(!match){
         this.context = null;
 
-        Eleven.each(this.commands, (context) => !this.evaluate(context, this.commands[context], speech));
+        Eleven.each(this.commands, (context) => {
+          match = this.evaluate(context, this.commands[context], speech);
+
+          return !match;
+        });
       }
     });
 
-    if(Eleven.isFunction(this.options.onResultNoMatch)){
-      options.onResultNoMatch.call(this, results);
+    if(!match){
+      if(Eleven.isFunction(this.options.onResultNoMatch)){
+        options.onResultNoMatch.call(this, results);
+      }
     }
 
     return this;
@@ -95,7 +101,12 @@ Eleven.fn.extend({
       if(!this.activated){
         this.activated = true;
         this.container.classList.add('ready');
-        this.wakeSound.play();
+
+        if(Eleven.device.isDesktop){
+          this.wakeSound.play();
+        }else{
+          this.start();
+        }
 
         this.commandTimer = setTimeout(() => {
           this.activated = false;
@@ -103,11 +114,12 @@ Eleven.fn.extend({
         }, this.options.wakeCommandWait);
       }
     }else{
+      clearTimeout(this.commandTimer);
+
       if(this.activated){
         if(!this.running && this.visualizer){
           this.running = true;
           this.visualizer.start();
-          clearTimeout(this.commandTimer);
         }
 
         for(var i = 0, k = result.length; i < k; i++){
