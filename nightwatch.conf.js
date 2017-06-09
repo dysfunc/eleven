@@ -9,7 +9,7 @@ require('nightwatch-cucumber')({
     '--require', 'test/e2e/timeout.js',
     '--require', 'test/e2e/features/step_definitions',
     '--format', 'pretty',
-    '--format', 'json:reports/cucumber.json',
+    '--format', 'json:test/e2e/reports/cucumber.json',
     'test/e2e/features'
   ]
 });
