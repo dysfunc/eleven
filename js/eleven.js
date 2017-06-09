@@ -20,44 +20,20 @@ var _helpers = require('../common/helpers');
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 _core2.default.fn.extend({
-  agent: function agent() {
-    var _this = this;
-
-    // reference to SpeechRecognition instance
-    this.recognition = new _speechRecognition2.default();
-    // set language
-    this.recognition.lang = this.options.language;
-    // set max alternative results
-    this.recognition.maxAlternatives = this.options.maxAlternatives;
-    // set continuous listening
-    this.recognition.continuous = this.options.continuous;
-    // return results immediately so we can emulate audio waves
-    this.recognition.interimResults = this.options.interimResults;
-
-    this.recognition.onend = function () {
-      return _this.stop(true);
-    };
-    this.recognition.onerror = function (error) {
-      return _this.error(error);
-    };
-    this.recognition.onresult = function (result) {
-      return _this.result(result);
-    };
-    // this.recognition.onstart = () => this.start();
-    // this.recognition.onaudioend = () => this.stop();
-    this.recognition.onaudiostart = function () {
-      if (_core2.default.isFunction(_this.options.onStart)) {
-        _this.options.onStart.call(_this);
-      }
-    };
-
-    this.recognition.start();
-
-    return this;
-  },
-
   /**
-   * Iterates over a collection of objects
+   * Fired when a speech recognition error occurs
+   *
+   * Error codes:
+   * -----------
+   * "no-speech": No speech was detected.
+   * "aborted": Speech input was aborted somehow.
+   * "audio-capture": Audio capture failed.
+   * "network": Network communication required to complete the recognition failed.
+   * "not-allowed": The user agent is not allowing any speech input to occur for reasons of security, privacy or user preference.
+   * "service-not-allowed": The user agent is not allowing the requested speech service to be used either because the user agent doesn't support the selected one or because of reasons of security, privacy or user preference.
+   * "bad-grammar": There was an error in the speech recognition grammar or semantic tags, or the grammar format or semantic tag format is unsupported.
+   * "language-not-supported": The language was not supported.
+   *
    * @param {Mixed}    collection Collection to iterate over
    * @param {Function} fn         Callback function
    */
@@ -76,6 +52,8 @@ _core2.default.fn.extend({
     if (this.options.debug) {
       console.warn('[Eleven] SpeechRecognition event error: ' + error + ' \n ' + JSON.stringify(event, null, 2));
     }
+
+    return this;
   },
 
   /**
@@ -85,7 +63,7 @@ _core2.default.fn.extend({
    * @return {Object} Eleven instance
    */
   enable: function enable() {
-    var _this2 = this;
+    var _this = this;
 
     var options = this.options;
     // if true, this will pass all speech back to the onCommand callback
@@ -97,7 +75,7 @@ _core2.default.fn.extend({
     // add commands
     this.addCommands('eleven', {
       'stop': function stop() {
-        _this2.stop();
+        _this.stop();
 
         setTimeout(function () {
           return _core2.default.resetView(function () {
@@ -106,8 +84,8 @@ _core2.default.fn.extend({
         }, 500);
 
         if (_core2.default.isFunction(options.onStop)) {
-          _this2.context = null;
-          options.onStop.call(_this2);
+          _this.context = null;
+          options.onStop.call(_this);
         }
       }
     });
@@ -126,19 +104,20 @@ _core2.default.fn.extend({
     // prevent multi-tab issues running SpeechRecognition/SpeechSynthesis
     _document.document.addEventListener('visibilitychange', function () {
       if (_document.document.hidden) {
-        if (_this2.recognition && _this2.recognition.abort) {
-          if (_this2.debug) {
-            console.debug('[Eleven] User switched to another tab - disabling listeners.');
+        if (_this.recognition && _this.recognition.abort) {
+          if (_this.debug) {
+            console.debug('[Eleven] User switched to another tab - disabling recognition.');
           }
-          console.log('stopping!');
-          _this2.recognition.abort();
-          _this2.stop();
-          _this2.recognition = null;
+
+          if (_this.recognition) {
+            _this.recognition.stop();
+            _this.recognition = null;
+            _this.stop();
+          }
         }
       } else {
-        if (_this2.options.autoRestart) {
-          console.log('starting!');
-          _this2.agent();
+        if (!_this.recognition && _this.options.autoRestart) {
+          _this.start();
         }
       }
     });
@@ -148,13 +127,56 @@ _core2.default.fn.extend({
     return this;
   },
   start: function start() {
-    this.listening = true;
+    var _this2 = this;
 
-    this.agent();
+    // reference to SpeechRecognition instance
+    this.recognition = new _speechRecognition2.default();
+    // set language
+    this.recognition.lang = this.options.language;
+    // set max alternative results
+    this.recognition.maxAlternatives = this.options.maxAlternatives;
+    // set continuous listening
+    this.recognition.continuous = this.options.continuous;
+    // return results immediately so we can emulate audio waves
+    this.recognition.interimResults = this.options.interimResults;
+    /**
+     * runs when the voice recognition ends. this should be set to null in recognition.onresult
+     * to prevent it running if you have a successful result. if recognition.onend runs, you know
+     * the voice recognition API hasn’t understood the user.
+     * @return {Object} Eleven
+     */
+    this.recognition.onend = function () {
+      return _this2.stop(true);
+    };
+    /**
+     * Fired when a speech recognition error occurs
+     * @param  {Object} error SpeechRecognition error object { error, message }
+     * @return {Object}       Eleven
+     */
+    this.recognition.onerror = function (error) {
+      return _this2.error(error);
+    };
+    /**
+     * Fires when you have a result from the voice recognition
+     * @param  {Object} event Event that contains the interim or final results
+     * @return {Object}        Eleven
+     */
+    this.recognition.onresult = function (event) {
+      return _this2.result(event);
+    };
+    // this.recognition.onstart = () => this.start();
+    // this.recognition.onaudioend = () => this.stop();
+    this.recognition.onaudiostart = function () {
+      if (_core2.default.isFunction(_this2.options.onStart)) {
+        _this2.options.onStart.call(_this2);
+      }
+    };
+
+    this.recognition.start();
 
     return this;
   },
-  stop: function stop() {
+  stop: function stop(restart) {
     if (this.visualizer) {
       this.running = false;
       this.visualizer.stop();
@@ -163,6 +185,10 @@ _core2.default.fn.extend({
 
     if (_core2.default.isFunction(this.options.onEnd)) {
       this.options.onEnd.call(this);
+    }
+
+    if (restart && this.options.autoRestart) {
+      this.start();
     }
 
     return this;
@@ -4200,13 +4226,17 @@ _core2.default.fn.extend({
         _this.context = null;
 
         _core2.default.each(_this.commands, function (context) {
-          return !_this.evaluate(context, _this.commands[context], speech);
+          match = _this.evaluate(context, _this.commands[context], speech);
+
+          return !match;
         });
       }
     });
 
-    if (_core2.default.isFunction(this.options.onResultNoMatch)) {
-      options.onResultNoMatch.call(this, results);
+    if (!match) {
+      if (_core2.default.isFunction(this.options.onResultNoMatch)) {
+        options.onResultNoMatch.call(this, results);
+      }
     }
 
     return this;
@@ -4276,13 +4306,12 @@ _core2.default.fn.extend({
         }, this.options.wakeCommandWait);
       }
     } else {
-      console.log('did not get here!');
+      clearTimeout(this.commandTimer);
 
       if (this.activated) {
         if (!this.running && this.visualizer) {
           this.running = true;
           this.visualizer.start();
-          clearTimeout(this.commandTimer);
         }
 
         for (var i = 0, k = result.length; i < k; i++) {
