@@ -138,7 +138,7 @@ _core2.default.fn.extend({
     // set continuous listening
     this.recognition.continuous = this.options.continuous;
     // return results immediately so we can emulate audio waves
-    this.recognition.interimResults = this.options.interimResults;
+    this.recognition.interimResults = _core2.default.device.isDesktop ? this.options.interimResults : false;
     /**
      * runs when the voice recognition ends. this should be set to null in recognition.onresult
      * to prevent it running if you have a successful result. if recognition.onend runs, you know
@@ -165,7 +165,7 @@ _core2.default.fn.extend({
       return _this2.result(event);
     };
     // this.recognition.onstart = () => this.start();
-    // this.recognition.onaudioend = () => this.stop();
+    // this.recognition.onaudioend = () => this.start();
     this.recognition.onaudiostart = function () {
       if (_core2.default.isFunction(_this2.options.onStart)) {
         _this2.options.onStart.call(_this2);
@@ -4239,6 +4239,10 @@ _core2.default.fn.extend({
       }
     }
 
+    if (_core2.default.device.isMobile) {
+      this.start();
+    }
+
     return this;
   },
   evaluate: function evaluate(name, context, speech) {
@@ -4287,9 +4291,14 @@ _core2.default.fn.extend({
     this.recognition.onend = null;
 
     var result = event.results[event.resultIndex];
+    var first = result[0].transcript.trim();
     var results = [];
 
-    if ((0, _helpers.indexOf)(this.options.wakeCommands, result[0].transcript.trim()) > -1) {
+    if (first.toLowerCase() === 'stop') {
+      this.parser(results['stop']);
+    }
+
+    if ((0, _helpers.indexOf)(this.options.wakeCommands, first) > -1) {
       if (!this.activated) {
         this.activated = true;
         this.container.classList.add('ready');
