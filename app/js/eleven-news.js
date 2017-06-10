@@ -13,7 +13,7 @@
       var articles = data.articles.slice(2);
       var data = [];
 
-      Eleven.resetView();
+      Eleven.clearStage();
 
       articles.forEach(function(article){
         var description = article.description || '';
@@ -36,11 +36,11 @@
 
       setTimeout(function(){
         var container = $('<div id="news-results"><ul></ul></div>'),
-            wrapper = $('<div id="carousel" class="results"></div>');
+            wrapper = $('<div id="carousel"></div>');
 
         wrapper.append(container);
 
-        $(document.body).append(wrapper);
+        $(Eleven.stage).append(wrapper);
 
         wrapper.addClass('show');
 
@@ -68,17 +68,6 @@
             '</li>'
           ].join(''),
           data: data
-        });
-
-        $(document).on('gest', function(gesture){
-          console.log(gesture);
-          if(gesture.direction === 'Left'){
-            $('.carousel-next').click();
-          }
-
-          if(gesture.direction === 'Right'){
-            $('.carousel-prev').click();
-          }
         });
       }, 500);
     },

@@ -9,14 +9,15 @@ var initialized = null;
  * @param  {Object} options Object containing Eleven's configuration
  * @return {Object}         Eleven instance
  */
-const Eleven = (selector, options) => initialized || new Eleven.fn.init(selector, options);
+const Eleven = (options) => initialized || new Eleven.fn.init(options);
 
 Eleven.fn = Eleven.prototype = {
   constructor: Eleven,
   version: '1.0.0',
-  init(selector, options){
+  init(options){
     const defaultConfig = {
       autoRestart: true,
+      container: '#eleven',
       debug: false,
       language: 'en-US',
       commands: [],
@@ -25,12 +26,13 @@ Eleven.fn = Eleven.prototype = {
       maxAlternatives: 1,
       requiresWakeWord: true,
       speechAgent: 'Google UK English Female',
+      stage: '#stage',
       useEngine: false,
       wakeCommands: ['eleven', '11'],
       wakeSound: 'https://s3-us-west-1.amazonaws.com/voicelabs/static/chime.mp3',
       wakeCommandWait: 10000,
       template: `
-         <div class="eleven-container">
+        <div class="eleven-container">
           <div class="eleven-container-inner">
             <div class="eleven-off">
               <span>ELEVEN</span>
@@ -43,10 +45,16 @@ Eleven.fn = Eleven.prototype = {
         </div>
       `
     };
-    // create a ref to the container element
-    this.container = document.querySelector(selector);
     // store options
     this.options = Eleven.extend({}, defaultConfig, options || {});
+    // create ref to stage element
+    Eleven.stage = document.querySelector(this.options.stage);
+    // add stage class
+    Eleven.stage.className += ' stage';
+    // create a ref to the container element
+    Eleven.container = this.container = document.querySelector(this.options.container);
+    // assign eleven class to container
+    this.container.className += ' eleven';
     // create markup
     this.container.innerHTML = this.options.template;
     // reference to all of our commands
@@ -67,9 +75,8 @@ Eleven.fn = Eleven.prototype = {
       Eleven.debug = true;
       console.debug(this);
     }
-    
+    // configure speechSynthesis voices
     if(Eleven.device.isDesktop){
-      // configure speechSynthesis voices
       this.voices();
     }
     // allow single instance (Speech API does not support multiple instances yet)

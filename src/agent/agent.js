@@ -1,6 +1,7 @@
 import Eleven from '../core';
 import SpeechRecognition from '../speech/speechRecognition';
 import { document } from '../common/document';
+import { slice } from '../common/arrays';
 import { each } from '../common/helpers';
 
 Eleven.fn.extend({
@@ -165,22 +166,16 @@ Eleven.fn.extend({
   }
 });
 
-Eleven.extend(Eleven, {
+Eleven.extend({
   /**
    * Removes all rendered elements from the viewport and executes a callback
    * @param  {Function} fn Function to execute once the view has been cleared
    */
-  resetView(selector = '.results', fn){
-    if(Eleven.isFunction(selector)){
-      fn = selector;
-      selector = '.results';
-    }
+  clearStage(fn){
 
-    const results = document.querySelectorAll(selector);
+    const elements = slice.call(Eleven.stage.childNodes);
 
-    if(results && results.length){
-      results.forEach((element) => element.parentNode && element.parentNode.removeChild(element));
-    }
+    each(elements, (element) => Eleven.stage.removeChild(element));
 
     if(Eleven.isFunction(fn)){
       fn();

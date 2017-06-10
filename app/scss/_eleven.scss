@@ -1,34 +1,34 @@
-#eleven div,
+.eleven div,
 .eleven-message div,
-#eleven span,
+.eleven span,
 .eleven-message span,
-#eleven h1,
+.eleven h1,
 .eleven-message h1,
-#eleven h2,
+.eleven h2,
 .eleven-message h2,
-#eleven h3,
+.eleven h3,
 .eleven-message h3,
-#eleven h4,
+.eleven h4,
 .eleven-message h4,
-#eleven h5,
+.eleven h5,
 .eleven-message h5,
-#eleven h6,
+.eleven h6,
 .eleven-message h6,
-#eleven p,
+.eleven p,
 .eleven-message p,
-#eleven a,
+.eleven a,
 .eleven-message a,
-#eleven b,
+.eleven b,
 .eleven-message b,
-#eleven u,
+.eleven u,
 .eleven-message u,
-#eleven i,
+.eleven i,
 .eleven-message i,
-#eleven ul,
+.eleven ul,
 .eleven-message ul,
-#eleven li,
+.eleven li,
 .eleven-message li,
-#eleven canvas,
+.eleven canvas,
 .eleven-message canvas {
   border: 0;
   font: inherit;
@@ -38,17 +38,17 @@
   vertical-align: baseline;
 }
 
-#eleven p,
+.eleven p,
 .eleven-message p {
   line-height: 1.2em;
 }
 
-#eleven ul,
+.eleven ul,
 .eleven-message ul {
   list-style: none;
 }
 
-#eleven {
+.eleven {
   bottom: 40px;
   height: 90px;
   position: fixed;
@@ -251,4 +251,14 @@
   100% {
     top: -110px;
   }
+}
+
+
+.stage {
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 1;
 }
