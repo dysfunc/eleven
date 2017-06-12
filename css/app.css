@@ -1804,7 +1804,8 @@ p {
   padding: 8px 12px;
   position: absolute;
   right: 20px;
-  top: 20px; }
+  top: 20px;
+  z-index: 999999; }
 
 #supported {
   display: none; }
@@ -1829,7 +1830,7 @@ p {
   background-clip: padding-box; }
 
 .supported-intents {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(16, 35, 68, 0.8);
   border-radius: 4px;
   color: #fff;
   max-width: 300px;
@@ -1837,7 +1838,7 @@ p {
   position: absolute;
   right: 20px;
   top: 70px;
-  z-index: 1000; }
+  z-index: 99999; }
   .supported-intents ol {
     margin: 0;
     padding: 12px; }
@@ -1850,37 +1851,37 @@ p {
         margin: 5px 0;
         padding: 4px 8px; }
 
-#eleven div,
+.eleven div,
 .eleven-message div,
-#eleven span,
+.eleven span,
 .eleven-message span,
-#eleven h1,
+.eleven h1,
 .eleven-message h1,
-#eleven h2,
+.eleven h2,
 .eleven-message h2,
-#eleven h3,
+.eleven h3,
 .eleven-message h3,
-#eleven h4,
+.eleven h4,
 .eleven-message h4,
-#eleven h5,
+.eleven h5,
 .eleven-message h5,
-#eleven h6,
+.eleven h6,
 .eleven-message h6,
-#eleven p,
+.eleven p,
 .eleven-message p,
-#eleven a,
+.eleven a,
 .eleven-message a,
-#eleven b,
+.eleven b,
 .eleven-message b,
-#eleven u,
+.eleven u,
 .eleven-message u,
-#eleven i,
+.eleven i,
 .eleven-message i,
-#eleven ul,
+.eleven ul,
 .eleven-message ul,
-#eleven li,
+.eleven li,
 .eleven-message li,
-#eleven canvas,
+.eleven canvas,
 .eleven-message canvas {
   border: 0;
   font: inherit;
@@ -1889,31 +1890,31 @@ p {
   padding: 0;
   vertical-align: baseline; }
 
-#eleven p,
+.eleven p,
 .eleven-message p {
   line-height: 1.2em; }
 
-#eleven ul,
+.eleven ul,
 .eleven-message ul {
   list-style: none; }
 
-#eleven {
+.eleven {
   bottom: 40px;
   height: 90px;
   position: fixed;
   right: 40px;
   width: 90px;
   z-index: 9998; }
-  #eleven * {
+  .eleven * {
     font-family: "Helvetica Neue", "Helvetica", Arial, sans-serif; }
-  #eleven .eleven-container {
+  .eleven .eleven-container {
     perspective: 1000px; }
-  #eleven .eleven-container,
-  #eleven .eleven-off,
-  #eleven .eleven-on {
+  .eleven .eleven-container,
+  .eleven .eleven-off,
+  .eleven .eleven-on {
     height: 94px;
     width: 94px; }
-  #eleven .eleven-container-inner {
+  .eleven .eleven-container-inner {
     position: relative;
     transform-style: preserve-3d;
     -webkit-backface-visibility: hidden;
@@ -1922,8 +1923,8 @@ p {
     -ms-transition: 0.6s;
     -o-transition: 0.6s;
     transition: 0.6s; }
-  #eleven .eleven-off,
-  #eleven .eleven-on {
+  .eleven .eleven-off,
+  .eleven .eleven-on {
     left: 0;
     padding: 0;
     position: absolute;
@@ -1935,7 +1936,7 @@ p {
     -webkit-background-clip: padding-box;
     -moz-background-clip: padding;
     background-clip: padding-box; }
-  #eleven .eleven-off {
+  .eleven .eleven-off {
     background: linear-gradient(to bottom, #fff 0%, #f6f6f6 47%, #ededed 100%);
     height: 90px;
     width: 90px;
@@ -1947,7 +1948,7 @@ p {
     -ms-transform: rotateY(0deg);
     -o-transform: rotateY(0deg);
     transform: rotateY(0deg); }
-    #eleven .eleven-off > span {
+    .eleven .eleven-off > span {
       color: #3c92e8;
       display: block;
       font-size: 12px !important;
@@ -1962,7 +1963,7 @@ p {
       -webkit-background-clip: padding-box;
       -moz-background-clip: padding;
       background-clip: padding-box; }
-  #eleven .eleven-on {
+  .eleven .eleven-on {
     background: linear-gradient(to bottom, #fff 0%, #e3e1e8 40%, #c7c4d1 80%, #f5f5f5 100%);
     z-index: 2;
     -webkit-box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.17), 0 1px 4px rgba(0, 0, 0, 0.25);
@@ -1978,14 +1979,14 @@ p {
     -ms-transition: transform 0.3s ease-in-out;
     -o-transition: transform 0.3s ease-in-out;
     transition: transform 0.3s ease-in-out; }
-    #eleven .eleven-on.speaking {
+    .eleven .eleven-on.speaking {
       -webkit-transform: rotateY(180deg) scale(1);
       -moz-transform: rotateY(180deg) scale(1);
       -ms-transform: rotateY(180deg) scale(1);
       -o-transform: rotateY(180deg) scale(1);
       transform: rotateY(180deg) scale(1); }
-    #eleven .eleven-on .bg,
-    #eleven .eleven-on .waves {
+    .eleven .eleven-on .bg,
+    .eleven .eleven-on .waves {
       border-radius: 100%;
       height: 92px;
       left: 1px;
@@ -1993,11 +1994,11 @@ p {
       position: absolute;
       top: 1px;
       width: 92px; }
-    #eleven .eleven-on .bg {
+    .eleven .eleven-on .bg {
       background: #1f0c48; }
-    #eleven .eleven-on .waves {
+    .eleven .eleven-on .waves {
       z-index: 99; }
-      #eleven .eleven-on .waves:after {
+      .eleven .eleven-on .waves:after {
         content: " ";
         height: 100%;
         left: 0;
@@ -2014,13 +2015,13 @@ p {
         -webkit-box-shadow: inset 0 0 0.5px 1px rgba(0, 0, 0, 0.25);
         -moz-box-shadow: inset 0 0 0.5px 1px rgba(0, 0, 0, 0.25);
         box-shadow: inset 0 0 0.5px 1px rgba(0, 0, 0, 0.25); }
-  #eleven.ready .eleven-container .eleven-container-inner {
+  .eleven.ready .eleven-container .eleven-container-inner {
     -webkit-transform: rotateY(180deg);
     -moz-transform: rotateY(180deg);
     -ms-transform: rotateY(180deg);
     -o-transform: rotateY(180deg);
     transform: rotateY(180deg); }
-  #eleven canvas {
+  .eleven canvas {
     height: 100% !important;
     left: -50%;
     opacity: 0;
@@ -2039,7 +2040,7 @@ p {
     -ms-transition: all 0.3s ease-in-out;
     -o-transition: all 0.3s ease-in-out;
     transition: all 0.3s ease-in-out; }
-    #eleven canvas.fadein {
+    .eleven canvas.fadein {
       opacity: 1;
       -webkit-transform: translateY(0);
       -moz-transform: translateY(0);
@@ -2153,6 +2154,14 @@ p {
   100% {
     top: -110px; } }
 
+.stage {
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 1; }
+
 #eleven {
   bottom: 50%;
   height: 140px;
@@ -2228,7 +2237,6 @@ p {
   transition: transform 0.3s ease-in-out; }
   #carousel.show {
     opacity: 1;
-    position: fixed;
     -webkit-transform: translateY(0);
     -moz-transform: translateY(0);
     -ms-transform: translateY(0);
@@ -2257,7 +2265,7 @@ p {
       list-style: none;
       margin: 0;
       padding: 0;
-      position: absolute;
+      position: fixed;
       top: 0;
       transition: left .25s ease-in-out; }
       .carousel .carousel-viewport .carousel-content li {
@@ -2343,7 +2351,7 @@ p {
   bottom: 20%;
   left: 0;
   opacity: 0;
-  position: fixed;
+  position: absolute;
   right: 0;
   top: 18%;
   will-change: transform, opacity;
@@ -2368,7 +2376,6 @@ p {
     text-align: center; }
   #weather-results.show {
     opacity: 1;
-    position: fixed;
     -webkit-transform: translateY(0);
     -moz-transform: translateY(0);
     -ms-transform: translateY(0);

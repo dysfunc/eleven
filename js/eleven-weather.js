@@ -55,9 +55,9 @@
       const region = query.channel.location.region;
       const days = forecast.slice(0, total);
 
-      Eleven.resetView();
+      Eleven.clearStage();
 
-      const container = $('<div id="weather-results" class="results"></div>');
+      const container = $('<div id="weather-results"></div>');
       const ul = $('<ul>');
 
       days.forEach(function(day){
@@ -84,7 +84,7 @@
       setTimeout(function(){
         container
           .append(ul)
-          .appendTo(document.body)
+          .appendTo(Eleven.stage)
           .addClass('show');
       }, 500);
     },

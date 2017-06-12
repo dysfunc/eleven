@@ -71,6 +71,7 @@ p {
   position: absolute;
   right: 20px;
   top: 20px;
+  z-index: 999999;
 }
 
 #supported {
@@ -96,7 +97,7 @@ p {
 }
 
 .supported-intents {
-  background-color: rgba(#fff, .1);
+  background-color: darken(rgba(#19386e, .8), 10%);
   border-radius: 4px;
   color: #fff;
   max-width: 300px;
@@ -104,7 +105,7 @@ p {
   position: absolute;
   right: 20px;
   top: 70px;
-  z-index: 1000;
+  z-index: 99999;
 
   ol {
     margin: 0;

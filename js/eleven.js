@@ -15,9 +15,14 @@ var _speechRecognition2 = _interopRequireDefault(_speechRecognition);
 
 var _document = require('../common/document');
 
+var _arrays = require('../common/arrays');
+
 var _helpers = require('../common/helpers');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var lastStartTime = 0,
+    restartCount = 0;
 
 _core2.default.fn.extend({
   /**
@@ -66,6 +71,8 @@ _core2.default.fn.extend({
     var _this = this;
 
     var options = this.options;
+    // track restart
+    var timeSinceLastStart = new Date().getTime() - lastStartTime;
     // if true, this will pass all speech back to the onCommand callback
     if (options.useEngine) {
       this.addCommands('eleven', {
@@ -121,6 +128,14 @@ _core2.default.fn.extend({
         }
       }
     });
+
+    if (timeSinceLastStart < 60000) {
+      setTimeout(function () {
+        lastStartTime = new Date().getTime();
+        _this.start();
+        alert('helllooo world');
+      }, 60000 - timeSinceLastStart);
+    }
 
     this.start();
 
@@ -195,27 +210,17 @@ _core2.default.fn.extend({
   }
 });
 
-_core2.default.extend(_core2.default, {
+_core2.default.extend({
   /**
    * Removes all rendered elements from the viewport and executes a callback
    * @param  {Function} fn Function to execute once the view has been cleared
    */
-  resetView: function resetView() {
-    var selector = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '.results';
-    var fn = arguments[1];
+  clearStage: function clearStage(fn) {
+    var elements = _arrays.slice.call(_core2.default.stage.childNodes);
 
-    if (_core2.default.isFunction(selector)) {
-      fn = selector;
-      selector = '.results';
-    }
-
-    var results = _document.document.querySelectorAll(selector);
-
-    if (results && results.length) {
-      results.forEach(function (element) {
-        return element.parentNode && element.parentNode.removeChild(element);
-      });
-    }
+    (0, _helpers.each)(elements, function (element) {
+      return _core2.default.stage.removeChild(element);
+    });
 
     if (_core2.default.isFunction(fn)) {
       fn();
@@ -227,7 +232,7 @@ _core2.default.extend(_core2.default, {
 
 exports.default = _core2.default;
 
-},{"../common/document":5,"../common/helpers":6,"../core":10,"../speech/speechRecognition":51}],2:[function(require,module,exports){
+},{"../common/arrays":4,"../common/document":5,"../common/helpers":6,"../core":10,"../speech/speechRecognition":51}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -634,16 +639,17 @@ var initialized = null;
  * @param  {Object} options Object containing Eleven's configuration
  * @return {Object}         Eleven instance
  */
-var Eleven = function Eleven(selector, options) {
-  return initialized || new Eleven.fn.init(selector, options);
+var Eleven = function Eleven(options) {
+  return initialized || new Eleven.fn.init(options);
 };
 
 Eleven.fn = Eleven.prototype = {
   constructor: Eleven,
   version: '1.0.0',
-  init: function init(selector, options) {
+  init: function init(options) {
     var defaultConfig = {
       autoRestart: true,
+      container: '#eleven',
       debug: false,
       language: 'en-US',
       commands: [],
@@ -652,16 +658,23 @@ Eleven.fn = Eleven.prototype = {
       maxAlternatives: 1,
       requiresWakeWord: true,
       speechAgent: 'Google UK English Female',
+      stage: '#stage',
       useEngine: false,
       wakeCommands: ['eleven', '11'],
       wakeSound: 'https://s3-us-west-1.amazonaws.com/voicelabs/static/chime.mp3',
       wakeCommandWait: 10000,
-      template: '\n         <div class="eleven-container">\n          <div class="eleven-container-inner">\n            <div class="eleven-off">\n              <span>ELEVEN</span>\n            </div>\n            <div class="eleven-on">\n              <div class="bg"></div>\n              <div class="waves"></div>\n            </div>\n          </div>\n        </div>\n      '
+      template: '\n        <div class="eleven-container">\n          <div class="eleven-container-inner">\n            <div class="eleven-off">\n              <span>ELEVEN</span>\n            </div>\n            <div class="eleven-on">\n              <div class="bg"></div>\n              <div class="waves"></div>\n            </div>\n          </div>\n        </div>\n      '
     };
-    // create a ref to the container element
-    this.container = _document.document.querySelector(selector);
     // store options
     this.options = Eleven.extend({}, defaultConfig, options || {});
+    // create ref to stage element
+    Eleven.stage = _document.document.querySelector(this.options.stage);
+    // add stage class
+    Eleven.stage.className += ' stage';
+    // create a ref to the container element
+    Eleven.container = this.container = _document.document.querySelector(this.options.container);
+    // assign eleven class to container
+    this.container.className += ' eleven';
     // create markup
     this.container.innerHTML = this.options.template;
     // reference to all of our commands
@@ -682,9 +695,8 @@ Eleven.fn = Eleven.prototype = {
       Eleven.debug = true;
       console.debug(this);
     }
-
+    // configure speechSynthesis voices
     if (Eleven.device.isDesktop) {
-      // configure speechSynthesis voices
       this.voices();
     }
     // allow single instance (Speech API does not support multiple instances yet)
@@ -4156,7 +4168,7 @@ _core2.default.speak = function (text) {
           return;
         }
 
-        eleven.stop();
+        eleven.stop(true);
 
         if (_core2.default.isFunction(config.onEnd)) {
           config.onEnd();
@@ -4202,13 +4214,7 @@ _core2.default.fn.extend({
     }
 
     setTimeout(function () {
-      if (_this.running && _this.visualizer) {
-        _this.running = false;
-        _this.visualizer.stop();
-      }
-
-      _this.container.classList.remove('ready');
-      _this.activated = false;
+      return _this.stop(true);
     }, 750);
 
     (0, _helpers.each)(results, function (result) {
@@ -4310,8 +4316,7 @@ _core2.default.fn.extend({
         }
 
         this.commandTimer = setTimeout(function () {
-          _this2.activated = false;
-          _this2.container.classList.remove('ready');
+          return _this2.stop(true);
         }, this.options.wakeCommandWait);
       }
     } else {

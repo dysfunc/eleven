@@ -18,7 +18,7 @@
   $.extend(yelp.prototype, {
     createList: function(data, speech){
       // clear any results from previous commands
-      Eleven.resetView();
+      Eleven.clearStage();
 
       var container = document.createElement('div'),
           ul = document.createElement('ul'),
@@ -49,7 +49,7 @@
 
       container.appendChild(ul);
 
-      document.body.appendChild(container);
+      Eleven.stage.appendChild(container);
 
       setTimeout(function(){
         container.classList.add('show');

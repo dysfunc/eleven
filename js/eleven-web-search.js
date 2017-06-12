@@ -13,7 +13,7 @@
     createList: function(data, total){
       var articles = data.items.slice(0, 1)
 
-      Eleven.resetView();
+      Eleven.clearStage();
 
       var container = document.createElement('div'),
           ul = document.createElement('ul');
