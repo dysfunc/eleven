@@ -128,10 +128,15 @@ _core2.default.fn.extend({
     });
 
     this.start();
-    this.recognition.start();
 
     return this;
   },
+
+  /**
+   * This creates a new SpeechRecognition object instance, binds to its event handlers,
+   * and starts our timer to ensure/mitigate speech loss.
+   * @return {Object} Eleven
+   */
   start: function start() {
     var _this2 = this;
 
@@ -183,21 +188,13 @@ _core2.default.fn.extend({
 
     return this;
   },
-  watch: function watch() {
-    var _this3 = this;
 
-    // track restart
-    var timeSinceLastStart = new Date().getTime() - lastStartTime;
-
-    if (timeSinceLastStart < 1000) {
-      elapsedTimer = setTimeout(function () {
-        lastStartTime = new Date().getTime();
-        _this3.recognition.start();
-      }, 1000 - timeSinceLastStart);
-    } else {
-      clearTimeout(elapsedTimer);
-    }
-  },
+  /**
+   * Stops all visual interactions, removes interactive classes from the stage, and
+   * executes a callback (optional)
+   * @param  {Boolean} restart If true, start will be invoked to continue listening
+   * @return {Object}          Eleven
+   */
   stop: function stop(restart) {
     if (this.visualizer) {
       this.running = false;
@@ -211,6 +208,37 @@ _core2.default.fn.extend({
 
     if (restart && this.options.autoRestart) {
       this.start();
+    }
+
+    return this;
+  },
+
+  /**
+   * SpeechRecognition will die after 60 secs. This will continuously restart the agent
+   * so things are not missed when the user speaks
+   * @return {Object} Eleven
+   */
+  watch: function watch() {
+    var _this3 = this;
+
+    // control SpeechRecognition restarts
+    var timeSinceLastStart = new Date().getTime() - lastStartTime;
+
+    if (timeSinceLastStart < 1000) {
+      elapsedTimer = setTimeout(function () {
+        lastStartTime = new Date().getTime();
+
+        try {
+          _this3.recognition.start();
+        } catch (error) {
+          if (_this3.options.debug) {
+            console.warn('[Eleven] Error trying to start SpeechRecognition: ' + error.message);
+          }
+        }
+      }, 1000 - timeSinceLastStart);
+    } else {
+      clearTimeout(elapsedTimer);
+      lastStartTime = new Date().getTime();
     }
 
     return this;
@@ -4161,8 +4189,6 @@ _core2.default.speak = function (text) {
         eleven.getVisualizer('container').classList.add('ready');
         eleven.getVisualizer().start();
 
-        eleven.activate = true;
-
         if (_core2.default.isFunction(config.onStart)) {
           config.onStart();
         }
@@ -4177,7 +4203,7 @@ _core2.default.speak = function (text) {
           return;
         }
 
-        eleven.stop(true);
+        eleven.stop();
 
         if (_core2.default.isFunction(config.onEnd)) {
           config.onEnd();

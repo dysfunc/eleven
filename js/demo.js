@@ -17,7 +17,7 @@
       // init
       Eleven({
         container: '#eleven',
-        debug: true,
+        debug: false,
         stage: '#stage',
         useEngine: true,
         onCommand: function(params, speech, command){
