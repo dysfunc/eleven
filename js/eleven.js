@@ -22,7 +22,7 @@ var _helpers = require('../common/helpers');
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var lastStartTime = 0,
-    restartCount = 0;
+    elapsedTimer = null;
 
 _core2.default.fn.extend({
   /**
@@ -71,8 +71,6 @@ _core2.default.fn.extend({
     var _this = this;
 
     var options = this.options;
-    // track restart
-    var timeSinceLastStart = new Date().getTime() - lastStartTime;
     // if true, this will pass all speech back to the onCommand callback
     if (options.useEngine) {
       this.addCommands('eleven', {
@@ -129,21 +127,15 @@ _core2.default.fn.extend({
       }
     });
 
-    if (timeSinceLastStart < 60000) {
-      setTimeout(function () {
-        lastStartTime = new Date().getTime();
-        _this.start();
-        alert('helllooo world');
-      }, 60000 - timeSinceLastStart);
-    }
-
     this.start();
+    this.recognition.start();
 
     return this;
   },
   start: function start() {
     var _this2 = this;
 
+    lastStartTime = new Date().getTime();
     // reference to SpeechRecognition instance
     this.recognition = new _speechRecognition2.default();
     // set language
@@ -187,9 +179,24 @@ _core2.default.fn.extend({
       }
     };
 
-    this.recognition.start();
+    this.watch();
 
     return this;
+  },
+  watch: function watch() {
+    var _this3 = this;
+
+    // track restart
+    var timeSinceLastStart = new Date().getTime() - lastStartTime;
+
+    if (timeSinceLastStart < 1000) {
+      elapsedTimer = setTimeout(function () {
+        lastStartTime = new Date().getTime();
+        _this3.recognition.start();
+      }, 1000 - timeSinceLastStart);
+    } else {
+      clearTimeout(elapsedTimer);
+    }
   },
   stop: function stop(restart) {
     if (this.visualizer) {
@@ -4153,6 +4160,8 @@ _core2.default.speak = function (text) {
       speechUtterance.onstart = function () {
         eleven.getVisualizer('container').classList.add('ready');
         eleven.getVisualizer().start();
+
+        eleven.activate = true;
 
         if (_core2.default.isFunction(config.onStart)) {
           config.onStart();
