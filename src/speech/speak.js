@@ -55,7 +55,7 @@ Eleven.speak = function(text, config = {}){
           cancelled = false;
           return;
         }
-        
+
         eleven.stop();
 
         if(Eleven.isFunction(config.onEnd)){

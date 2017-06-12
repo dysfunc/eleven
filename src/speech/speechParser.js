@@ -9,15 +9,7 @@ Eleven.fn.extend({
       this.options.onResult.call(this, results);
     }
 
-    setTimeout(() => {
-      if(this.running && this.visualizer){
-        this.running = false;
-        this.visualizer.stop();
-      }
-
-      this.container.classList.remove('ready');
-      this.activated = false;
-    }, 750);
+    setTimeout(() => this.stop(true), 750);
 
     each(results, (result) => {
       const speech = result.replace(Eleven.regexp.wakeCommands, '').trim();
@@ -117,10 +109,7 @@ Eleven.fn.extend({
           this.start();
         }
 
-        this.commandTimer = setTimeout(() => {
-          this.activated = false;
-          this.container.classList.remove('ready');
-        }, this.options.wakeCommandWait);
+        this.commandTimer = setTimeout(() => this.stop(true), this.options.wakeCommandWait);
       }
     }else{
       clearTimeout(this.commandTimer);

@@ -4,6 +4,8 @@ import { document } from '../common/document';
 import { slice } from '../common/arrays';
 import { each } from '../common/helpers';
 
+var lastStartTime = 0, elapsedTimer = null;
+
 Eleven.fn.extend({
   /**
    * Fired when a speech recognition error occurs
@@ -103,8 +105,13 @@ Eleven.fn.extend({
 
     return this;
   },
-
+  /**
+   * This creates a new SpeechRecognition object instance, binds to its event handlers,
+   * and starts our timer to ensure/mitigate speech loss.
+   * @return {Object} Eleven
+   */
   start(){
+    lastStartTime = new Date().getTime();
     // reference to SpeechRecognition instance
     this.recognition = new SpeechRecognition();
     // set language
@@ -142,11 +149,16 @@ Eleven.fn.extend({
       }
     };
 
-    this.recognition.start();
+    this.watch();
 
     return this;
   },
-
+  /**
+   * Stops all visual interactions, removes interactive classes from the stage, and
+   * executes a callback (optional)
+   * @param  {Boolean} restart If true, start will be invoked to continue listening
+   * @return {Object}          Eleven
+   */
   stop(restart){
     if(this.visualizer){
       this.running = false;
@@ -163,6 +175,34 @@ Eleven.fn.extend({
     }
 
     return this;
+  },
+  /**
+   * SpeechRecognition will die after 60 secs. This will continuously restart the agent
+   * so things are not missed when the user speaks
+   * @return {Object} Eleven
+   */
+  watch(){
+    // control SpeechRecognition restarts
+    const timeSinceLastStart = new Date().getTime() - lastStartTime;
+
+    if(timeSinceLastStart < 1000){
+      elapsedTimer = setTimeout(() => {
+        lastStartTime = new Date().getTime();
+
+        try {
+          this.recognition.start();
+        }catch(error){
+          if(this.options.debug){
+            console.warn(`[Eleven] Error trying to start SpeechRecognition: ${error.message}`);
+          }
+        }
+      }, 1000 - timeSinceLastStart);
+    }else{
+      clearTimeout(elapsedTimer);
+      lastStartTime = new Date().getTime();
+    }
+
+    return this;
   }
 });
 
@@ -172,7 +212,6 @@ Eleven.extend({
    * @param  {Function} fn Function to execute once the view has been cleared
    */
   clearStage(fn){
-
     const elements = slice.call(Eleven.stage.childNodes);
 
     each(elements, (element) => Eleven.stage.removeChild(element));
