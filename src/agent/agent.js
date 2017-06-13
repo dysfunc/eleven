@@ -60,7 +60,7 @@ Eleven.fn.extend({
       'stop': () => {
         this.stop();
 
-        setTimeout(() => Eleven.resetView(() => document.body.classList.remove('interactive')), 500);
+        setTimeout(() => Eleven.clearStage(() => document.body.classList.remove('interactive')), 500);
 
         if(Eleven.isFunction(options.onStop)){
           this.context = null;
@@ -82,18 +82,13 @@ Eleven.fn.extend({
     }
     // prevent multi-tab issues running SpeechRecognition/SpeechSynthesis
     document.addEventListener('visibilitychange', () => {
-      if(document.hidden){
-        if(this.recognition && this.recognition.abort){
-          if(this.debug){
-            console.debug('[Eleven] User switched to another tab - disabling recognition.');
-          }
-
-          if(this.recognition){
-            this.recognition.stop();
-            this.recognition = null;
-            this.stop();
-          }
+      if(document.hidden && this.recognition.abort){
+        if(this.debug){
+          console.debug('[Eleven] User switched to another tab - disabling recognition.');
         }
+
+        this.recognition.abort();
+        this.stop();
       }else{
         if(!this.recognition && this.options.autoRestart){
           this.start();

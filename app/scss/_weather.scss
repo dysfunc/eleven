@@ -49,6 +49,17 @@
       margin: 10px 0;
       padding: 10px 0;
       @include border-radius(3px);
+      @include transform(scale(.8));
+
+      &.today {
+        @include transform(scale(1));
+
+        i {
+          &.wi-wu-unknown {
+            @include animation(10s linear 0s infinite rotate);
+          }
+        }
+      }
 
       .dow {
         color: #fff;
