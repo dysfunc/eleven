@@ -2,7 +2,7 @@
   bottom: 20%;
   left: 0;
   opacity: 0;
-  position: fixed;
+  position: absolute;
   right: 0;
   top: 18%;
   will-change: transform, opacity;
@@ -22,7 +22,6 @@
 
   &.show {
     opacity: 1;
-    position: fixed;
     @include transform(translateY(0));
     @include animation(vanishIn .5s linear);
   }
@@ -50,6 +49,17 @@
       margin: 10px 0;
       padding: 10px 0;
       @include border-radius(3px);
+      @include transform(scale(.8));
+
+      &.today {
+        @include transform(scale(1));
+
+        i {
+          &.wi-wu-unknown {
+            @include animation(10s linear 0s infinite rotate);
+          }
+        }
+      }
 
       .dow {
         color: #fff;

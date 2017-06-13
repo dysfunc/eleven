@@ -1,7 +1,10 @@
 import Eleven from '../core';
 import SpeechRecognition from '../speech/speechRecognition';
 import { document } from '../common/document';
+import { slice } from '../common/arrays';
 import { each } from '../common/helpers';
+
+var lastStartTime = 0, elapsedTimer = null;
 
 Eleven.fn.extend({
   /**
@@ -23,7 +26,7 @@ Eleven.fn.extend({
    */
   error(event){
     const { error } = event;
-    
+
     if(Eleven.isFunction(this.options.onError)){
       this.options.onError(error, event);
     }
@@ -57,7 +60,7 @@ Eleven.fn.extend({
       'stop': () => {
         this.stop();
 
-        setTimeout(() => Eleven.resetView(() => document.body.classList.remove('interactive')), 500);
+        setTimeout(() => Eleven.clearStage(() => document.body.classList.remove('interactive')), 500);
 
         if(Eleven.isFunction(options.onStop)){
           this.context = null;
@@ -79,18 +82,13 @@ Eleven.fn.extend({
     }
     // prevent multi-tab issues running SpeechRecognition/SpeechSynthesis
     document.addEventListener('visibilitychange', () => {
-      if(document.hidden){
-        if(this.recognition && this.recognition.abort){
-          if(this.debug){
-            console.debug('[Eleven] User switched to another tab - disabling recognition.');
-          }
-
-          if(this.recognition){
-            this.recognition.stop();
-            this.recognition = null;
-            this.stop();
-          }
+      if(document.hidden && this.recognition.abort){
+        if(this.debug){
+          console.debug('[Eleven] User switched to another tab - disabling recognition.');
         }
+
+        this.recognition.abort();
+        this.stop();
       }else{
         if(!this.recognition && this.options.autoRestart){
           this.start();
@@ -102,8 +100,13 @@ Eleven.fn.extend({
 
     return this;
   },
-
+  /**
+   * This creates a new SpeechRecognition object instance, binds to its event handlers,
+   * and starts our timer to ensure/mitigate speech loss.
+   * @return {Object} Eleven
+   */
   start(){
+    lastStartTime = new Date().getTime();
     // reference to SpeechRecognition instance
     this.recognition = new SpeechRecognition();
     // set language
@@ -113,7 +116,7 @@ Eleven.fn.extend({
     // set continuous listening
     this.recognition.continuous = this.options.continuous;
     // return results immediately so we can emulate audio waves
-    this.recognition.interimResults = this.options.interimResults;
+    this.recognition.interimResults = Eleven.device.isDesktop ? this.options.interimResults : false;
     /**
      * runs when the voice recognition ends. this should be set to null in recognition.onresult
      * to prevent it running if you have a successful result. if recognition.onend runs, you know
@@ -134,18 +137,23 @@ Eleven.fn.extend({
      */
     this.recognition.onresult = (event) => this.result(event);
     // this.recognition.onstart = () => this.start();
-    // this.recognition.onaudioend = () => this.stop();
+    // this.recognition.onaudioend = () => this.start();
     this.recognition.onaudiostart = () => {
       if(Eleven.isFunction(this.options.onStart)){
         this.options.onStart.call(this);
       }
     };
 
-    this.recognition.start();
+    this.watch();
 
     return this;
   },
-
+  /**
+   * Stops all visual interactions, removes interactive classes from the stage, and
+   * executes a callback (optional)
+   * @param  {Boolean} restart If true, start will be invoked to continue listening
+   * @return {Object}          Eleven
+   */
   stop(restart){
     if(this.visualizer){
       this.running = false;
@@ -162,25 +170,46 @@ Eleven.fn.extend({
     }
 
     return this;
+  },
+  /**
+   * SpeechRecognition will die after 60 secs. This will continuously restart the agent
+   * so things are not missed when the user speaks
+   * @return {Object} Eleven
+   */
+  watch(){
+    // control SpeechRecognition restarts
+    const timeSinceLastStart = new Date().getTime() - lastStartTime;
+
+    if(timeSinceLastStart < 1000){
+      elapsedTimer = setTimeout(() => {
+        lastStartTime = new Date().getTime();
+
+        try {
+          this.recognition.start();
+        }catch(error){
+          if(this.options.debug){
+            console.warn(`[Eleven] Error trying to start SpeechRecognition: ${error.message}`);
+          }
+        }
+      }, 1000 - timeSinceLastStart);
+    }else{
+      clearTimeout(elapsedTimer);
+      lastStartTime = new Date().getTime();
+    }
+
+    return this;
   }
 });
 
-Eleven.extend(Eleven, {
+Eleven.extend({
   /**
    * Removes all rendered elements from the viewport and executes a callback
    * @param  {Function} fn Function to execute once the view has been cleared
    */
-  resetView(selector = '.results', fn){
-    if(Eleven.isFunction(selector)){
-      fn = selector;
-      selector = '.results';
-    }
+  clearStage(fn){
+    const elements = slice.call(Eleven.stage.childNodes);
 
-    const results = document.querySelectorAll(selector);
-
-    if(results && results.length){
-      results.forEach((element) => element.parentNode && element.parentNode.removeChild(element));
-    }
+    each(elements, (element) => Eleven.stage.removeChild(element));
 
     if(Eleven.isFunction(fn)){
       fn();

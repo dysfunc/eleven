@@ -9,15 +9,7 @@ Eleven.fn.extend({
       this.options.onResult.call(this, results);
     }
 
-    setTimeout(() => {
-      if(this.running && this.visualizer){
-        this.running = false;
-        this.visualizer.stop();
-      }
-
-      this.container.classList.remove('ready');
-      this.activated = false;
-    }, 750);
+    setTimeout(() => this.stop(true), 750);
 
     each(results, (result) => {
       const speech = result.replace(Eleven.regexp.wakeCommands, '').trim();
@@ -45,6 +37,10 @@ Eleven.fn.extend({
       if(Eleven.isFunction(this.options.onResultNoMatch)){
         options.onResultNoMatch.call(this, results);
       }
+    }
+
+    if(Eleven.device.isMobile){
+      this.start();
     }
 
     return this;
@@ -95,9 +91,14 @@ Eleven.fn.extend({
     this.recognition.onend = null;
 
     const result = event.results[event.resultIndex];
+    const first = result[0].transcript.trim();
     const results = [];
 
-    if(indexOf(this.options.wakeCommands, result[0].transcript.trim()) > -1){
+    if(first.toLowerCase() === 'stop'){
+      this.parser(results['stop']);
+    }
+
+    if(indexOf(this.options.wakeCommands, first) > -1){
       if(!this.activated){
         this.activated = true;
         this.container.classList.add('ready');
@@ -108,10 +109,7 @@ Eleven.fn.extend({
           this.start();
         }
 
-        this.commandTimer = setTimeout(() => {
-          this.activated = false;
-          this.container.classList.remove('ready');
-        }, this.options.wakeCommandWait);
+        this.commandTimer = setTimeout(() => this.stop(true), this.options.wakeCommandWait);
       }
     }else{
       clearTimeout(this.commandTimer);

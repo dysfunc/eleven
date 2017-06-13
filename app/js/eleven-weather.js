@@ -55,25 +55,30 @@
       const region = query.channel.location.region;
       const days = forecast.slice(0, total);
 
-      Eleven.resetView();
+      Eleven.clearStage();
 
-      const container = $('<div id="weather-results" class="results"></div>');
+      const container = $('<div id="weather-results"></div>');
       const ul = $('<ul>');
 
-      days.forEach(function(day){
+      days.forEach(function(day, i){
         var icon = 'wi wi-wu-' + iconMap[day.code] || 'wi-day-cloudy';
         var high = day.high;
         var low = day.low;
 
-        $('<li>')
+        var li = $('<li>')
           .html(
-            '<div class="dow">' + weekdays[day.day]  + '</div>' +
+            '<div class="dow">' + (i === 0 ? 'Now' : weekdays[day.day])  + '</div>' +
             '<div class="picture"><i class="' + icon + '"></i></div>' +
             '<div class="details">' +
               '<h1>' + high + '<small>' + day.text + '</small></h1>' +
             '</div>'
-          )
-          .appendTo(ul);
+          );
+
+          if(i === 0){
+            li.addClass('today');
+          }
+
+          li.appendTo(ul);
       });
 
 
@@ -84,7 +89,7 @@
       setTimeout(function(){
         container
           .append(ul)
-          .appendTo(document.body)
+          .appendTo(Eleven.stage)
           .addClass('show');
       }, 500);
     },

@@ -15,8 +15,10 @@
     if(Eleven){
       var sessionId = Eleven.uuid();
       // init
-      Eleven('#eleven', {
-        debug: true,
+      Eleven({
+        container: '#eleven',
+        debug: false,
+        stage: '#stage',
         useEngine: true,
         onCommand: function(params, speech, command){
 
@@ -118,7 +120,6 @@
           }
         })
 
-
       //   .addCommands({
       //     'hello :name': function(){
       //       document.body.style.border = 0;
@@ -152,6 +153,11 @@
       //   Eleven().removeCommands(['hello :name', 'stop']);
       //   console.log(Eleven());
       // }, 2000);
+
+      // Eleven().getPlugin('yelp').search({
+      //   term: 'Chinese food',
+      //   location: 'San Francisco, CA'
+      // }, 'Finding you chinese food near san francisco');
 
       // Eleven().getPlugin('news').headlines()
       // Eleven().getPlugin('weather').forecast('Los Angeles');
