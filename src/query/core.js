@@ -93,7 +93,7 @@ each(['tbody', 'thead', 'tfoot', 'tr', 'th', 'td'], (item) => {
 $.fragment = (container, html) => {
   container.innerHTML = ('' + html);
 
-  const items = slice.call(container.childNodes);
+  const items = [...container.childNodes];
 
   each(items, (element) => container.removeChild(element));
 
@@ -114,7 +114,7 @@ $.query = (selector, context) => {
     const element = context.getElementById(selector.slice(1));
 
     if(element){
-      query = [element];
+      return [element];
     }
   }else{
     if(context.nodeType === 1 || context.nodeType === 9){
@@ -128,7 +128,7 @@ $.query = (selector, context) => {
     }
   }
 
-  return slice.call(query);
+  return [...query];
 };
 
 /**

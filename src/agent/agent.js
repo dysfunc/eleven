@@ -193,7 +193,6 @@ Eleven.fn.extend({
         }
       }, 1000 - timeSinceLastStart);
     }else{
-      clearTimeout(elapsedTimer);
       lastStartTime = new Date().getTime();
     }
 
@@ -207,7 +206,7 @@ Eleven.extend({
    * @param  {Function} fn Function to execute once the view has been cleared
    */
   clearStage(fn){
-    const elements = slice.call(Eleven.stage.childNodes);
+    const elements = [...Eleven.stage.childNodes];
 
     each(elements, (element) => Eleven.stage.removeChild(element));
 

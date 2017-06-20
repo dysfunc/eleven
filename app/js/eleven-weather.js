@@ -54,44 +54,66 @@
       const city = query.channel.location.city;
       const region = query.channel.location.region;
       const days = forecast.slice(0, total);
+      const queryCity = city.toLowerCase().replace(/\s/g, '+')
 
       Eleven.clearStage();
 
-      const container = $('<div id="weather-results"></div>');
-      const ul = $('<ul>');
+      $.ajax({
+        url: 'https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=418dfbcc398ff8a2f6e697a7aca93d44&tags=' + queryCity + '&content_type=1&group_id=1463451@N25&format=json&nojsoncallback=1',
+        dataType: 'json',
+        success: (data) => {
+          const photo = data.photos.photo[Math.round(Math.random() * 3)];
+          const farm = photo.farm;
+          const id = photo.id;
+          const secret = photo.secret;
+          const server = photo.server;
+          const size = 'h';
+          const backgroungImage = 'https://farm'+ farm +'.staticflickr.com/'+ server +'/'+ id +'_' + secret +'_' + size + '.jpg'
 
-      days.forEach(function(day, i){
-        var icon = 'wi wi-wu-' + iconMap[day.code] || 'wi-day-cloudy';
-        var high = day.high;
-        var low = day.low;
+          const img = document.createElement('img');
+          img.src = backgroungImage;
 
-        var li = $('<li>')
-          .html(
-            '<div class="dow">' + (i === 0 ? 'Now' : weekdays[day.day])  + '</div>' +
-            '<div class="picture"><i class="' + icon + '"></i></div>' +
-            '<div class="details">' +
-              '<h1>' + high + '<small>' + day.text + '</small></h1>' +
-            '</div>'
-          );
+          const wrapper = $('<div id="weather-results" style="background: url(' + backgroungImage + ') no-repeat center center; background-size: cover;"></div>');
+          const container = $('<div id="weather-container"></div>');
+          const ul = $('<ul>');
 
-          if(i === 0){
-            li.addClass('today');
-          }
+          days.forEach(function(day, i){
+            var icon = 'wi wi-wu-' + iconMap[day.code] || 'wi-day-cloudy';
+            var high = day.high;
+            var low = day.low;
 
-          li.appendTo(ul);
+            var li = $('<li>')
+              .html(
+                '<div class="dow">' + (i === 0 ? 'Now' : weekdays[day.day])  + '</div>' +
+                '<div class="picture"><i class="' + icon + '"></i></div>' +
+                '<div class="details">' +
+                  '<h1>' + high + '<span>/ ' + low + '</span><small>' + day.text + '</small></h1>' +
+                '</div>'
+              );
+
+              if(i === 0){
+                li.addClass('today');
+              }
+
+              li.appendTo(ul);
+          });
+
+
+          $('<div class="location"></div>')
+            .html('<span>' + city + ', ' + region + '</span>')
+            .appendTo(wrapper);
+
+          setTimeout(function(){
+            container.append(ul);
+
+            wrapper
+              .append(container)
+              .appendTo(Eleven.stage)
+              .addClass('show');
+          }, 500);
+
+        }
       });
-
-
-      $('<div class="location"></div>')
-        .html('<span>' + city + ', ' + region + '</span>')
-        .appendTo(container);
-
-      setTimeout(function(){
-        container
-          .append(ul)
-          .appendTo(Eleven.stage)
-          .addClass('show');
-      }, 500);
     },
 
     fetch: function(city, callback, total){

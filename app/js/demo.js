@@ -160,7 +160,7 @@
       // }, 'Finding you chinese food near san francisco');
 
       // Eleven().getPlugin('news').headlines()
-      // Eleven().getPlugin('weather').forecast('Los Angeles');
+      // Eleven().getPlugin('weather').forecast('San Francisco');
     }
   })
 })(Eleven, Eleven.query);
