@@ -1,17 +1,25 @@
 #weather-results {
-  bottom: 20%;
+  bottom: 0;
   left: 0;
   opacity: 0;
   position: absolute;
   right: 0;
-  top: 18%;
+  top: 0;
   will-change: transform, opacity;
   @include transform(translateY(10%));
   @include transition(transform .3s ease-in-out);
 
+  #weather-container {
+    bottom: 18%;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 20%;
+  }
+
   .location {
     bottom: 30px;
-    color: rgba(255, 255, 255, .3);
+    color: rgba(255, 255, 255, .9);
     display: block;
     font-size: 24px;
     left: 0;
@@ -49,6 +57,19 @@
       margin: 10px 0;
       padding: 10px 0;
       @include border-radius(3px);
+      @include transform(scale(.8));
+
+      &.today {
+        @include transform(scale(1));
+
+        i {
+          &.wi-wu-unknown,
+          &.wi-wu-mostlysunny,
+          &.wi-wu-sunny {
+            @include animation(10s linear 0s infinite rotate);
+          }
+        }
+      }
 
       .dow {
         color: #fff;
@@ -86,16 +107,22 @@
           font-size: 50px;
           font-weight: bold;
           margin: 20px 0 0;
-        }
 
-        small {
-          color: rgba(#fff, .5);
-          display: block;
-          font-size: 16px;
-          font-weight: 500;
-          line-height: 1.5em;
-          margin-top: 10px;
-          min-height: 50px;
+          span {
+            color: rgba(255,255,255, .5);
+            font-size: 25px;
+            padding-left: 10px;
+          }
+
+          small {
+            color: rgba(#fff, .5);
+            display: block;
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 1.5em;
+            margin-top: 10px;
+            min-height: 50px;
+          }
         }
 
         .rating {

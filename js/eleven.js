@@ -21,6 +21,8 @@ var _helpers = require('../common/helpers');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 var lastStartTime = 0,
     elapsedTimer = null;
 
@@ -83,7 +85,7 @@ _core2.default.fn.extend({
         _this.stop();
 
         setTimeout(function () {
-          return _core2.default.resetView(function () {
+          return _core2.default.clearStage(function () {
             return _document.document.body.classList.remove('interactive');
           });
         }, 500);
@@ -108,18 +110,13 @@ _core2.default.fn.extend({
     }
     // prevent multi-tab issues running SpeechRecognition/SpeechSynthesis
     _document.document.addEventListener('visibilitychange', function () {
-      if (_document.document.hidden) {
-        if (_this.recognition && _this.recognition.abort) {
-          if (_this.debug) {
-            console.debug('[Eleven] User switched to another tab - disabling recognition.');
-          }
-
-          if (_this.recognition) {
-            _this.recognition.stop();
-            _this.recognition = null;
-            _this.stop();
-          }
+      if (_document.document.hidden && _this.recognition.abort) {
+        if (_this.debug) {
+          console.debug('[Eleven] User switched to another tab - disabling recognition.');
         }
+
+        _this.recognition.abort();
+        _this.stop();
       } else {
         if (!_this.recognition && _this.options.autoRestart) {
           _this.start();
@@ -237,7 +234,6 @@ _core2.default.fn.extend({
         }
       }, 1000 - timeSinceLastStart);
     } else {
-      clearTimeout(elapsedTimer);
       lastStartTime = new Date().getTime();
     }
 
@@ -251,7 +247,7 @@ _core2.default.extend({
    * @param  {Function} fn Function to execute once the view has been cleared
    */
   clearStage: function clearStage(fn) {
-    var elements = _arrays.slice.call(_core2.default.stage.childNodes);
+    var elements = [].concat(_toConsumableArray(_core2.default.stage.childNodes));
 
     (0, _helpers.each)(elements, function (element) {
       return _core2.default.stage.removeChild(element);
@@ -1490,7 +1486,7 @@ $.fn = $.prototype = {
 $.fragment = function (container, html) {
   container.innerHTML = '' + html;
 
-  var items = _arrays.slice.call(container.childNodes);
+  var items = [].concat(_toConsumableArray(container.childNodes));
 
   (0, _helpers.each)(items, function (element) {
     return container.removeChild(element);
@@ -1513,7 +1509,7 @@ $.query = function (selector, context) {
     var element = context.getElementById(selector.slice(1));
 
     if (element) {
-      query = [element];
+      return [element];
     }
   } else {
     if (context.nodeType === 1 || context.nodeType === 9) {
@@ -1527,7 +1523,7 @@ $.query = function (selector, context) {
     }
   }
 
-  return _arrays.slice.call(query);
+  return [].concat(_toConsumableArray(query));
 };
 
 /**
