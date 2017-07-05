@@ -204,6 +204,17 @@
   }
 }
 
+@include keyframes(slideInUp) {
+  0% {
+    @include opacity(0);
+    @include transform(translateY(2000px));
+  }
+
+  100% {
+    @include transform(translateY(0));
+  }
+}
+
 @include keyframes (subtleFadeInUp) {
   0% {
     @include opacity(0);

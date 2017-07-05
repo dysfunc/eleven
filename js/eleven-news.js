@@ -30,17 +30,24 @@
         data.push({
           image: article.urlToImage,
           title: article.title,
-          description: description
+          description: description,
+          originalDescription: article.description,
+          url: article.url
         });
       });
 
-      setTimeout(function(){
-        var container = $('<div id="news-results"><ul></ul></div>'),
+      this.cache = data;
+
+      this.article = $('<div id="news-article"></div>');
+      this.frame = this.article.find('#news-frame');
+
+      setTimeout(() => {
+        var container = $('<div id="news-results"></div>'),
             wrapper = $('<div id="carousel"></div>');
 
-        wrapper.append(container);
+        this.wrapper = wrapper.append(container);
 
-        $(Eleven.stage).append(wrapper);
+        $(Eleven.stage).append(wrapper).append(this.article);
 
         wrapper.addClass('show');
 
@@ -75,13 +82,15 @@
     fetch: function(source, callback){
       var self = this;
 
+      console.log(source);
+
       $.ajax({
         url: 'https://newsapi.org/v1/articles',
         dataType: 'json',
         data: {
           apiKey: 'e80471c0aa344ef3aa5cc466eb5375c4',
           sortBy: 'top',
-          source: 'cnn'
+          source: source ? source.toLowerCase() : 'cnn'
         },
         success: function(data){
           self.createList(data);
@@ -99,6 +108,51 @@
     headlines: function(source, callback){
       document.body.classList.add('interactive');
       this.fetch(source, callback);
+    },
+
+    stop: function(){
+      this.article.removeClass('show');
+      this.wrapper.removeClass('backset');
+    },
+
+    nextPage: function(){
+      $('.carousel-next').click();
+    },
+
+    previousPage: function(){
+      $('.carousel-prev').click();
+    },
+
+    launch: function(index){
+      var item = this.cache[Number(index)-1];
+      // this.frame.attr('src', this.cache[index-1].url);
+      //
+      // this.frame.on('load', () => {
+        this.article
+          .empty()
+          .html(
+            $.format(
+              [
+                '<div class="news-article large">',
+                  '<div class="picture">',
+                    '<div class="img" style="background: url({image}) no-repeat center center;"></div>',
+                  '</div>',
+                  '<div class="details">',
+                    '<h1>{title}<h1>',
+                    '<p>{description}</p>',
+                  '</div>',
+                '</div>'
+              ].join(''), {
+                image: item.image,
+                title: item.title,
+                description: item.originalDescription
+              })
+            );
+
+        this.article.addClass('show');
+        this.wrapper.addClass('backset');
+      // });
+        // console.log(this.wrapper.find('li').eq(index));
     }
   });
 

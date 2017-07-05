@@ -1,3 +1,4 @@
+@charset "UTF-8";
 .pointer {
   cursor: pointer; }
 
@@ -1193,6 +1194,70 @@
     -o-transform: translateY(0);
     transform: translateY(0); } }
 
+@-webkit-keyframes slideInUp {
+  0% {
+    opacity: 0;
+    filter: alpha(opacity=0);
+    -webkit-transform: translateY(2000px);
+    -moz-transform: translateY(2000px);
+    -ms-transform: translateY(2000px);
+    -o-transform: translateY(2000px);
+    transform: translateY(2000px); }
+  100% {
+    -webkit-transform: translateY(0);
+    -moz-transform: translateY(0);
+    -ms-transform: translateY(0);
+    -o-transform: translateY(0);
+    transform: translateY(0); } }
+
+@-moz-keyframes slideInUp {
+  0% {
+    opacity: 0;
+    filter: alpha(opacity=0);
+    -webkit-transform: translateY(2000px);
+    -moz-transform: translateY(2000px);
+    -ms-transform: translateY(2000px);
+    -o-transform: translateY(2000px);
+    transform: translateY(2000px); }
+  100% {
+    -webkit-transform: translateY(0);
+    -moz-transform: translateY(0);
+    -ms-transform: translateY(0);
+    -o-transform: translateY(0);
+    transform: translateY(0); } }
+
+@-o-keyframes slideInUp {
+  0% {
+    opacity: 0;
+    filter: alpha(opacity=0);
+    -webkit-transform: translateY(2000px);
+    -moz-transform: translateY(2000px);
+    -ms-transform: translateY(2000px);
+    -o-transform: translateY(2000px);
+    transform: translateY(2000px); }
+  100% {
+    -webkit-transform: translateY(0);
+    -moz-transform: translateY(0);
+    -ms-transform: translateY(0);
+    -o-transform: translateY(0);
+    transform: translateY(0); } }
+
+@keyframes slideInUp {
+  0% {
+    opacity: 0;
+    filter: alpha(opacity=0);
+    -webkit-transform: translateY(2000px);
+    -moz-transform: translateY(2000px);
+    -ms-transform: translateY(2000px);
+    -o-transform: translateY(2000px);
+    transform: translateY(2000px); }
+  100% {
+    -webkit-transform: translateY(0);
+    -moz-transform: translateY(0);
+    -ms-transform: translateY(0);
+    -o-transform: translateY(0);
+    transform: translateY(0); } }
+
 @-webkit-keyframes subtleFadeInUp {
   0% {
     opacity: 0;
@@ -2231,18 +2296,18 @@ p {
   opacity: 0;
   position: fixed;
   right: 0;
-  top: 10%;
+  top: 15%;
   will-change: transform, opacity;
   -webkit-transform: translateY(10%);
   -moz-transform: translateY(10%);
   -ms-transform: translateY(10%);
   -o-transform: translateY(10%);
   transform: translateY(10%);
-  -webkit-transition: transform 0.3s ease-in-out;
-  -moz-transition: transform 0.3s ease-in-out;
-  -ms-transition: transform 0.3s ease-in-out;
-  -o-transition: transform 0.3s ease-in-out;
-  transition: transform 0.3s ease-in-out; }
+  -webkit-transition: all 0.3s ease-in-out;
+  -moz-transition: all 0.3s ease-in-out;
+  -ms-transition: all 0.3s ease-in-out;
+  -o-transition: all 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out; }
   #carousel.show {
     opacity: 1;
     -webkit-transform: translateY(0);
@@ -2254,6 +2319,70 @@ p {
     -moz-animation: vanishIn 0.5s linear;
     -o-animation: vanishIn 0.5s linear;
     animation: vanishIn 0.5s linear; }
+  #carousel.backset {
+    -webkit-filter: blur(10px);
+    -webkit-transform: scale(0.9) translateX(-2%);
+    -moz-transform: scale(0.9) translateX(-2%);
+    -ms-transform: scale(0.9) translateX(-2%);
+    -o-transform: scale(0.9) translateX(-2%);
+    transform: scale(0.9) translateX(-2%); }
+
+#news-article {
+  bottom: 5%;
+  left: 20%;
+  opacity: 0;
+  position: absolute;
+  right: 20%;
+  top: 5%;
+  z-index: 1000px;
+  -webkit-transition: all 0.3s ease-in-out;
+  -moz-transition: all 0.3s ease-in-out;
+  -ms-transition: all 0.3s ease-in-out;
+  -o-transition: all 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out; }
+  #news-article.show {
+    opacity: 1;
+    -webkit-animation: slideInUp 0.5s linear;
+    -moz-animation: slideInUp 0.5s linear;
+    -o-animation: slideInUp 0.5s linear;
+    animation: slideInUp 0.5s linear; }
+  #news-article .news-article.large {
+    background-color: #121212;
+    height: 100%;
+    padding: 10px;
+    width: 100%; }
+    #news-article .news-article.large .picture {
+      position: relative;
+      width: 100%; }
+      #news-article .news-article.large .picture:before {
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, transparent 50%);
+        bottom: 0;
+        content: " ";
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+        z-index: 99; }
+      #news-article .news-article.large .picture .img {
+        background-position: top center;
+        background-size: cover !important;
+        height: 350px;
+        width: 100%; }
+    #news-article .news-article.large .details {
+      font-family: 'Roboto', 'Helvetica Neue', 'Open-Bold', sans-serif;
+      line-height: 0;
+      margin: 20px 10px; }
+      #news-article .news-article.large .details h1 {
+        color: #fff;
+        display: block;
+        font-size: 24px;
+        font-weight: 300;
+        line-height: 1.3em; }
+      #news-article .news-article.large .details p {
+        font-size: 14px;
+        font-weight: 200;
+        line-height: 1.7em;
+        margin-top: 20px; }
 
 .carousel {
   position: relative;
@@ -2327,7 +2456,7 @@ p {
     opacity: .5;
     position: absolute;
     text-align: center;
-    top: -18px;
+    top: -32px;
     width: 40px;
     z-index: 110;
     transition: opacity .3s ease-in-out; }
@@ -2408,12 +2537,6 @@ p {
     margin: 0;
     overflow-x: auto;
     padding: 10px;
-    -webkit-border-radius: 6px;
-    -moz-border-radius: 6px;
-    border-radius: 6px;
-    -webkit-background-clip: padding-box;
-    -moz-background-clip: padding;
-    background-clip: padding-box;
     display: flex;
     display: -ms-flexbox;
     display: -webkit-flex; }
@@ -2485,6 +2608,12 @@ p {
           font-weight: bold;
           margin: 20px 0 0; }
           #weather-results ul li .details h1 span {
+            position: relative;
+            display: inline-block;
+            *display: inline;
+            vertical-align: baseline;
+            zoom: 1; }
+          #weather-results ul li .details h1 span:not(:first-child) {
             color: rgba(255, 255, 255, 0.5);
             font-size: 25px;
             padding-left: 10px; }
@@ -2496,6 +2625,18 @@ p {
             line-height: 1.5em;
             margin-top: 10px;
             min-height: 50px; }
+        #weather-results ul li .details.unit-f h1 span:first-child:before {
+          content: '°F';
+          font-size: 12px;
+          position: absolute;
+          right: -12px;
+          top: 9px; }
+        #weather-results ul li .details.unit-c h1 span:first-child:before {
+          content: '°C';
+          font-size: 12px;
+          position: absolute;
+          right: -8px;
+          top: 5px; }
         #weather-results ul li .details .rating {
           height: 12px; }
           #weather-results ul li .details .rating img {
