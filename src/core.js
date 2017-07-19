@@ -29,7 +29,7 @@ Eleven.fn = Eleven.prototype = {
       stage: '#stage',
       useEngine: false,
       wakeCommands: ['eleven', '11'],
-      wakeSound: 'https://s3-us-west-1.amazonaws.com/voicelabs/static/chime.mp3',
+      wakeSound: 'audio/chime.mp3',
       wakeCommandWait: 10000,
       template: `
         <div class="eleven-container">
@@ -79,6 +79,12 @@ Eleven.fn = Eleven.prototype = {
     if(Eleven.device.isDesktop){
       this.voices();
     }
+
+    Eleven.container.addEventListener('click', () => {
+      if(!this.activated){
+        this.result({ results: [[{ transcript: 'eleven' }]], resultIndex: 0 });
+      }
+    });
     // allow single instance (Speech API does not support multiple instances yet)
     initialized = this;
     // always return this for chaining

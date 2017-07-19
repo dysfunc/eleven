@@ -45,7 +45,6 @@
     margin: 0;
     overflow-x: auto;
     padding: 10px;
-    @include border-radius(6px);
     @include display-flex;
 
     li {
@@ -109,6 +108,11 @@
           margin: 20px 0 0;
 
           span {
+            position: relative;
+            @include inline-block(baseline);
+          }
+
+          span:not(:first-child) {
             color: rgba(255,255,255, .5);
             font-size: 25px;
             padding-left: 10px;
@@ -122,6 +126,26 @@
             line-height: 1.5em;
             margin-top: 10px;
             min-height: 50px;
+          }
+        }
+
+        &.unit-f h1 span:first-child {
+          &:before {
+            content: '°F';
+            font-size: 12px;
+            position: absolute;
+            right: -12px;
+            top: 9px;
+          }
+        }
+
+        &.unit-c h1 span:first-child {
+          &:before {
+            content: '°C';
+            font-size: 12px;
+            position: absolute;
+            right: -8px;
+            top: 5px;
           }
         }
 

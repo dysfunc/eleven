@@ -156,6 +156,7 @@ Eleven.fn.extend({
    */
   stop(restart){
     if(this.visualizer){
+      this.activated = false;
       this.running = false;
       this.visualizer.stop();
       this.container.classList.remove('ready');
