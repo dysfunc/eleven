@@ -194,6 +194,7 @@ _core2.default.fn.extend({
    */
   stop: function stop(restart) {
     if (this.visualizer) {
+      this.activated = false;
       this.running = false;
       this.visualizer.stop();
       this.container.classList.remove('ready');
@@ -678,6 +679,8 @@ Eleven.fn = Eleven.prototype = {
   constructor: Eleven,
   version: '1.0.0',
   init: function init(options) {
+    var _this = this;
+
     var defaultConfig = {
       autoRestart: true,
       container: '#eleven',
@@ -692,7 +695,7 @@ Eleven.fn = Eleven.prototype = {
       stage: '#stage',
       useEngine: false,
       wakeCommands: ['eleven', '11'],
-      wakeSound: 'https://s3-us-west-1.amazonaws.com/voicelabs/static/chime.mp3',
+      wakeSound: 'audio/chime.mp3',
       wakeCommandWait: 10000,
       template: '\n        <div class="eleven-container">\n          <div class="eleven-container-inner">\n            <div class="eleven-off">\n              <span>ELEVEN</span>\n            </div>\n            <div class="eleven-on">\n              <div class="bg"></div>\n              <div class="waves"></div>\n            </div>\n          </div>\n        </div>\n      '
     };
@@ -730,6 +733,12 @@ Eleven.fn = Eleven.prototype = {
     if (Eleven.device.isDesktop) {
       this.voices();
     }
+
+    Eleven.container.addEventListener('click', function () {
+      if (!_this.activated) {
+        _this.result({ results: [[{ transcript: 'eleven' }]], resultIndex: 0 });
+      }
+    });
     // allow single instance (Speech API does not support multiple instances yet)
     initialized = this;
     // always return this for chaining
@@ -808,7 +817,7 @@ var _eleven2 = _interopRequireDefault(_eleven);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 (function (root) {
-  return (root.Eleven = _eleven2.default) && ('$' in window ? window.Q = _eleven2.default.query : window.$ = _eleven2.default.query);
+  return (root.Eleven = _eleven2.default) && ('$' in window && (window.Q = _eleven2.default.query) || (window.$ = _eleven2.default.query));
 })(window);
 
 },{"./eleven":11}],14:[function(require,module,exports){

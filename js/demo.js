@@ -68,15 +68,19 @@
 
             if(result.action === 'news.search'){
               if(parameters.source.trim() !== 'done reading'){
-                news.headlines(parameters.source);
+                if(parameters.position){
+                  news.launch(parameters.position);
+                }else{
+                  news.headlines(parameters.source);
+                }
               }else{
                 news.stop();
               }
             }
 
-            if(result.action === 'newssearch.newssearch-position'){
-              news.launch(parameters.position);
-            }
+            // if(result.action === 'newssearch.newssearch-position'){
+            //   news.launch(parameters.position);
+            // }
 
             if(result.action === 'news.search.next'){
               news.nextPage();
