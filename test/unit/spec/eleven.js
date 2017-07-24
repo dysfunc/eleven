@@ -20,7 +20,7 @@ describe('Eleven())', () => {
       stage: '#stage',
       useEngine: false,
       wakeCommands: ['eleven', '11'],
-      wakeSound: 'https://s3-us-west-1.amazonaws.com/voicelabs/static/chime.mp3',
+      wakeSound: 'audio/chime.mp3',
       wakeCommandWait: 10000,
       template: `
         <div class="eleven-container">
