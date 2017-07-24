@@ -63,7 +63,7 @@
         url: 'https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=418dfbcc398ff8a2f6e697a7aca93d44&tags=' + queryCity + '&content_type=1&group_id=1463451@N25&format=json&nojsoncallback=1',
         dataType: 'json',
         success: (data) => {
-          const photo = data.photos.photo[Math.round(Math.random() * data.photos.photo.length)];
+          const photo = data.photos.photo[1];//Math.round(Math.random() * data.photos.photo.length)];
           const farm = photo.farm;
           const id = photo.id;
           const secret = photo.secret;

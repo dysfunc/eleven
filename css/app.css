@@ -1924,6 +1924,63 @@ p {
         margin: 5px 0;
         padding: 4px 8px; }
 
+#demo {
+  position: absolute;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 20px;
+  z-index: 999999; }
+  #demo > .btn {
+    background-color: #3c92e8;
+    border-radius: 3px;
+    cursor: pointer;
+    display: inline-block;
+    float: right;
+    margin-right: 20px;
+    padding: 8px 12px; }
+  #demo .speech {
+    background-color: #feffe6;
+    border-radius: 4px;
+    color: #121212;
+    display: block;
+    max-width: 300px;
+    opacity: 0;
+    padding: 20px;
+    position: absolute;
+    right: 20px;
+    top: 50px;
+    z-index: 99999;
+    -webkit-transform: translateY(-10%);
+    -moz-transform: translateY(-10%);
+    -ms-transform: translateY(-10%);
+    -o-transform: translateY(-10%);
+    transform: translateY(-10%);
+    -webkit-transition: all 0.3s ease-in-out;
+    -moz-transition: all 0.3s ease-in-out;
+    -ms-transition: all 0.3s ease-in-out;
+    -o-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out; }
+    #demo .speech :after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 75%;
+      width: 0;
+      height: 0;
+      border: 10px solid transparent;
+      border-bottom-color: #feffe6;
+      border-top: 0;
+      margin-left: -10px;
+      margin-top: -10px; }
+    #demo .speech.show {
+      opacity: 1;
+      -webkit-transform: translateY(0);
+      -moz-transform: translateY(0);
+      -ms-transform: translateY(0);
+      -o-transform: translateY(0);
+      transform: translateY(0); }
+
 .eleven div,
 .eleven-message div,
 .eleven span,
@@ -2456,7 +2513,7 @@ p {
     opacity: .5;
     position: absolute;
     text-align: center;
-    top: -32px;
+    top: -19px;
     width: 40px;
     z-index: 110;
     transition: opacity .3s ease-in-out; }

@@ -90,7 +90,7 @@
         data: {
           apiKey: 'e80471c0aa344ef3aa5cc466eb5375c4',
           sortBy: 'top',
-          source: source ? source.toLowerCase() : 'cnn'
+          source: source ? source.toLowerCase() : 'bbc-news'
         },
         success: function(data){
           self.createList(data);

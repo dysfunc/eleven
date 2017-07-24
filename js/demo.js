@@ -1,18 +1,18 @@
 (function(Eleven, $){
   $(function(){
-    $('#toggleCommands').on('click', function(){
-      var element = $('#supported');
+    // $('#toggleCommands').on('click', function(){
+    //   var element = $('#supported');
+    //
+    //   if(element.hasClass('show')){
+    //     this.textContent = 'Show Commands';
+    //     element.removeClass('show');
+    //   }else{
+    //     this.textContent = 'Hide Commands';
+    //     element.addClass('show');
+    //   }
+    // });
 
-      if(element.hasClass('show')){
-        this.textContent = 'Show Commands';
-        element.removeClass('show');
-      }else{
-        this.textContent = 'Hide Commands';
-        element.addClass('show');
-      }
-    });
-
-    var onCommand = function(params, speech, command){
+    var onCommand = function(params, speech, command, fn){
       $.ajax({
         url: 'https://api.api.ai/api/query?v=20150910&lang=en',
         contentType: 'application/json; charset=utf-8',
@@ -78,9 +78,9 @@
               }
             }
 
-            // if(result.action === 'newssearch.newssearch-position'){
-            //   news.launch(parameters.position);
-            // }
+            if(result.action === 'newssearch.newssearch-position'){
+              news.launch(parameters.position);
+            }
 
             if(result.action === 'news.search.next'){
               news.nextPage();
@@ -92,6 +92,10 @@
 
             if(output){
               Eleven.speak(output);
+            }
+
+            if(fn && typeof(fn) === 'function'){
+              fn();
             }
           }
         }
@@ -205,5 +209,61 @@
       // Eleven().getPlugin('weather').forecast('San Francisco');
       // Eleven().getPlugin('weather').forecast('New York');
     }
+
+    $('#run').on('click', function(){
+      const E = Eleven();
+      const speech = $('#speech');
+
+      const startSpeechSimulation = function(){
+        speech.addClass('show');
+        E.getVisualizer('container').classList.add('ready');
+        E.getVisualizer().start();
+      };
+
+      const stopSpeechSimulation = function(){
+        setTimeout(function(){
+          speech.removeClass('show');
+          E.getVisualizer('container').classList.remove('ready');
+          E.getVisualizer().stop();
+        }, 3000);
+      };
+
+      const scenario = function(command){
+        startSpeechSimulation();
+        onCommand({}, command);
+        stopSpeechSimulation();
+        speech.html('<p>Eleven &lt;pause&gt; ' + command + '</p>');
+      };
+
+      // YES I KNOW THIS HORRIBLE :| I'LL BE CHANGING THIS
+      // NEWS
+      scenario('show me todays news');
+
+      setTimeout(function(){
+        scenario('now from CNN');
+        setTimeout(function(){
+
+          scenario('show me the third article');
+
+          setTimeout(function(){
+            scenario('done reading');
+          }, 7000);
+        }, 7000);
+      }, 7000);
+
+      // WEATHER
+      setTimeout(function(){
+        scenario('What\'s the weather like in San Francisco?');
+
+        setTimeout(function(){
+          scenario('What about Los Angeles?');
+        }, 7000);
+      }, 27000);
+
+      // Food
+      setTimeout(function(){
+        scenario('find me chinese food near San Francisco');
+      }, 44000);
+    });
   })
 })(Eleven, Eleven.query);
