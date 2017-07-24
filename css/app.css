@@ -1965,7 +1965,7 @@ p {
       content: '';
       position: absolute;
       top: 0;
-      left: 75%;
+      right: 32px;
       width: 0;
       height: 0;
       border: 10px solid transparent;
