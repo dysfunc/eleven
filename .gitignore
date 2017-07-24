@@ -1,0 +1,28 @@
+*.
+
+# configs
+!.babelrc
+!.coveralls.yml
+!.editorconfig
+!.eslintignore
+!.eslintrc
+!.gitignore
+!.scss-lint.yml
+!.travis.yml
+
+# generated
+node_modules
+build
+.publish
+phantomjsdriver.log
+scss-lint-report.xml
+selenium-debug.log
+
+# testing
+test/unit/coverage
+test/functional/reports
+
+# demo
+app/js/eleven.js
+app/js/eleven.js.map
+app/css/

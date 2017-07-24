@@ -1,0 +1,229 @@
+#carousel {
+  bottom: 0;
+  left: 0;
+  opacity: 0;
+  position: fixed;
+  right: 0;
+  top: 15%;
+  will-change: transform, opacity;
+  @include transform(translateY(10%));
+  @include transition(all .3s ease-in-out);
+
+  &.show {
+    opacity: 1;
+    @include transform(translateY(0));
+    @include animation(vanishIn .5s linear);
+  }
+
+  &.backset {
+    // perspective: 1000px;
+    -webkit-filter: blur(10px);
+    @include transform(scale(.9) translateX(-2%));
+  }
+}
+
+#news-article {
+  bottom: 5%;
+  left: 20%;
+  opacity: 0;
+  position: absolute;
+  right: 20%;
+  top: 5%;
+  z-index: 1000px;
+  @include transition(all .3s ease-in-out);
+
+  &.show {
+    opacity: 1;
+    @include animation(slideInUp .5s linear);
+  }
+
+  .news-article.large {
+    background-color: #121212;
+    height: 100%;
+    padding: 10px;
+    width: 100%;
+
+    .picture {
+      position: relative;
+      width: 100%;
+
+      &:before {
+        background: linear-gradient(to top, rgba(0, 0, 0, .7) 0%, rgba(0, 0, 0, 0) 50%);
+        bottom: 0;
+        content: " ";
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+        z-index: 99;
+      }
+
+      .img {
+        background-position: top center;
+        background-size: cover !important;
+        height: 350px;
+        width: 100%;
+      }
+    }
+
+    .details {
+      font-family: 'Roboto', 'Helvetica Neue', 'Open-Bold', sans-serif;
+      line-height: 0;
+      margin: 20px 10px;
+
+      h1 {
+        color: #fff;
+        display: block;
+        font-size: 24px;
+        font-weight: 300;
+        line-height: 1.3em;
+      }
+
+      p {
+        font-size: 14px;
+        font-weight: 200;
+        line-height: 1.7em;
+        margin-top: 20px;
+      }
+    }
+  }
+}
+
+.carousel {
+  position: relative;
+  visibility: hidden;
+  width: 100%;
+
+  &.show {
+    visibility: visible;
+  }
+
+  .carousel-viewport {
+    float: left;
+    height: 700px;
+    position: relative;
+    width: 100%;
+
+    .carousel-content {
+      background-color: rgba(#000, .1);
+      border-top: 1px solid rgba(#fff, .1);
+      left: 0;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      position: fixed;
+      top: 0;
+      transition: left .25s ease-in-out;
+
+      li {
+        float: left;
+        font-size: 13px;
+
+        .news-article {
+          height: 100%;
+          padding: 10px;
+          width: 100%;
+
+          .picture {
+            position: relative;
+            width: 100%;
+
+            &:before {
+              background: linear-gradient(to top, rgba(0, 0, 0, .7) 0%, rgba(0, 0, 0, 0) 50%);
+              bottom: 0;
+              content: " ";
+              left: 0;
+              position: absolute;
+              right: 0;
+              top: 0;
+              z-index: 99;
+            }
+
+            .img {
+              background-size: cover !important;
+              height: 250px;
+              width: 100%;
+            }
+          }
+
+          .details {
+            font-family: 'Roboto', 'Helvetica Neue', 'Open-Bold', sans-serif;
+            line-height: 0;
+            margin: 20px 10px;
+
+            h1 {
+              color: #fff;
+              display: block;
+              font-size: 24px;
+              font-weight: 300;
+              line-height: 1.3em;
+            }
+
+            p {
+              font-size: 14px;
+              font-weight: 200;
+              line-height: 1.7em;
+              margin-top: 20px;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .carousel-nav {
+    background: rgba(#000, .5);
+    border-radius: 100%;
+    box-shadow: 0 0 5px rgba(0, 0, 0, .2);
+    cursor: pointer;
+    display: none;
+    font-family: "Consolas";
+    font-size: 24px;
+    height: 40px;
+    line-height: 38px;
+    opacity: .5;
+    position: absolute;
+    text-align: center;
+    top: -19px;
+    width: 40px;
+    z-index: 110;
+    transition: opacity .3s ease-in-out;
+
+    &.show {
+      display: block;
+
+      &:hover {
+        opacity: .9;
+      }
+
+      &:active {
+        background-color: rgba(#000, .9);
+      }
+    }
+
+    &.carousel-prev {
+      left: 10px;
+      opacity: 1;
+    }
+
+    &.carousel-next {
+      opacity: 1;
+      right: 10px;
+    }
+  }
+
+  .carousel-item a {
+    color: #6e329d;
+    display: block;
+    font-family: "Arial";
+    line-height: 1.3em;
+    padding: 10px 3px 0 0;
+    text-align: left;
+    text-decoration: none;
+    white-space: normal;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
