@@ -1981,64 +1981,6 @@ p {
       -o-transform: translateY(0);
       transform: translateY(0); }
 
-.cover {
-  background: blue;
-  border-radius: 50%;
-  height: 160px;
-  left: 0;
-  margin: auto;
-  position: absolute;
-  right: 0;
-  top: 10px;
-  width: 160px;
-  z-index: 9999; }
-
-.left-half, .right-half {
-  height: 140px;
-  overflow: hidden;
-  position: absolute;
-  width: 140px; }
-
-.left-half {
-  left: 20px; }
-
-.left-half-circle {
-  background: lightgray;
-  border-radius: 50%;
-  height: 100%;
-  width: 100%;
-  -webkit-clip-path: polygon(50% 0, 0 0, 0 100%, 50% 100%);
-  clip-path: polygon(50% 0, 0 0, 0 100%, 50% 100%);
-  -webkit-animation: rotate-half-circle 16s 4s linear infinite;
-  -webkit-transform: translatez(0); }
-
-.right-half {
-  right: 0; }
-
-.right-half-circle {
-  background: lightgray;
-  border-radius: 50%;
-  height: 100%;
-  position: absolute;
-  right: 0;
-  width: 100%;
-  -webkit-clip-path: polygon(100% 0, 50% 0, 50% 100%, 100% 100%);
-  clip-path: polygon(100% 0, 50% 0, 50% 100%, 100% 100%);
-  -webkit-animation: rotate-half-circle 16s 0s linear infinite forwards;
-  -webkit-transform: translatez(0); }
-
-@-webkit-keyframes rotate-half-circle {
-  0% {
-    -webkit-transform: rotate(0deg); }
-  25% {
-    -webkit-transform: rotate(180deg); }
-  50% {
-    -webkit-transform: rotate(180deg); }
-  75% {
-    -webkit-transform: rotate(360deg); }
-  100% {
-    -webkit-transform: rotate(360deg); } }
-
 .eleven div,
 .eleven-message div,
 .eleven span,
@@ -2617,12 +2559,22 @@ p {
   -ms-transition: transform 0.3s ease-in-out;
   -o-transition: transform 0.3s ease-in-out;
   transition: transform 0.3s ease-in-out; }
+  #weather-results:before {
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, transparent 70%);
+    bottom: 0;
+    content: " ";
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 10; }
   #weather-results #weather-container {
     bottom: 18%;
     left: 0;
     position: absolute;
     right: 0;
-    top: 20%; }
+    top: 20%;
+    z-index: 11; }
   #weather-results .location {
     bottom: 30px;
     color: rgba(255, 255, 255, 0.9);
@@ -2631,7 +2583,8 @@ p {
     left: 0;
     position: absolute;
     right: 0;
-    text-align: center; }
+    text-align: center;
+    z-index: 12; }
   #weather-results.show {
     opacity: 1;
     -webkit-transform: translateY(0);
@@ -2733,7 +2686,7 @@ p {
             font-size: 25px;
             padding-left: 10px; }
           #weather-results ul li .details h1 small {
-            color: rgba(255, 255, 255, 0.5);
+            color: rgba(255, 255, 255, 0.9);
             display: block;
             font-size: 16px;
             font-weight: 500;

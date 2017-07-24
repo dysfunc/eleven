@@ -1,4 +1,5 @@
 #weather-results {
+
   bottom: 0;
   left: 0;
   opacity: 0;
@@ -9,12 +10,24 @@
   @include transform(translateY(10%));
   @include transition(transform .3s ease-in-out);
 
+  &:before {
+    background: linear-gradient(to top, rgba(0, 0, 0, .7) 0%, rgba(0, 0, 0, 0) 70%);
+    bottom: 0;
+    content: " ";
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 10;
+  }
+
   #weather-container {
     bottom: 18%;
     left: 0;
     position: absolute;
     right: 0;
     top: 20%;
+    z-index: 11;
   }
 
   .location {
@@ -26,6 +39,7 @@
     position: absolute;
     right: 0;
     text-align: center;
+    z-index: 12;
   }
 
   &.show {
@@ -119,7 +133,7 @@
           }
 
           small {
-            color: rgba(#fff, .5);
+            color: rgba(#fff, .9);
             display: block;
             font-size: 16px;
             font-weight: 500;
