@@ -225,7 +225,7 @@
           speech.removeClass('show');
           E.getVisualizer('container').classList.remove('ready');
           E.getVisualizer().stop();
-        }, 2000);
+        }, 3000);
       };
 
       const scenario = function(command){
@@ -235,6 +235,7 @@
         speech.html('<p>Eleven &lt;pause&gt; ' + command + '</p>');
       };
 
+      // YES I KNOW THIS HORRIBLE :| I'LL BE CHANGING THIS
       // NEWS
       scenario('show me todays news');
 
@@ -246,17 +247,23 @@
 
           setTimeout(function(){
             scenario('done reading');
-          }, 5000);
-        }, 5000);
-      }, 5000);
+          }, 7000);
+        }, 7000);
+      }, 7000);
 
+      // WEATHER
       setTimeout(function(){
         scenario('What\'s the weather like in San Francisco?');
 
         setTimeout(function(){
           scenario('What about Los Angeles?');
-        }, 8000);
-      }, 25000);
+        }, 7000);
+      }, 27000);
+
+      // Food
+      setTimeout(function(){
+        scenario('find me chinese food near San Francisco');
+      }, 44000);
     });
   })
 })(Eleven, Eleven.query);
