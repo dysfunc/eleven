@@ -1981,6 +1981,64 @@ p {
       -o-transform: translateY(0);
       transform: translateY(0); }
 
+.cover {
+  background: blue;
+  border-radius: 50%;
+  height: 160px;
+  left: 0;
+  margin: auto;
+  position: absolute;
+  right: 0;
+  top: 10px;
+  width: 160px;
+  z-index: 9999; }
+
+.left-half, .right-half {
+  height: 140px;
+  overflow: hidden;
+  position: absolute;
+  width: 140px; }
+
+.left-half {
+  left: 20px; }
+
+.left-half-circle {
+  background: lightgray;
+  border-radius: 50%;
+  height: 100%;
+  width: 100%;
+  -webkit-clip-path: polygon(50% 0, 0 0, 0 100%, 50% 100%);
+  clip-path: polygon(50% 0, 0 0, 0 100%, 50% 100%);
+  -webkit-animation: rotate-half-circle 16s 4s linear infinite;
+  -webkit-transform: translatez(0); }
+
+.right-half {
+  right: 0; }
+
+.right-half-circle {
+  background: lightgray;
+  border-radius: 50%;
+  height: 100%;
+  position: absolute;
+  right: 0;
+  width: 100%;
+  -webkit-clip-path: polygon(100% 0, 50% 0, 50% 100%, 100% 100%);
+  clip-path: polygon(100% 0, 50% 0, 50% 100%, 100% 100%);
+  -webkit-animation: rotate-half-circle 16s 0s linear infinite forwards;
+  -webkit-transform: translatez(0); }
+
+@-webkit-keyframes rotate-half-circle {
+  0% {
+    -webkit-transform: rotate(0deg); }
+  25% {
+    -webkit-transform: rotate(180deg); }
+  50% {
+    -webkit-transform: rotate(180deg); }
+  75% {
+    -webkit-transform: rotate(360deg); }
+  100% {
+    -webkit-transform: rotate(360deg); } }
+
 .eleven div,
 .eleven-message div,
 .eleven span,
