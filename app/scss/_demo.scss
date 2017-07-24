@@ -124,3 +124,57 @@ p {
     }
   }
 }
+
+#demo {
+  position: absolute;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 20px;
+  z-index: 999999;
+
+  > .btn {
+    background-color: #3c92e8;
+    border-radius: 3px;
+    cursor: pointer;
+    display: inline-block;
+    float: right;
+    margin-right: 20px;
+    padding: 8px 12px;
+  }
+
+  .speech {
+    background-color: #feffe6;
+    border-radius: 4px;
+    color: #121212;
+    display: block;
+    max-width: 300px;
+    opacity: 0;
+    padding: 20px;
+    position: absolute;
+    right: 20px;
+    top: 50px;
+    z-index: 99999;
+    @include transform(translateY(-10%))
+    @include transition(all .3s ease-in-out);
+
+    :after {
+    	content: '';
+    	position: absolute;
+    	top: 0;
+    	left: 75%;
+    	width: 0;
+    	height: 0;
+    	border: 10px solid transparent;
+    	border-bottom-color: #feffe6;
+    	border-top: 0;
+    	margin-left: -10px;
+    	margin-top: -10px;
+    }
+
+    &.show {
+      opacity: 1;
+      @include transform(translateY(0))
+    }
+  }
+}
