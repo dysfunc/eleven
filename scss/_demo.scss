@@ -125,6 +125,23 @@ p {
   }
 }
 
+#github {
+  bottom: 25px;
+  left: 0;
+  position: absolute;
+  right: 0;
+  text-align: center;
+
+  iframe {
+    margin-right: 5px;
+    @include inline-block;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+}
+
 #demo {
   position: absolute;
   left: 0;

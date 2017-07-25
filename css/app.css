@@ -1924,6 +1924,21 @@ p {
         margin: 5px 0;
         padding: 4px 8px; }
 
+#github {
+  bottom: 25px;
+  left: 0;
+  position: absolute;
+  right: 0;
+  text-align: center; }
+  #github iframe {
+    margin-right: 5px;
+    display: inline-block;
+    *display: inline;
+    vertical-align: middle;
+    zoom: 1; }
+    #github iframe:last-child {
+      margin-right: 0; }
+
 #demo {
   position: absolute;
   left: 0;
