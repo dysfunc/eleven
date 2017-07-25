@@ -1929,7 +1929,8 @@ p {
   left: 0;
   position: absolute;
   right: 0;
-  text-align: center; }
+  text-align: center;
+  z-index: 1000; }
   #github iframe {
     margin-right: 5px;
     display: inline-block;
