@@ -131,7 +131,8 @@ p {
   position: absolute;
   right: 0;
   text-align: center;
-
+  z-index: 1000;
+  
   iframe {
     margin-right: 5px;
     @include inline-block;
