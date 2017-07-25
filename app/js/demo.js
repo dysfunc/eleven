@@ -208,7 +208,6 @@
       // Eleven().getPlugin('news').headlines()
       // Eleven().getPlugin('weather').forecast('San Francisco');
       // Eleven().getPlugin('weather').forecast('New York');
-      // Eleven().getPlugin('weather').forecast('Los Angeles');
     }
 
     $('#run').on('click', function(){
