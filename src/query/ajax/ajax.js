@@ -158,11 +158,12 @@ $.extend({
    * @param  {Object} config The request configuration
    * @return {Object}
    */
-  jsonP({ context, jsonp, url, xhr, error, success, timeout }){
+  jsonP({ context, jsonp, url, xhr, error, success, timeout = 0 }){
     const script = document.createElement('script');
     const fn = jsonp || 'jsonpCallback' + (jsonPUID++);
 
-    var data, timeout;
+    var data = null;
+    var timer = null;
 
     script.src = url.replace($.regexp.callback, '?$1=' + fn);
 
@@ -178,7 +179,7 @@ $.extend({
 
       script.parentNode.removeChild(script);
 
-      timeout && clearTimeout(timeout) && (timeout = null);
+      timer && clearTimeout(timer) && (timer = null);
 
       try {
         delete window[fn];
@@ -196,7 +197,7 @@ $.extend({
     }
 
     if(timeout > 0){
-      timeout = setTimeout(function(){
+      timer = setTimeout(function(){
         script.parentNode.removeChild(script);
 
         if(fn in window){

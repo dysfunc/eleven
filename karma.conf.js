@@ -27,35 +27,38 @@ module.exports = (karma) => {
       }
     },
     webpack: {
+      mode: 'development',
       cache: true,
       devtool: 'inline-source-map',
       module: {
-        preLoaders: [
+        rules: [
           {
             test: /\.js$/,
             include: /test\/unit\/spec/,
-            loader: 'babel',
-            query: {
-              cacheDirectory: true,
-            }
+            exclude: /node_modules/,
+            enforce: 'pre',
+            use: [{
+              loader: 'babel-loader'
+            }]
           },
           {
-            test: /\.js?$/,
-            include: /src/,
-            loader: 'babel-istanbul',
-            query: {
-              cacheDirectory: true,
-            }
-          }
-        ],
-        loaders: [
+            test: /\.js$/,
+            exclude: [/node_modules/, /test/, /.spec\.js$/],
+            enforce: 'pre',
+            use: [{
+              loader: 'istanbul-instrumenter-loader',
+              query: {
+                esModules: true
+              }
+            }]
+          },
           {
             test: /\.js$/,
-            include: path.resolve(__dirname, '/src'),
-            loader: 'babel',
-            query: {
-              cacheDirectory: true
-            }
+            include: /src/,
+            exclude: [/node_modules/, /test/],
+            use: [{
+              loader: 'babel-loader'
+            }]
           }
         ]
       }
