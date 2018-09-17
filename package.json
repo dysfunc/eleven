@@ -10,7 +10,7 @@
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
     "babel-eslint": "^8.2.3",
-    "babel-loader": "^7.1.4",
+    "babel-loader": "^8.0.2",
     "babel-preset-env": "^1.7.0",
     "babel-register": "^6.26.0",
     "babelify": "^7.3.0",
