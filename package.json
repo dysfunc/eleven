@@ -17,7 +17,7 @@
     "browser-sync": "^2.24.7",
     "browserify": "^13.0.0",
     "chromedriver": "^2.41.0",
-    "cucumber": "^2.3.0",
+    "cucumber": "^5.0.1",
     "eslint": "^2.8.0",
     "exorcist": "^0.4.0",
     "gulp": "^3.0.0",
