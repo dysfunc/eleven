@@ -22,7 +22,7 @@
     "exorcist": "^0.4.0",
     "gulp": "^3.0.0",
     "gulp-cached": "^1.1.1",
-    "gulp-eslint": "^2.0.0",
+    "gulp-eslint": "^5.0.0",
     "gulp-gh-pages": "^0.5.4",
     "gulp-if-else": "^1.0.3",
     "gulp-nightwatch": "^1.0.1",
