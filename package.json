@@ -13,7 +13,7 @@
     "babel-loader": "^7.1.4",
     "babel-preset-env": "^1.7.0",
     "babel-register": "^6.26.0",
-    "babelify": "^7.3.0",
+    "babelify": "^10.0.0",
     "browser-sync": "^2.24.7",
     "browserify": "^13.0.0",
     "chromedriver": "^2.41.0",
